@@ -1,8 +1,8 @@
 import { atom } from 'jotai'
 
-export const otpSentAtom = atom(true);
-export const otpVerifiedAtom = atom(true);
-export const darkModeAtom = atom(true);
-export const isPostOtpCompleteAtom = atom(true);
-export const isPostPassCompleteAtom = atom(true);
-export const isPostUserCompleteAtom = atom(true);
+export const otpSentAtom = atom(false);
+export const otpVerifiedAtom = atom(false);
+export const darkModeAtom = atom(false);
+export const isPostOtpCompleteAtom = atom(false);
+export const isPostPassCompleteAtom = atom(false);
+export const isPostUserCompleteAtom = atom(false);

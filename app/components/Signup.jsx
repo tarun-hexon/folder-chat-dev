@@ -34,9 +34,6 @@ const Signup = () => {
       const { data, error } = await supabase.auth.signUp({
         email,
         password: email.split('@')[0],
-        // options: {
-        //     emailRedirectTo: 'http://localhost:300/signup'
-        // }
       });
       if (error) {
         alert(error.message)
@@ -67,21 +64,6 @@ const Signup = () => {
       handleSendOtp()
     }
   }
-
-  // async function signInWithEmail() {
-  //   const { data, error } = await supabase.auth.signInWithOtp({
-  //     email: email,
-
-  //     options: {
-  //       // set this to false if you do not want the user to be automatically signed up
-  //       shouldCreateUser: false,
-  //       emailRedirectTo: 'http://localhost:3000/signup',
-  //     },
-  //   });
-  //   if (error) {
-  //     console.log(error.message)
-  //   }
-  // }
 
   return (
     <div className={`flex flex-col w-[22rem] gap-6 items-center box-border ${darkMode ? '' : 'text-white'}`}>
