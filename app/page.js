@@ -3,7 +3,7 @@
 import Image from "next/image";
 import LogoW from "../public/assets/Logo-W.svg";
 import Logo from "../public/assets/Logo.svg"
-
+import { IoSunnyOutline } from "react-icons/io5";
 
 
 export default function Home() {
