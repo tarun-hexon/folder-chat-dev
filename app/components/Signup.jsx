@@ -40,7 +40,7 @@ const Signup = () => {
       }
       else {
         setOtpSent(true)
-        alert('Check Your Email For Confirmation Mail')
+        alert('We have sent you an OTP. Please check your email.')
       }
     } catch (error) {
       console.log(error.message)
