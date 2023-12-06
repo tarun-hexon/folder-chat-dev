@@ -106,7 +106,7 @@ const Signup = () => {
       <hr className='border border-[#CBD5E1] w-full' />
       <Button variant="outline" className='w-full text-black border border-[#CBD5E1] rounded-[6px] leading-[20px] flex items-center justify-center gap-1'><Image src={Google} alt="google" className='w-7 h-7' /><span className='font-[700] text-sm'>Continue With Google</span></Button>
 
-      {otpSent && <div className='w-[32rem] text-[12px] leading-[20px] opacity-70 text-center'>By clicking “Continue with Apple/Google/Email/SAML” above, you acknowledge that you have read and understood, and agree to Notion's Terms & Conditions and Privacy Policy.</div>}
+      {otpSent && <div className='w-[32rem] text-[12px] leading-[20px] opacity-70 text-center'>By clicking &lsquo;Continue with Apple/Google/Email/SAML&rsquo; above, you acknowledge that you have read and understood&#44; and agree to Notion's Terms & Conditions and Privacy Policy.</div>}
     </div>
   )
 }

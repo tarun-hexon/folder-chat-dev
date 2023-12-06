@@ -22,7 +22,7 @@ const PostPassword = () => {
         <div className={`flex flex-col w-[28rem] gap-8 items-center box-border ${darkMode ? '' : 'text-white'}`}>
             <div className='w-full text-center'>
                 <h1 className='font-[600] text-[20px]'>How are you planning to use <span className='text-[#14B8A6]'>folder.chat</span>?</h1>
-                <p className='text-xs opacity-90 font-[300]'>We'll streamline your setup experience accordingly</p>
+                <p className='text-xs opacity-90 font-[300]'>We&apos;ll streamline your setup experience accordingly</p>
             </div>
             <div className='w-full flex flex-row gap-3'>
 
@@ -42,7 +42,7 @@ const PostPassword = () => {
             </div>
             <Button variant="outline" className={`w-[80%] text-white mt-2 text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center`} disabled={selected === ""} onClick={()=> setIsPostPassComplete(true)}>Continue</Button>
 
-            <div className={`w-[33rem] ${darkMode ? 'text-black' : 'text-white'}  text-xs opacity-60 text-center mt-4 leading-[20px] font-[300]`}>You may unsubscribe from receiving marketing communications at any time. Folder.chat's websites and communications are subjects to our Privacy Policy</div>
+            <div className={`w-[33rem] ${darkMode ? 'text-black' : 'text-white'}  text-xs opacity-60 text-center mt-4 leading-[20px] font-[300]`}>You may unsubscribe from receiving marketing communications at any time. Folder.chat&apos;s websites and communications are subjects to our Privacy Policy</div>
         </div>
     )
 }
