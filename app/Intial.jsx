@@ -7,6 +7,8 @@ import { useAtom } from 'jotai';
 import { darkModeAtom, sessionAtom } from './store';
 import { IoSunnySharp, IoSunnyOutline } from "react-icons/io5";
 import Link from 'next/link';
+import { Button } from '../components/ui/button';
+
 
 const Intial = ({ children }) => {
 
