@@ -91,7 +91,7 @@ const UserDetails = () => {
 
       <Button variant="outline" className={`w-full text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center text-white`} onClick={()=>setIsPostUserComplete(true)}>Continue</Button>
 
-      <div className={`items-center w-full opacity-60 hover:cursor-pointer text-center mt-4`} onClick={()=>setIsPostPassComplete(false)}>Back</div>
+      <div className={`items-center w-full opacity-60 hover:cursor-pointer text-center mt-4 text-[14px]`} onClick={()=>setIsPostPassComplete(false)}>Back</div>
       </div>
       </>
      :

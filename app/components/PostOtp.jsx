@@ -40,6 +40,28 @@ const PostOtp = () => {
     };
 
 
+    async function uploadImage(file) {
+       
+        if (file) {
+          try {
+            const { data, error } = await supabase.storage
+              .from('profile_pic')
+              .upload(file.name, file, { contentType: file.type });
+  
+            if (error) {
+              console.error('Error uploading image:', error.message);
+            } else {
+              console.log('Image uploaded successfully:', data);
+              // Optionally, you can do something with the uploaded data.
+            }
+          } catch (error) {
+            console.error('An unexpected error occurred:', error.message);
+          }
+        } else {
+          console.warn('No file selected.');
+        }
+      };
+      
     async function updateDeatils(){
         const {data, error} = await supabase.auth.updateUser({ 
             password: userData.password, 
@@ -65,20 +87,22 @@ const PostOtp = () => {
                 <div className='w-full'>
                     <Label htmlFor='profile-img' className='flex flex-col items-center justify-center'><Image src={false ? imgURL : user_icon} alt="user_img" className='h-20 w-20 block' /><p className='text-[12px] font-[300] opacity-70 mt-2 -ml-1'>Add a photo</p>
                     </Label>
-                    <input type='file' id='profile-img' accept="image/png, image/jpeg" style={{ display: 'none' }} />
+                    <input type='file' id='profile-img' accept="image/png, image/jpeg" style={{ display: 'none' }} 
+                    onChange={(e) => uploadImage(e.target.files[0])}
+                    />
                 </div>
 
                 <div className='w-full text-start'>
                     <Label htmlFor="name" className='text-[14px] font-[500] leading-[20px]'>What should we call you?</Label>
-                    <Input type='text' id="name" name='name' placeholder='eg: Ada Lovelase' className='text-black mt-1 border-[#CBD5E1] text-[14px] font-[400] leading-[20px]' onChange={(e) => setUserInfo(e)} />
+                    <Input type='text' id="name" name='name' placeholder='eg: Ada Lovelase' className='text-black mt-1 border-[#CBD5E1] text-[14px] font-[500] leading-[20px]' onChange={(e) => setUserInfo(e)} />
                 </div>
 
                 <div className='w-full relative text-start'>
 
                     <Label htmlFor="password" className='text-[14px] font-[500] leading-[20px]'>Set a Password</Label>
-                    <Input type='password' name='password' id="password" placeholder='New Password' className='mt-1 text-black border-[#CBD5E1] pr-12' onChange={(e) => setUserInfo(e)} />
+                    <Input type='password' name='password' id="password" placeholder='New Password' className='mt-1 text-black border-[#CBD5E1] pr-12 font-[500]' onChange={(e) => setUserInfo(e)} />
 
-                    {userData.password !== '' && <button id="togglePassword" disabled={userData.password != ''} class="absolute top-2/3 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('password')}>
+                    {userData.password !== '' && <button id="togglePassword" className="absolute top-16 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('password')}>
                         <Image src={eye_icon} alt='show-password' title='Show Password' />
                     </button>}
                 </div>

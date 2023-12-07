@@ -53,9 +53,33 @@ const Signup = () => {
     if (error) {
       alert(error.message)
     } else {
+      // insertUserData()
       setOtpVerified(true)
     }
   };
+
+
+  async function insertUserData() {
+    try {
+
+      const { data, error } = await supabase
+        .from('client')
+        .insert({
+          email:email
+        })
+        .select()
+
+
+      if (error) {
+        console.error('Error inserting data:', error.message);
+      } else {
+        console.log('Data inserted successfully:', data);
+      }
+    } catch (e) {
+      console.error('An unexpected error occurred:', e.message);
+    }
+
+  }
 
   function signUpFunction() {
     if (otpSent) {
@@ -79,22 +103,22 @@ const Signup = () => {
     });
     if (error) {
       console.log(error.message);
-    }else{
+    } else {
       console.log(data)
-      
+
     }
   };
 
   function getSess() {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)     
+      setSession(session)
     });
   }
 
-  // useEffect(()=> {
-  //   console.log(session)
-  //   getSess()
-  // }, [session])
+  useEffect(()=> {
+    console.log(session)
+    getSess()
+  }, [session])
 
 
   return (
@@ -104,7 +128,7 @@ const Signup = () => {
 
       <div className='w-full flex flex-col gap-[8px] text-sm font-inter'>
         <Label htmlFor="email" className='font-[500] leading-[20px]'>Work email</Label>
-        <Input type='email' id="email" placeholder='Enter Your Email' className='text-black bg-white font-[400] leading-[20px]' onChange={(e) => setEmail(e.target.value)} />
+        <Input type='email' id="email" placeholder='Enter Your Email' className='text-black bg-white font-[500] leading-[20px]' onChange={(e) => setEmail(e.target.value)} />
 
         {otpSent ? <> <p className='text-sm mt-1 font-[300] leading-[24px]'>We just sent you a temporary sign up code. Please check your inbox and paste it below</p>
 
@@ -118,6 +142,7 @@ const Signup = () => {
       <Button variant="outline" className={`w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center ${disabled ? 'opacity-5' : ''}`} disabled={disabled} onClick={() => { signUpFunction() }}>{otpSent ? 'Create new account' : 'Continue with email'}</Button>
 
       <hr className='border border-[#CBD5E1] w-full' />
+
       <Button variant="outline" className='w-full text-black border border-[#CBD5E1] rounded-[6px] leading-[20px] flex items-center justify-center gap-1' onClick={googleSignIn}><Image src={Google} alt="google" className='w-7 h-7' /><span className='font-[700] text-sm'>Continue With Google</span></Button>
 
       {otpSent && <div className='w-[32rem] text-[12px] leading-[20px] opacity-70 text-center'>By clicking &lsquo;Continue with Apple/Google/Email/SAML&rsquo; above, you acknowledge that you have read and understood&#44; and agree to Notion&apos;s Terms & Conditions and Privacy Policy.</div>}

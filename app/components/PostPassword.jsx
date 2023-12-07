@@ -22,10 +22,32 @@ const PostPassword = () => {
     const [isPostOtpComplete, setPostOtpComplete] = useAtom(isPostOtpCompleteAtom);
     const [session, setSession1] = useAtom(sessionAtom);
 
+
+    async function insertUserData() {
+        try {
+    
+          const { data, error } = await supabase
+            .from('client')
+            .insert({
+              email:email
+            })
+            .select()
+    
+    
+          if (error) {
+            console.error('Error inserting data:', error.message);
+          } else {
+            console.log('Data inserted successfully:', data);
+          }
+        } catch (e) {
+          console.error('An unexpected error occurred:', e.message);
+        }
+    
+      }
+      
     async function getSess() {
         await supabase.auth.getSession().then(({ data: { session } }) => {
           setSession1(session);
-          
           // console.log('home page', session)
         });
       };

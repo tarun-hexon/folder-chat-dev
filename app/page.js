@@ -9,7 +9,7 @@ import { useEffect } from "react";
 import supabase from "../config/supabse";
 import { useAtom } from "jotai";
 import { useRouter } from "next/navigation";
-import { isPostOtpCompleteAtom, otpVerifiedAtom, sessionAtom } from "./store";
+import { isPostOtpCompleteAtom, otpVerifiedAtom, sessionAtom, isPostPassCompleteAtom, isPostUserCompleteAtom } from "./store";
 
 
 
@@ -19,13 +19,18 @@ export default function Home() {
   const router = useRouter();
   const [otpVerified, setOtpVerified] = useAtom(otpVerifiedAtom);
   const [isPostOtpComplete, setPostOtpComplete] = useAtom(isPostOtpCompleteAtom);
+  const [isPostPassComplete, setPostPassComplete] = useAtom(isPostPassCompleteAtom);
+  const [isPostUserComplete, setPostUserComplete] = useAtom(isPostUserCompleteAtom);
+
 
 
   async function getSess() {
     await supabase.auth.getSession().then(({ data: { session } }) => {
       setSession1(session);
       setOtpVerified(true);
-      setPostOtpComplete(true)
+      setPostOtpComplete(true);
+      setPostPassComplete(true);
+      setPostUserComplete(true)
       router.push('/signup');
       // console.log('home page', session)
     });
@@ -38,7 +43,6 @@ export default function Home() {
   return (
     <>
     <div className='flex font-Inter justify-center items-center w-full h-screen box-border bg-[#115E59] flex-col gap-10 text-white text-4xl'>
-    <Image src={LogoW} alt='logo' className='absolute self-start align-top top-3 left-2'/>
       <span className="hover:text-[#14B8A6] duration-200">Welcome To Folder Chat Landing Page...!</span>
       <Link href={'/signup'} className="text-sm hover:text-[#14B8A6] duration-200 hover:cursor-pointer">create an account</Link>
     </div>
