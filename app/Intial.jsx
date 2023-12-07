@@ -4,16 +4,20 @@ import Image from 'next/image'
 import LogoW from "../public/assets/Logo-W.svg";
 import Logo from "../public/assets/Logo.svg"
 import { useAtom } from 'jotai';
-import { darkModeAtom, sessionAtom } from './store';
+import { darkModeAtom, isPostOtpCompleteAtom, isPostPassCompleteAtom, isPostUserCompleteAtom, otpSentAtom, otpVerifiedAtom, sessionAtom } from './store';
 import { IoSunnySharp, IoSunnyOutline } from "react-icons/io5";
 import Link from 'next/link';
 import { Button } from '../components/ui/button';
-
+import supabase from '../config/supabse';
 
 const Intial = ({ children }) => {
 
   const [darkMode, setDarkMode] = useAtom(darkModeAtom);
   const [session, setSession] = useAtom(sessionAtom);
+  const [otpSent, setOtpSent] = useAtom(otpSentAtom);
+  const [otpVerified ,setOtpVerified] = useAtom(otpVerifiedAtom);
+  const [isPostOtpComplete, setPostOtpComplete] = useAtom(isPostOtpCompleteAtom);
+  const [isPostUserComplete ,setPostUserComplete] = useAtom(isPostUserCompleteAtom);
 
   async function signOut(){
     const { error } = await supabase.auth.signOut();
@@ -23,7 +27,8 @@ const Intial = ({ children }) => {
       setSession(null);
       setOtpSent(false)
       setOtpVerified(false);
-      setPostOtpComplete(false)
+      setPostOtpComplete(false);
+      setPostUserComplete(false)
     }
 }
 
