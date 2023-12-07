@@ -4,7 +4,7 @@ import React, { useState } from 'react'
 import supabase from "../../config/supabse";
 import { Button } from '../../components/ui/button'
 
-const page = () => {
+const Page = () => {
 
   const [email, setEmail] = useState('')
   const checkUserExists = async () => {
@@ -32,4 +32,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page

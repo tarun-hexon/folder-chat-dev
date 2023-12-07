@@ -26,12 +26,15 @@ export default function Home() {
 
   async function getSess() {
     await supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession1(session);
-      setOtpVerified(true);
-      setPostOtpComplete(true);
-      setPostPassComplete(true);
-      setPostUserComplete(true)
-      router.push('/signup');
+      if(session){
+        // console.log(session)
+        setSession1(session);
+        setOtpVerified(true);
+        setPostOtpComplete(true);
+        setPostPassComplete(true);
+        setPostUserComplete(true)
+      }
+      // router.push('/signup');
       // console.log('home page', session)
     });
   };

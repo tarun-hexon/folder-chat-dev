@@ -13,7 +13,7 @@ import { darkModeAtom } from '../../store';
 
 
 
-const page = () => {
+const Page = () => {
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -67,21 +67,21 @@ function showPassword(id) {
 
 
 useEffect(()=> {
-  setHash(window.location.hash)
+  setHash(true)
 }, []);
 
 
 
   return (
-    <div>
-      <h1 className={`text-5xl font-Inter space-x-0 w-full text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black': ''}`}>{hash ? "Update": 'Reset'} Password</h1>
+    <div className='w-full flex flex-col justify-center items-center'>
+      <h1 className={`text-3xl font-Inter space-x-0 text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black': ''}`}>{hash ? "Update": 'Reset'} Password</h1>
 
-      <div className='w-full flex flex-col gap-6 text-sm font-inter'>
+      <div className='w-80 flex flex-col gap-6 text-sm font-inter justify-center'>
         {hash ?
         <div className='relative text-start'>
 
           <Label htmlFor="password" className={`text-[14px] font-[500] leading-[20px] ${darkMode ? 'text-black': ''}`}>Set a Password</Label>
-          <Input type='password' name='password' id='password' placeholder='New Password' className='mt-1 text-black border-[#CBD5E1] pr-12 font-[500]' onChange={(e) => setPassword(e.target.value)} />
+          <Input type='password' name='password' id='password' placeholder='New Password' className='mt-2 text-black border-[#CBD5E1] pr-12 font-[500]' onChange={(e) => setPassword(e.target.value)} />
 
           {password !== '' && <button className="absolute top-2/3 right-2 transform -translate-y-1/2 px-2 py-1 z-20" onClick={()=> showPassword('password')}>
               <Image src={eye_icon} alt='show-password' title='Show Password' />
@@ -100,4 +100,4 @@ useEffect(()=> {
   )
 }
 
-export default page
+export default Page
