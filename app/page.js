@@ -1,13 +1,39 @@
-'use cient'
+'use client'
 
 import Image from "next/image";
 import LogoW from "../public/assets/Logo-W.svg";
 import Logo from "../public/assets/Logo.svg"
 import { IoSunnyOutline } from "react-icons/io5";
 import Link from "next/link";
+import { useEffect } from "react";
+import supabase from "../config/supabse";
+import { useAtom } from "jotai";
+import { useRouter } from "next/navigation";
+import { isPostOtpCompleteAtom, otpVerifiedAtom, sessionAtom } from "./store";
+
 
 
 export default function Home() {
+
+  const [session1, setSession1] = useAtom(sessionAtom);
+  const router = useRouter();
+  const [otpVerified, setOtpVerified] = useAtom(otpVerifiedAtom);
+  const [isPostOtpComplete, setPostOtpComplete] = useAtom(isPostOtpCompleteAtom);
+
+
+  async function getSess() {
+    await supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession1(session);
+      setOtpVerified(true);
+      setPostOtpComplete(true)
+      router.push('/signup');
+      // console.log('home page', session)
+    });
+  };
+
+  useEffect(()=> {
+    getSess();
+  }, [])
   
   return (
     <>

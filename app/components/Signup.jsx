@@ -7,7 +7,7 @@ import Google from "../../public/assets/google.svg"
 import Image from "next/image";
 import supabase from '../../config/supabse'
 import { useAtom } from 'jotai'
-import { otpSentAtom, otpVerifiedAtom, darkModeAtom } from '../store';
+import { otpSentAtom, otpVerifiedAtom, darkModeAtom, sessionAtom } from '../store';
 
 const Signup = () => {
 
@@ -17,8 +17,7 @@ const Signup = () => {
   const [otpVerified, setOtpVerified] = useAtom(otpVerifiedAtom);
   const [otp, setOtp] = useState(null);
   const [darkMode] = useAtom(darkModeAtom);
-
-  const [temp, setTemp] = useState(false);
+  const [session, setSession] = useAtom(sessionAtom)
 
 
   useEffect(() => {
@@ -48,8 +47,9 @@ const Signup = () => {
     }
   };
 
+
   const handleSignup = async () => {
-    const { data, error } = await supabase.auth.verifyOtp({ email:email, token:otp, type: 'email' });
+    const { data, error } = await supabase.auth.verifyOtp({ email: email, token: otp, type: 'email' });
     if (error) {
       alert(error.message)
     } else {
@@ -57,13 +57,45 @@ const Signup = () => {
     }
   };
 
-  function signUpFunction(){
-    if(otpSent){
+  function signUpFunction() {
+    if (otpSent) {
       handleSignup()
-    }else{
+    } else {
       handleSendOtp()
     }
+  };
+
+  async function googleSignIn() {
+    // return null
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        queryParams: {
+          access_type: 'offline',
+          prompt: 'consent',
+          // redirect_uri: 'http://localhost:3000/signup'
+        },
+      },
+    });
+    if (error) {
+      console.log(error.message);
+    }else{
+      console.log(data)
+      
+    }
+  };
+
+  function getSess() {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session)     
+    });
   }
+
+  // useEffect(()=> {
+  //   console.log(session)
+  //   getSess()
+  // }, [session])
+
 
   return (
     <div className={`flex flex-col w-[22rem] gap-6 items-center box-border ${darkMode ? '' : 'text-white'}`}>
@@ -86,7 +118,7 @@ const Signup = () => {
       <Button variant="outline" className={`w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center ${disabled ? 'opacity-5' : ''}`} disabled={disabled} onClick={() => { signUpFunction() }}>{otpSent ? 'Create new account' : 'Continue with email'}</Button>
 
       <hr className='border border-[#CBD5E1] w-full' />
-      <Button variant="outline" className='w-full text-black border border-[#CBD5E1] rounded-[6px] leading-[20px] flex items-center justify-center gap-1'><Image src={Google} alt="google" className='w-7 h-7' /><span className='font-[700] text-sm'>Continue With Google</span></Button>
+      <Button variant="outline" className='w-full text-black border border-[#CBD5E1] rounded-[6px] leading-[20px] flex items-center justify-center gap-1' onClick={googleSignIn}><Image src={Google} alt="google" className='w-7 h-7' /><span className='font-[700] text-sm'>Continue With Google</span></Button>
 
       {otpSent && <div className='w-[32rem] text-[12px] leading-[20px] opacity-70 text-center'>By clicking &lsquo;Continue with Apple/Google/Email/SAML&rsquo; above, you acknowledge that you have read and understood&#44; and agree to Notion&apos;s Terms & Conditions and Privacy Policy.</div>}
     </div>

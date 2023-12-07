@@ -1,4 +1,5 @@
-import React, { useState } from 'react'
+'use client'
+import React, { useState, useEffect } from 'react'
 import social_role from "../../public/assets/social_role.svg"
 import illustration from "../../public/assets/illustration.svg"
 import checkCircle from "../../public/assets/checkCircle.svg"
@@ -6,8 +7,9 @@ import { Button } from "../../components/ui/button"
 import { FaCheckCircle } from "react-icons/fa";
 
 import Image from 'next/image'
-import { darkModeAtom, isPostPassCompleteAtom } from '../store';
+import { darkModeAtom, isPostPassCompleteAtom, sessionAtom, isPostOtpCompleteAtom } from '../store';
 import { useAtom } from 'jotai'
+import supabase from '../../config/supabse'
 
 
 
@@ -17,6 +19,20 @@ const PostPassword = () => {
     const [darkMode] = useAtom(darkModeAtom);
     const [selected, setSelected] = useState('');
     const [isPostPassComplete, setIsPostPassComplete] = useAtom(isPostPassCompleteAtom);
+    const [isPostOtpComplete, setPostOtpComplete] = useAtom(isPostOtpCompleteAtom);
+    const [session, setSession1] = useAtom(sessionAtom);
+
+    async function getSess() {
+        await supabase.auth.getSession().then(({ data: { session } }) => {
+          setSession1(session);
+          
+          // console.log('home page', session)
+        });
+      };
+    
+      useEffect(()=> {
+        getSess()
+      }, [])
 
     return (
         <div className={`flex flex-col w-[28rem] gap-8 items-center box-border ${darkMode ? '' : 'text-white'}`}>

@@ -6,3 +6,4 @@ export const darkModeAtom = atom(false);
 export const isPostOtpCompleteAtom = atom(false);
 export const isPostPassCompleteAtom = atom(false);
 export const isPostUserCompleteAtom = atom(false);
+export const sessionAtom = atom(null)
