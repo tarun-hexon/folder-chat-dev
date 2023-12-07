@@ -1,7 +1,7 @@
 'use client'
 import { useAtom } from 'jotai'
 import React from 'react'
-import { darkModeAtom, isPostPassCompleteAtom, isPostUserCompleteAtom } from '../store'
+import { darkModeAtom, isPostNameCompleteAtom, isPostUserCompleteAtom } from '../store'
 import {
   Select,
   SelectContent,
@@ -73,7 +73,7 @@ const UserDetails = () => {
 
   const [darkMode] = useAtom(darkModeAtom);
   const [isPostUserComplete, setIsPostUserComplete] = useAtom(isPostUserCompleteAtom);
-  const [isPostPassComplete, setIsPostPassComplete] = useAtom(isPostPassCompleteAtom);
+  const [isPostNameComplete, setIsPostNameComplete] = useAtom(isPostNameCompleteAtom);
 
   return (
     <>
@@ -91,7 +91,7 @@ const UserDetails = () => {
 
       <Button variant="outline" className={`w-full text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center text-white`} onClick={()=>setIsPostUserComplete(true)}>Continue</Button>
 
-      <div className={`items-center w-full opacity-60 hover:cursor-pointer text-center mt-4 text-[14px]`} onClick={()=>setIsPostPassComplete(false)}>Back</div>
+      <div className={`items-center w-full opacity-60 hover:cursor-pointer text-center mt-4 text-[14px]`} onClick={()=>setIsPostNameComplete(false)}>Back</div>
       </div>
       </>
      :

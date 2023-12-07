@@ -1,60 +1,24 @@
 'use client'
-import React, { useState, useEffect } from 'react'
+import React, { useState } from 'react'
 import social_role from "../../public/assets/social_role.svg"
 import illustration from "../../public/assets/illustration.svg"
-import checkCircle from "../../public/assets/checkCircle.svg"
 import { Button } from "../../components/ui/button"
 import { FaCheckCircle } from "react-icons/fa";
 
 import Image from 'next/image'
-import { darkModeAtom, isPostPassCompleteAtom, sessionAtom, isPostOtpCompleteAtom } from '../store';
+import { darkModeAtom, isPostNameCompleteAtom, sessionAtom, isPostOtpCompleteAtom } from '../store';
 import { useAtom } from 'jotai'
 import supabase from '../../config/supabse'
 
 
 
 
-const PostPassword = () => {
+const PostName = () => {
 
     const [darkMode] = useAtom(darkModeAtom);
     const [selected, setSelected] = useState('');
-    const [isPostPassComplete, setIsPostPassComplete] = useAtom(isPostPassCompleteAtom);
-    const [isPostOtpComplete, setPostOtpComplete] = useAtom(isPostOtpCompleteAtom);
+    const [isPostNameComplete, setIsPostNameComplete] = useAtom(isPostNameCompleteAtom);
     const [session, setSession1] = useAtom(sessionAtom);
-
-
-    async function insertUserData() {
-        try {
-    
-          const { data, error } = await supabase
-            .from('client')
-            .insert({
-              email:email
-            })
-            .select()
-    
-    
-          if (error) {
-            console.error('Error inserting data:', error.message);
-          } else {
-            console.log('Data inserted successfully:', data);
-          }
-        } catch (e) {
-          console.error('An unexpected error occurred:', e.message);
-        }
-    
-      }
-      
-    async function getSess() {
-        await supabase.auth.getSession().then(({ data: { session } }) => {
-          setSession1(session);
-          // console.log('home page', session)
-        });
-      };
-    
-      useEffect(()=> {
-        getSess()
-      }, [])
 
     return (
         <div className={`flex flex-col w-[28rem] gap-8 items-center box-border ${darkMode ? '' : 'text-white'}`}>
@@ -78,11 +42,11 @@ const PostPassword = () => {
                     {selected === 'personal' && <FaCheckCircle className='absolute top-3 right-5' size={'1rem'}/>}
                 </div>
             </div>
-            <Button variant="outline" className={`w-[80%] text-white mt-2 text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center`} disabled={selected === ""} onClick={()=> setIsPostPassComplete(true)}>Continue</Button>
+            <Button variant="outline" className={`w-[80%] text-white mt-2 text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center`} disabled={selected === ""} onClick={()=> setIsPostNameComplete(true)}>Continue</Button>
 
             <div className={`w-[33rem] ${darkMode ? 'text-black' : 'text-white'}  text-xs opacity-60 text-center mt-4 leading-[20px] font-[300]`}>You may unsubscribe from receiving marketing communications at any time. Folder.chat&apos;s websites and communications are subjects to our Privacy Policy</div>
         </div>
     )
-}
+};
 
-export default PostPassword
+export default PostName

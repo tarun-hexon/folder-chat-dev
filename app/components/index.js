@@ -1,13 +1,13 @@
 import Signup from "./Signup";
-import PostOtp from "./PostOtp";
-import PostPassword from "./PostPassword";
+import PostSignup from "./PostSignup";
+import PostPassword from "./PostName";
 import UserDetails from "./UserDetails";
 
 
 
 export {
     Signup,
-    PostOtp,
+    PostSignup,
     PostPassword,
     UserDetails
 }
