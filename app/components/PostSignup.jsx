@@ -16,6 +16,19 @@ const PostSignup = () => {
 
     const [name, setName] = useState('');
 
+    async function updateName(){
+        try {
+            const { data, error } = await supabase.auth.updateUser({ name: name })
+
+            if (error) {
+                console.log(error)
+            };
+            console.log(data);
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
     
     return (
         <div className={`flex flex-col w-[22rem] gap-5 items-center box-border ${darkMode ? '' : 'text-white'}`}>

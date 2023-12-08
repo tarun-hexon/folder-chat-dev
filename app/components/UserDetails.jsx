@@ -47,10 +47,10 @@ const WorkPlace = () => {
       </div>
       <div className='w-full text-start space-y-2'>
         <Label htmlFor="workplace" className='text-[14px] leading-[20px] font-[500]'>Workplace name</Label>
-        <Input type='text' id="workplace" placeholder='Type workplace name' className='text-black'/>
+        <Input type='text' id="workplace" placeholder='Type workplace name' className='text-black' required/>
         <p className='font-[400] text-[14px] leading-[20px]'>The name of your company or organization</p>
       </div>
-      <Button variant="outline" className={`w-full text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center text-white`} onClick={()=> router.push('/')}>Continue</Button>
+      <Button variant="outline" className={`w-full text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center text-white`} onClick={()=> router.push('/welcome')}>Continue</Button>
     </div>
   )
 }

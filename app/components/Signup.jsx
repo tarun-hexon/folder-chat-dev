@@ -8,7 +8,7 @@ import Image from "next/image";
 import eye_icon from '../../public/assets/eye_icon.svg'
 import supabase from '../../config/supabse'
 import { useAtom } from 'jotai'
-import { darkModeAtom } from '../store';
+import { darkModeAtom, sessionAtom } from '../store';
 import Link from 'next/link'
 
 const Signup = () => {
@@ -22,7 +22,7 @@ const Signup = () => {
   const [inputError, setInputError] = useState(false)
 
   const [darkMode] = useAtom(darkModeAtom);
-  
+
   const [errorMsg, setErrorMsg] = useState(false);
 
   useEffect(() => {
@@ -40,17 +40,19 @@ const Signup = () => {
     if(userInput.password !== userInput.confirm_password){
       setInputError('Password and confirm password does not match');
       return null
+    }else{
+      setInputError(false);
     }
     try {
       const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
+        email: userInput.email,
+        password: userInput.password,
       });
       if (error) {
         setErrorMsg(error.message)
       }
       else {
-        alert('Check Your Email For Confirmation Mail')
+        setErrorMsg('Check Your Email For Confirmation Mail')
       }
     } catch (error) {
       setErrorMsg(error.message)
@@ -59,30 +61,8 @@ const Signup = () => {
   };
 
 
-  async function insertUserData() {
-    try {
-
-      const { data, error } = await supabase
-        .from('client')
-        .insert({
-          email: email
-        })
-        .select()
-
-
-      if (error) {
-        console.error('Error inserting data:', error.message);
-      } else {
-        console.log('Data inserted successfully:', data);
-      }
-    } catch (e) {
-      console.error('An unexpected error occurred:', e.message);
-    }
-
-  }
 
   async function googleSignIn() {
-    // return null
     const { data, error } = await supabase.auth.signInWithOAuth({
       provider: 'google',
       options: {
@@ -90,6 +70,7 @@ const Signup = () => {
           access_type: 'offline',
           prompt: 'consent',
         },
+        redirectTo : 'http://localhost:3000/welcome'
       },
     });
     if (error) {
@@ -118,13 +99,14 @@ const Signup = () => {
       ...userInput,
       [e.target.name] : e.target.value
     })
-  }
+  };
+
   return (
-    <div className={`flex flex-col w-[22rem] gap-4 justify-center items-center box-border ${darkMode ? '' : 'text-white'}`}>
+    <div className={`flex flex-col w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'}`}>
 
       <h1 className='text-5xl w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-8'>Sign Up</h1>
-
-      <div className='w-full flex flex-col gap-3 text-sm font-[500] leading-[20px]'>
+      <p className='tracking-tight text-xs text-[#14B8A6]'>{errorMsg}</p>
+      <div className='w-full flex flex-col gap-2 text-sm font-[500] leading-[20px]'>
 
         <div>
           <Label htmlFor="email">Email Address</Label>
@@ -141,7 +123,7 @@ const Signup = () => {
         </div>
 
         <div className='relative'>
-          <Label htmlFor="password">Confirm Password</Label>
+          <Label htmlFor="confirm_password">Confirm Password</Label>
           <Input type='password' id="confirm_password" name='confirm_password' value={userInput.confirm_password} placeholder='Confirm Password' className='text-black mt-2 font-[400]' onChange={(e) => handleOnchange(e)} />
 
           {userInput.confirm_password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('confirm_password')}>

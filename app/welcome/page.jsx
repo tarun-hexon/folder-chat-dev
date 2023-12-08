@@ -1,23 +1,40 @@
 'use client'
 import { useAtom } from 'jotai'
-import React from 'react'
+import React, { useEffect } from 'react'
 import { darkModeAtom, sessionAtom } from '../store'
-
+import { useRouter } from 'next/navigation'
+import supabase from '../../config/supabse'
 
 const Welcome = () => {
     const [session, setSession] = useAtom(sessionAtom);
-    const [darkMode, setDarkMode] = useAtom(darkModeAtom)
-    if(!session){
-        return (
-            <div className={`${darkMode ? 'text-black' : ''}`}>
-                You are not authenticated !
-            </div>
-        )
-    }
+    const [darkMode, setDarkMode] = useAtom(darkModeAtom);
+
+    const router = useRouter();
+
+    async function getSess() {
+        await supabase.auth.getSession().then(({ data: { session } }) => {
+          if(session){
+            console.log(session)
+            setSession(session);
+          }
+          else{
+            router.push('/login')
+          }
+        });
+      };
+
+    useEffect(()=> {
+        getSess()
+    }, [])
+
   return (
-    <div className={`${darkMode ? 'text-black' : ''}`}>
-        Welcome {session?.user?.email}
-    </div>
+    session && 
+        <>
+        <div className={`${darkMode ? 'text-black' : ''}`}>
+        Hello {session?.user?.email}
+        </div>
+        </>
+    
   )
 }
 

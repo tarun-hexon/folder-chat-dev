@@ -10,50 +10,89 @@ import Image from 'next/image';
 import eye_icon from '../../../public/assets/eye_icon.svg'
 import { useAtom } from 'jotai';
 import { darkModeAtom } from '../../store';
+import { UpdatePassword } from '../../components/index';
 
 
 
 const Page = () => {
 
   const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [emailSent, setEmailSent] = useState(false);
+
   const [darkMode, setDarkMode] = useAtom(darkModeAtom);
-  const router = useRouter()
+  const router = useRouter();
 
-  async function resetPass(){
-    if(email === '') return alert('type a valid email')
-    try {
-        const { data, error } = await supabase.auth.resetPasswordForEmail(
-            email,
-            { redirectTo: 'http://localhost:3000/update' }
-          );
-          if(error){
-            throw error
-          };
-          alert('check your email for verification link')
-    } catch (error) {
-        console.log(error)
+  const [error, setError] = useState('');
+  const [otp, setOTP] = useState('');
+  const [otpVerified, setOTPVerified] = useState(false)
+
+
+  async function sendMail() {
+    const { data, error } = await supabase.auth
+      .resetPasswordForEmail(email)
+    if (error) {
+      setError(error.message);
     }
-};
+    else {
+      setEmailSent(true);
+      setError(false);
+    }
+  };
 
 
+  const OtpValidationForm = async () => {
+    try {
 
+      const { data, error } = await supabase.auth.verifyOtp({ email: email, token: otp, type: 'email' })
 
+      if (error) {
+        console.log('Error verifying OTP:', error);
+        setError('Token has expired or is invalid');
+        throw error
+      }
+      if(!error){
+        setOTPVerified(true);
+        setError(false)
+      }
+
+    } catch (error) {
+      console.error('Error verifying OTP:', error);
+    }
+  }
+
+  if (otpVerified) {
+    return <UpdatePassword />
+  };
 
   return (
     <div className='w-full flex flex-col justify-center items-center'>
-      <h1 className={`text-3xl font-Inter space-x-0 text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black': ''}`}>Reset Password</h1>
+      {!emailSent ?
+        <><h1 className={`text-3xl font-Inter space-x-0 text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black' : ''}`}>Reset Password</h1>
 
-      <div className='w-80 flex flex-col gap-6 text-sm font-inter justify-center'>
+          <div className='w-80 flex flex-col gap-6 text-sm font-inter justify-center'>
 
-        <div>
-        <Label htmlFor="email" className={`text-[14px] font-[500] leading-[20px] ${darkMode ? 'text-black': ''}`}>Email Address</Label>
-        <Input type='email' id="email" name='email' value={email} placeholder='Enter Your Email' className='text-black bg-white font-[500] leading-[20px] mt-2' onChange={(e) => setEmail(e.target.value)} />
-        </div>
+            <div>
+              <Label htmlFor="email" className={`text-[14px] font-[500] leading-[20px] ${darkMode ? 'text-black' : ''}`}>Email Address</Label>
+              <Input type='email' id="email" name='email' value={email} placeholder='Enter Your Email' className='text-black bg-white font-[500] leading-[20px] mt-2' onChange={(e) => setEmail(e.target.value)} />
+            </div>
+            <p className='tracking-tight text-xs text-red-400 -mt-4'>{error}</p>
+            <Button onClick={sendMail} variant={'outline'} className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center'>Send Otp</Button>
+          </div> </> :
+        <><h1 className={`text-3xl font-Inter space-x-0 text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black' : ''}`}>Verify Otp</h1>
 
-        <Button onClick={resetPass} variant={'outline'} className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center'>Reset Password</Button>
-      </div>
-      
+          <div className='w-80 flex flex-col gap-6 text-sm font-inter justify-center'>
+
+            <div>
+              <Label htmlFor="otp" className={`text-[14px] font-[500] leading-[20px] ${darkMode ? 'text-black' : ''}`}>Email OTP</Label>
+              <Input type='text' id="otp" name='email' value={otp} placeholder='Enter OTP' className='text-black bg-white font-[500] leading-[20px] mt-2' onChange={(e) => setOTP(e.target.value)} />
+
+            </div>
+            <p className='tracking-tight text-xs text-red-400 -mt-4'>{error}</p>
+
+            <Button onClick={OtpValidationForm} variant={'outline'} className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center -mt-2'>Submit</Button>
+          </div> </>
+      }
+
     </div>
   )
 }

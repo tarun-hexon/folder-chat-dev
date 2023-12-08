@@ -19,9 +19,9 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false)
   const [darkMode] = useAtom(darkModeAtom);
-  const [session, setSession] = useAtom(sessionAtom)
-const [errorMsg, setErrorMsg] = useState('');
-const router = useRouter()
+  const [session, setSession] = useAtom(sessionAtom);
+  const [errorMsg, setErrorMsg] = useState(false);
+  const router = useRouter()
 
   useEffect(() => {
     if (email !== '' && email.split('@').length > 1 && password != '') {
@@ -44,6 +44,7 @@ const router = useRouter()
         console.log(error.message)
       }else{
         getSess();
+        setErrorMsg(false)
         router.push('/welcome')
       }
       
@@ -64,12 +65,11 @@ const router = useRouter()
                 access_type: 'offline',
                 prompt: 'consent',
               },
-            },
+              redirectTo : 'http://localhost:3000/welcome'
+            }            
         });
         if (error) {
             console.log(error.message);
-        } else {
-            getSess()
         }
     } catch (error) {
         console.log(error)
@@ -78,18 +78,22 @@ const router = useRouter()
 
   function getSess() {
     supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session)
+      setSession(session);
     });
   }
 
-
+  useEffect(() => {
+    if (session) {
+      router.push("/welcome");
+    }
+  }, [session]);
 
   return (
-    <div className={`flex flex-col w-[22rem] gap-6 items-center box-border ${darkMode ? 'text-black' : 'text-white'}`}>
+    <div className={`flex flex-col w-[22rem] gap-5 items-center box-border ${darkMode ? 'text-black' : 'text-white'}`}>
 
       <h1 className='text-5xl space-x-0 w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-8'>Sign In</h1>
 
-      <div className='w-full flex flex-col gap-4 text-sm font-inter'>
+      <div className='w-full flex flex-col gap-3 text-sm font-inter'>
 
         <div>
           <Label htmlFor="email" className='text-sm font-[500] leading-[20px]'>Email Address</Label>
@@ -103,10 +107,11 @@ const router = useRouter()
           {password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => setShowPassword(!showPassword)}>
             <Image src={eye_icon} alt='show-password' title='Show Password' />
           </button>}
+          
         </div>
-
-
+        <p className='tracking-tight text-xs text-red-400 -mt-1'>{errorMsg}</p>
       </div>
+      
 
       <Button variant="outline" className={`w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center ${disabled ? 'opacity-5' : ''}`} disabled={disabled} onClick={signInFunction}>Login</Button>
 
