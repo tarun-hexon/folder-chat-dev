@@ -8,30 +8,39 @@ import Image from "next/image";
 import eye_icon from '../../public/assets/eye_icon.svg'
 import supabase from '../../config/supabse'
 import { useAtom } from 'jotai'
-import { otpSentAtom, otpVerifiedAtom, darkModeAtom, sessionAtom } from '../store';
+import { darkModeAtom } from '../store';
 import Link from 'next/link'
 
 const Signup = () => {
 
   const [disabled, setDisabled] = useState(false);
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false)
+  const [userInput, setUserInput] = useState({
+    email:'',
+    password:'',
+    confirm_password:''
+  });
+  const [inputError, setInputError] = useState(false)
+
   const [darkMode] = useAtom(darkModeAtom);
   
-  const [errorMsg, setErrorMsg] = useState('');
+  const [errorMsg, setErrorMsg] = useState(false);
 
   useEffect(() => {
-    if (email !== '' && email.split('@').length > 1 && password != '') {
+    if (userInput.email !== '' && userInput.email.split('@').length > 1 && userInput.password != '' && userInput.confirm_password != '') {
       setDisabled(false)
+      
     } else {
       setDisabled(true)
     }
-  }, [email, password]);
+  }, [userInput]);
 
 
 
   async function signUpFunction() {
+    if(userInput.password !== userInput.confirm_password){
+      setInputError('Password and confirm password does not match');
+      return null
+    }
     try {
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -91,27 +100,56 @@ const Signup = () => {
     }
   };
 
+  function showPassword(id) {
+    var input = document.getElementById(id);
+    if (input) {
+        if (input.type === "text") {
+            input.type = "password";
+        } else {
+            input.type = "text";
+        }
+    }
+};
 
+
+
+  function handleOnchange(e){
+    setUserInput({
+      ...userInput,
+      [e.target.name] : e.target.value
+    })
+  }
   return (
-    <div className={`flex flex-col w-[22rem] gap-6 justify-center items-center box-border ${darkMode ? '' : 'text-white'}`}>
+    <div className={`flex flex-col w-[22rem] gap-4 justify-center items-center box-border ${darkMode ? '' : 'text-white'}`}>
 
       <h1 className='text-5xl w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-8'>Sign Up</h1>
 
-      <div className='w-full flex flex-col gap-4 text-sm font-[500] leading-[20px]'>
+      <div className='w-full flex flex-col gap-3 text-sm font-[500] leading-[20px]'>
 
         <div>
           <Label htmlFor="email">Email Address</Label>
-          <Input type='email' id="email" placeholder='Enter Your Email' className='text-black mt-2 bg-white font-[400] leading-[20px]' onChange={(e) => setEmail(e.target.value)} />
+          <Input type='email' name='email' id="email" value={userInput.email} placeholder='Enter Your Email' className='text-black mt-2 bg-white font-[400] leading-[20px]' onChange={(e) => handleOnchange(e)} />
         </div>
 
         <div className='relative'>
           <Label htmlFor="password">Password</Label>
-          <Input type={showPassword ? 'text' : 'password'} id="password" value={password} placeholder='Password' className='text-black mt-2 font-[400]' onChange={(e) => setPassword(e.target.value)} />
+          <Input type='password' id="password" name='password' value={userInput.password} placeholder='Password' className='text-black mt-2 font-[400]' onChange={(e) => handleOnchange(e)} />
 
-          {password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => setShowPassword(!showPassword)}>
+          {userInput.password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('password')}>
             <Image src={eye_icon} alt='show-password' title='Show Password' />
           </button>}
         </div>
+
+        <div className='relative'>
+          <Label htmlFor="password">Confirm Password</Label>
+          <Input type='password' id="confirm_password" name='confirm_password' value={userInput.confirm_password} placeholder='Confirm Password' className='text-black mt-2 font-[400]' onChange={(e) => handleOnchange(e)} />
+
+          {userInput.confirm_password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('confirm_password')}>
+            <Image src={eye_icon} alt='show-password' title='Show Password' />
+          </button>}
+          <p className='tracking-tight text-xs text-red-400 mt-1'>{inputError}</p>
+        </div>
+        
 
 
       </div>
