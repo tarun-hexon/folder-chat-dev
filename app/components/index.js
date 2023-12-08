@@ -1,6 +1,6 @@
 import Signup from "./Signup";
 import PostSignup from "./PostSignup";
-import PostPassword from "./PostName";
+import PostName from "./PostName";
 import UserDetails from "./UserDetails";
 import UpdatePassword from "./UpdatePassword";
 
@@ -8,7 +8,7 @@ import UpdatePassword from "./UpdatePassword";
 export {
     Signup,
     PostSignup,
-    PostPassword,
+    PostName,
     UserDetails,
     UpdatePassword
 }

@@ -42,9 +42,19 @@ async function getSess() {
   });
 };
 
+async function getSess() {
+  await supabase.auth.getSession().then(({ data: { session } }) => {
+    if(session){
+      setUserSession(session);
+    }
+    
+  });
+};
+
 useEffect(()=> {
   getSess();
 }, [])
+
 
 
 return (

@@ -49,14 +49,18 @@ const Signup = () => {
         password: userInput.password,
       });
       if (error) {
-        setErrorMsg(error.message)
+        setInputError(error.message)
+      }else if (data.user?.identities?.length === 0) {
+        setInputError('User already registered');
       }
       else {
+        console.log(data)
         setErrorMsg('Check Your Email For Confirmation Mail')
       }
+      console.log(error)
     } catch (error) {
-      setErrorMsg(error.message)
-      console.error('Error logging in:', error.message);
+      setInputError(error?.message)
+      console.error('Error logging in:', error?.message);
     }
   };
 
@@ -102,11 +106,11 @@ const Signup = () => {
   };
 
   return (
-    <div className={`flex flex-col w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'}`}>
+    <div className={`flex flex-col w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'} `}>
 
-      <h1 className='text-5xl w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-8'>Sign Up</h1>
+      <h1 className='text-5xl w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-6'>Sign Up</h1>
       <p className='tracking-tight text-xs text-[#14B8A6]'>{errorMsg}</p>
-      <div className='w-full flex flex-col gap-2 text-sm font-[500] leading-[20px]'>
+      <div className='w-full flex flex-col gap-3 text-sm font-[500] leading-[20px]'>
 
         <div>
           <Label htmlFor="email">Email Address</Label>

@@ -11,6 +11,7 @@ import eye_icon from '../../../public/assets/eye_icon.svg'
 import { useAtom } from 'jotai';
 import { darkModeAtom } from '../../store';
 import { UpdatePassword } from '../../components/index';
+import Link from 'next/link';
 
 
 
@@ -77,6 +78,7 @@ const Page = () => {
             </div>
             <p className='tracking-tight text-xs text-red-400 -mt-4'>{error}</p>
             <Button onClick={sendMail} variant={'outline'} className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center'>Send Otp</Button>
+            <div className={`w-full text-sm opacity-75 text-center ${darkMode ? 'text-black' : 'text-white'}`}>Already have an account &#63; <Link href={'/login'} className='font-[500] hover:underline'>Sign In</Link></div>
           </div> </> :
         <><h1 className={`text-3xl font-Inter space-x-0 text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black' : ''}`}>Verify Otp</h1>
 

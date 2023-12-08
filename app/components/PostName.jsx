@@ -8,8 +8,6 @@ import { FaCheckCircle } from "react-icons/fa";
 import Image from 'next/image'
 import { darkModeAtom, isPostNameCompleteAtom, sessionAtom, isPostOtpCompleteAtom } from '../store';
 import { useAtom } from 'jotai'
-import supabase from '../../config/supabse'
-
 
 
 
