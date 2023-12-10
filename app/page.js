@@ -1,9 +1,8 @@
 'use client'
-import { useEffect } from 'react';
-import { PostSignup, Signup, UserDetails } from './components/index'
+
 import { useAtom } from 'jotai'
 import { darkModeAtom, isPostSignUpCompleteAtom, isPostNameCompleteAtom, sessionAtom, onBoardCompleteAtom } from './store';
-import { PostName, Header } from './components'
+
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
