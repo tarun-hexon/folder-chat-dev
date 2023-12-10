@@ -7,7 +7,7 @@ import { PostName, Header } from '../../components'
 import { useRouter } from 'next/navigation';
 import {Loader2} from 'lucide-react';
 
-const page = () => {
+const Page = () => {
 
 
     const [darkMode, setDarkMode] = useAtom(darkModeAtom);
@@ -52,4 +52,4 @@ const page = () => {
   )
 }
 
-export default page
+export default Page
