@@ -1,15 +1,16 @@
 'use client'
-import React, { useEffect, useState } from 'react'
-import { Input } from '../../components/ui/input'
-import { Label } from "../../components/ui/label"
-import { Button } from "../../components/ui/button"
-import Google from "../../public/assets/google.svg"
+import React, { useEffect, useState } from 'react';
+import { Input } from '../../components/ui/input';
+import { Label } from "../../components/ui/label";
+import { Button } from "../../components/ui/button";
+import Google from "../../public/assets/google.svg";
 import Image from "next/image";
-import eye_icon from '../../public/assets/eye_icon.svg'
-import supabase from '../../config/supabse'
-import { useAtom } from 'jotai'
-import { darkModeAtom, sessionAtom } from '../store';
-import Link from 'next/link'
+import eye_icon from '../../public/assets/eye_icon.svg';
+import supabase from '../../config/supabse';
+import { useAtom } from 'jotai';
+import { darkModeAtom, isOnboardCompleteAtom, sessionAtom } from '../store';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
 const Signup = () => {
 
@@ -21,20 +22,11 @@ const Signup = () => {
   });
   const [inputError, setInputError] = useState(false)
 
-  const [darkMode] = useAtom(darkModeAtom);
-
-  const [errorMsg, setErrorMsg] = useState(false);
-
-  useEffect(() => {
-    if (userInput.email !== '' && userInput.email.split('@').length > 1 && userInput.password != '' && userInput.confirm_password != '') {
-      setDisabled(false)
-      
-    } else {
-      setDisabled(true)
-    }
-  }, [userInput]);
-
-
+  const [darkMode, setDarkMode] = useAtom(darkModeAtom);
+  const [session, setSession] = useAtom(sessionAtom)
+  const [emailSent, setEmailSent] = useState(false);
+  const [loading, setLoading] = useState(true)
+  const router = useRouter();
 
   async function signUpFunction() {
     if(userInput.password !== userInput.confirm_password){
@@ -55,7 +47,7 @@ const Signup = () => {
       }
       else {
         console.log(data)
-        setErrorMsg('Check Your Email For Confirmation Mail')
+        setEmailSent('Check Your Email For Confirmation Mail')
       }
       console.log(error)
     } catch (error) {
@@ -74,15 +66,22 @@ const Signup = () => {
           access_type: 'offline',
           prompt: 'consent',
         },
-        redirectTo : 'http://localhost:3000/welcome'
+        redirectTo : `${process.env.NEXT_PUBLIC_URL}/chat`
       },
     });
     if (error) {
-      setErrorMsg(error.message);
+      setInputError(error.message);
     } else {
-      console.log(data)
-
+      
     }
+  };
+
+
+  function handleOnchange(e){
+    setUserInput({
+      ...userInput,
+      [e.target.name] : e.target.value
+    })
   };
 
   function showPassword(id) {
@@ -94,32 +93,45 @@ const Signup = () => {
             input.type = "text";
         }
     }
-};
-
-
-
-  function handleOnchange(e){
-    setUserInput({
-      ...userInput,
-      [e.target.name] : e.target.value
-    })
   };
+  useEffect(() => {
+    if (userInput.email !== '' && userInput.email.split('@').length > 1 && userInput.password != '' && userInput.confirm_password != '') {
+      setDisabled(false)
+      
+    } else {
+      setDisabled(true)
+    }
+  }, [userInput]);
+
+
+  useEffect(()=> {
+
+    if (session) {
+      setLoading(false);
+      router.push("/chat");
+    } else {
+      setLoading(false)
+    }
+  }, [session]);
+
 
   return (
-    <div className={`flex flex-col w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'} `}>
+    <div className={`flex flex-col w-[22rem] gap-2 justify-center items-center box-border ${darkMode ? '' : 'text-white'} `}>
 
-      <h1 className='text-5xl w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-6'>Sign Up</h1>
-      <p className='tracking-tight text-xs text-[#14B8A6]'>{errorMsg}</p>
+      <h1 className='text-5xl w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-3'>Sign Up</h1>
+
+      <p className={`text-sm ${darkMode ? 'text-[#4b7bf4]' : 'text-[#f7d24c]'}`}>{emailSent}</p>
+
       <div className='w-full flex flex-col gap-3 text-sm font-[500] leading-[20px]'>
 
         <div>
           <Label htmlFor="email">Email Address</Label>
-          <Input type='email' name='email' id="email" value={userInput.email} placeholder='Enter Your Email' className='text-black mt-2 bg-white font-[400] leading-[20px]' onChange={(e) => handleOnchange(e)} />
+          <Input type='email' name='email' id="email" value={userInput.email} placeholder='Enter Your Email' className='text-black mt-2 bg-white font-[400] leading-[20px]' onChange={(e) => {handleOnchange(e); setInputError(false)}} />
         </div>
 
         <div className='relative'>
           <Label htmlFor="password">Password</Label>
-          <Input type='password' id="password" name='password' value={userInput.password} placeholder='Password' className='text-black mt-2 font-[400]' onChange={(e) => handleOnchange(e)} />
+          <Input type={'password'} id="password" name='password' value={userInput.password} placeholder='Password' className='text-black mt-2 font-[400]' onChange={(e) => {handleOnchange(e); setInputError(false)}} />
 
           {userInput.password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('password')}>
             <Image src={eye_icon} alt='show-password' title='Show Password' />
@@ -128,7 +140,7 @@ const Signup = () => {
 
         <div className='relative'>
           <Label htmlFor="confirm_password">Confirm Password</Label>
-          <Input type='password' id="confirm_password" name='confirm_password' value={userInput.confirm_password} placeholder='Confirm Password' className='text-black mt-2 font-[400]' onChange={(e) => handleOnchange(e)} />
+          <Input type={'password'} id="confirm_password" name='confirm_password' value={userInput.confirm_password} placeholder='Confirm Password' className='text-black mt-2 font-[400]' onChange={(e) => {handleOnchange(e); setInputError(false)}} />
 
           {userInput.confirm_password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('confirm_password')}>
             <Image src={eye_icon} alt='show-password' title='Show Password' />

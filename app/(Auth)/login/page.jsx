@@ -8,19 +8,27 @@ import Image from "next/image";
 import eye_icon from '../../../public/assets/eye_icon.svg'
 import supabase from '../../../config/supabse'
 import { useAtom } from 'jotai'
-import { darkModeAtom, sessionAtom } from '../../store';
+import { darkModeAtom, isOnboardCompleteAtom, sessionAtom } from '../../store';
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
+import { Loader2 } from 'lucide-react';
+
+import { Header } from '../../components'
+
 
 const Login = () => {
 
   const [disabled, setDisabled] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false)
+
   const [darkMode] = useAtom(darkModeAtom);
   const [session, setSession] = useAtom(sessionAtom);
   const [errorMsg, setErrorMsg] = useState(false);
+
+  const [loading, setLoading] = useState(true);
+
+
   const router = useRouter()
 
   useEffect(() => {
@@ -41,15 +49,14 @@ const Login = () => {
       });
       if (error) {
         setErrorMsg(error.message);
-        console.log(error.message)
       }else{
-        getSess();
+        
         setErrorMsg(false)
-        router.push('/welcome')
+        router.push('/chat')
       }
       
     } catch (error) {
-      console.error('Error logging in:', error.message);
+      // console.error('Error logging in:', error.message);
     }
   }
 
@@ -65,46 +72,64 @@ const Login = () => {
                 access_type: 'offline',
                 prompt: 'consent',
               },
-              redirectTo : 'http://localhost:3000/welcome'
+              redirectTo : `${process.env.NEXT_PUBLIC_URL}/chat`
             }            
         });
         if (error) {
             console.log(error.message);
+            return null
         }
+        
+        getSess();
     } catch (error) {
         console.log(error)
     }
   };
 
-  function getSess() {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-    });
-  }
-
-  useEffect(() => {
-    if (session) {
-      router.push("/welcome");
+  function showPassword(id) {
+    var input = document.getElementById(id);
+    if (input) {
+        if (input.type === "text") {
+            input.type = "password";
+        } else {
+            input.type = "text";
+        }
     }
-  }, [session]);
+};
+
+
+useEffect(()=> {
+
+  if (session) {
+    setLoading(false);
+    router.push("/chat");
+  } else {
+    setLoading(false)
+  }
+}, [session]);
+
 
   return (
-    <div className={`flex flex-col w-[22rem] gap-5 items-center box-border ${darkMode ? 'text-black' : 'text-white'}`}>
-
+  
+    <Header>
+    
+    
+    {session || loading ?<div className={`flex font-Inter justify-center items-center w-full h-screen flex-col gap-4  box-border ${darkMode ? 'text-black bg-[#EFF5F5]' : 'text-white bg-[#115E59]'}`}><Loader2 className='animate-spin'/></div>:
+    <div className={`flex font-Inter justify-center items-center w-[22rem] flex-col gap-4  box-border ${darkMode ? 'text-black bg-[#EFF5F5]' : 'text-white bg-[#115E59]'}`}>
       <h1 className='text-5xl space-x-0 w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-8'>Sign In</h1>
 
       <div className='w-full flex flex-col gap-3 text-sm font-inter'>
 
         <div>
           <Label htmlFor="email" className='text-sm font-[500] leading-[20px]'>Email Address</Label>
-          <Input type='email' id="email" placeholder='Enter Your Email' className='text-black mt-2 bg-white font-[400] leading-[20px]' onChange={(e) => setEmail(e.target.value)} />
+          <Input type='email' id="email" placeholder='Enter Your Email' className='text-black mt-2 bg-white font-[400] leading-[20px]' onChange={(e) => {setEmail(e.target.value); setErrorMsg(false)}} />
         </div>
 
         <div className='relative'>
           <Label htmlFor="login-code" className='text-sm font-[500] leading-[20px]'>Password</Label>
-          <Input type={showPassword ? 'text' : 'password'} id="password" value={password} placeholder='Password' className='text-black mt-2 font-[400]' onChange={(e) => setPassword(e.target.value)} />
+          <Input type={'password'} id="password" value={password} placeholder='Password' className='text-black mt-2 font-[400]' onChange={(e) => {setPassword(e.target.value); setErrorMsg(false)}} />
 
-          {password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => setShowPassword(!showPassword)}>
+          {password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('password')}>
             <Image src={eye_icon} alt='show-password' title='Show Password' />
           </button>}
           
@@ -121,9 +146,11 @@ const Login = () => {
 
       <div className='w-full text-sm opacity-75 text-center'>Don&apos;t have an account &#63; <Link href={'/'} className='font-[500] hover:underline '>Sign Up</Link></div>
       <Link href={'/reset'} className='w-full text-sm opacity-75 text-center hover:underline'>Forgot your password &#63;</Link>
-
-    </div>
+      </div>}
+      
+    
+    </Header>
   )
 }
 
-export default Login
+export default Login;

@@ -10,8 +10,9 @@ import Image from 'next/image';
 import eye_icon from '../../../public/assets/eye_icon.svg'
 import { useAtom } from 'jotai';
 import { darkModeAtom } from '../../store';
-import { UpdatePassword } from '../../components/index';
+import { Header, UpdatePassword } from '../../components/index';
 import Link from 'next/link';
+import Intial from '../../Intial';
 
 
 
@@ -66,7 +67,9 @@ const Page = () => {
   };
 
   return (
-    <div className='w-full flex flex-col justify-center items-center'>
+    <Header>
+    <div className='w-full h-screen flex flex-col justify-center items-center'>
+
       {!emailSent ?
         <><h1 className={`text-3xl font-Inter space-x-0 text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black' : ''}`}>Reset Password</h1>
 
@@ -80,10 +83,11 @@ const Page = () => {
             <Button onClick={sendMail} variant={'outline'} className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center'>Send Otp</Button>
             <div className={`w-full text-sm opacity-75 text-center ${darkMode ? 'text-black' : 'text-white'}`}>Already have an account &#63; <Link href={'/login'} className='font-[500] hover:underline'>Sign In</Link></div>
           </div> </> :
-        <><h1 className={`text-3xl font-Inter space-x-0 text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black' : ''}`}>Verify Otp</h1>
+        <>
+        <h1 className={`text-3xl font-Inter space-x-0 text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black' : ''}`}>Verify Otp</h1>
 
           <div className='w-80 flex flex-col gap-6 text-sm font-inter justify-center'>
-
+          <p className={`tracking-tight text-sm ${darkMode ? 'text-[#4a4ff6]': 'text-[#f7d24c]'} -mt-4 text-center`}>An OTP has been sent to your registered Email Id</p>
             <div>
               <Label htmlFor="otp" className={`text-[14px] font-[500] leading-[20px] ${darkMode ? 'text-black' : ''}`}>Email OTP</Label>
               <Input type='text' id="otp" name='email' value={otp} placeholder='Enter OTP' className='text-black bg-white font-[500] leading-[20px] mt-2' onChange={(e) => setOTP(e.target.value)} />
@@ -96,6 +100,7 @@ const Page = () => {
       }
 
     </div>
+    </Header>
   )
 }
 

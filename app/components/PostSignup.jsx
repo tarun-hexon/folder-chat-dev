@@ -1,24 +1,29 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
 import { Button } from "../../components/ui/button"
 import user_icon from "../../public/assets/user_icon.png"
+import temp_icon from '../../public/assets/temp_icon.jpg'
 import supabase from '../../config/supabse'
 import Image from "next/image";
-import { darkModeAtom, isPostSignUpCompleteAtom, sessionAtom } from '../store';
+import { darkModeAtom, onBoardCompleteAtom, isPostSignUpCompleteAtom, sessionAtom } from '../store';
 import { useAtom } from 'jotai'
+import { Loader2 } from 'lucide-react'
 
 
 const PostSignup = () => {
     const [darkMode] = useAtom(darkModeAtom);
     const [isPostSignUpComplete, setIsPostSignUpComplete] = useAtom(isPostSignUpCompleteAtom);
     
-    const [session, setSession] = useAtom(sessionAtom);
+    const [onBoard, setOnBoard] = useAtom(onBoardCompleteAtom);
+    
 
     const [name, setName] = useState('');
 
-
+if(onBoard){
+    return <Loader2 className='animate-spin' />
+}
     return (
         <div className={`flex flex-col w-[22rem] gap-5 items-center box-border ${darkMode ? '' : 'text-white'}`}>
 
@@ -30,7 +35,7 @@ const PostSignup = () => {
             <div className='w-full flex flex-col items-center gap-4 justify-center mt-4'>
 
                 <div className='w-full'>
-                    <Label htmlFor='profile-img' className='flex flex-col items-center justify-center'><Image src={false ? imgURL : user_icon} alt="user_img" className='h-20 w-20 block' /><p className='text-[12px] font-[300] opacity-70 mt-2 -ml-1'>Add a photo</p>
+                    <Label htmlFor='profile-img' className='flex flex-col items-center justify-center'><Image src={temp_icon} alt="user_img" className='h-20 w-20 block rounded-full' /><p className='text-[12px] font-[300] opacity-70 mt-2 -ml-1'>Add a photo</p>
                     </Label>
                     <input type='file' id='profile-img' accept="image/png, image/jpeg" style={{ display: 'none' }} 
                     onChange={(e) => uploadImage(e.target.files[0])}

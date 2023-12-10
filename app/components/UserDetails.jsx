@@ -13,7 +13,7 @@ import { Button } from '../../components/ui/button'
 import { Label } from '../../components/ui/label'
 import { Input } from '../../components/ui/input'
 import { useRouter } from 'next/navigation'
-
+import { selectOptions } from '../../config/constants';
 
 
 const SelectCard = (props) => {
@@ -50,26 +50,11 @@ const WorkPlace = () => {
         <Input type='text' id="workplace" placeholder='Type workplace name' className='text-black' required/>
         <p className='font-[400] text-[14px] leading-[20px]'>The name of your company or organization</p>
       </div>
-      <Button variant="outline" className={`w-full text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center text-white`} onClick={()=> router.push('/welcome')}>Continue</Button>
+      <Button variant="outline" className={`w-full text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center text-white`} onClick={()=> router.push('/chat')}>Continue</Button>
     </div>
   )
 }
 const UserDetails = () => {
-
-  const selectOptions = [
-    {
-      title: 'What kind of work you do?'
-    },
-    {
-      title: 'What is your role?'
-    },
-    {
-      title: 'Roughly how many people work at your company?'
-    },
-    {
-      title: 'What are you planning to use folder.chat for?'
-    }
-  ]
 
   const [darkMode] = useAtom(darkModeAtom);
   const [isPostUserComplete, setIsPostUserComplete] = useAtom(isPostUserCompleteAtom);

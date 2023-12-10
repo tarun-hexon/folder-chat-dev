@@ -2,7 +2,6 @@ import './globals.css'
 import Image from 'next/image'
 
 import { Inter } from 'next/font/google'
-import { Signup } from './components';
 import Intial from './Intial';
 
 const inter = Inter({ subsets: ['latin'] })
@@ -21,10 +20,9 @@ export default function RootLayout({ children }) {
         <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet" />
       </head>
       <body className={inter.className}>      
-        
-        <Intial>
+        <Intial />
           {children}
-        </Intial>
+        
       </body>
 
     </html>
