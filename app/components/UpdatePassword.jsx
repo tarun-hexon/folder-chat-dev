@@ -39,7 +39,7 @@ const UpdatePassword = () => {
             const { data, error } = await supabase.auth.updateUser({ password: password })
 
             if (error) {
-                setInputError(error)
+                setInputError(error.message);
                 throw error
             };
             supabase.auth.signOut();

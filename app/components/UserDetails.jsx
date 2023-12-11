@@ -14,6 +14,7 @@ import { Label } from '../../components/ui/label'
 import { Input } from '../../components/ui/input'
 import { useRouter } from 'next/navigation'
 import { selectOptions } from '../../config/constants';
+import supabase from '../../config/supabse'
 
 
 const SelectCard = (props) => {
@@ -38,7 +39,25 @@ const SelectCard = (props) => {
 
 const WorkPlace = () => {
   const [darkMode] = useAtom(darkModeAtom);
-  const router = useRouter()
+  
+  const router = useRouter();
+
+  async function updateUser(){
+    try {
+      const { user, error } = await supabase.auth.updateUser({
+        data:{onBoarding: true}
+      });
+      if(error){
+        throw error
+      }
+      router.push('/chat')
+    } catch (error) {
+      console.log(error)
+    };
+    
+  }
+
+
   return (
     <div className={`flex flex-col w-96 gap-5 items-center box-border ${darkMode ? '' : 'text-white'}`}>
       <div className='w-[90%] text-center mb-5'>
@@ -50,7 +69,7 @@ const WorkPlace = () => {
         <Input type='text' id="workplace" placeholder='Type workplace name' className='text-black' required/>
         <p className='font-[400] text-[14px] leading-[20px]'>The name of your company or organization</p>
       </div>
-      <Button variant="outline" className={`w-full text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center text-white`} onClick={()=> router.push('/chat')}>Continue</Button>
+      <Button variant="outline" className={`w-full text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center text-white`} onClick={()=> {updateUser()}}>Continue</Button>
     </div>
   )
 }

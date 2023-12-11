@@ -8,7 +8,7 @@ import Image from "next/image";
 import eye_icon from '../../../public/assets/eye_icon.svg'
 import supabase from '../../../config/supabse'
 import { useAtom } from 'jotai'
-import { darkModeAtom, isOnboardCompleteAtom, sessionAtom } from '../../store';
+import { darkModeAtom, sessionAtom } from '../../store';
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react';
@@ -50,7 +50,8 @@ const Login = () => {
       if (error) {
         setErrorMsg(error.message);
       }else{
-        
+        getSess()
+        console.log(session)
         setErrorMsg(false)
         router.push('/chat')
       }
@@ -63,7 +64,6 @@ const Login = () => {
 
 
   async function googleSignIn() {
-    // return null
     try {
         const { data, error } = await supabase.auth.signInWithOAuth({
             provider: 'google',
@@ -85,6 +85,14 @@ const Login = () => {
         console.log(error)
     }
   };
+  async function getSess() {
+    await supabase.auth.getSession().then(({ data: { session } }) => {
+      if(session){
+        setSession(session);
+      }
+      
+    });
+  };
 
   function showPassword(id) {
     var input = document.getElementById(id);
@@ -99,11 +107,14 @@ const Login = () => {
 
 
 useEffect(()=> {
-
-  if (session) {
+  if (session && session?.user?.user_metadata?.onBoarding) {
     setLoading(false);
-    router.push("/chat");
-  } else {
+    router.push('/chat')
+  } else if(session && !session?.user?.user_metadata?.onBoarding){
+    setLoading(false);
+    router.push('/signup')
+  }
+  else {
     setLoading(false)
   }
 }, [session]);

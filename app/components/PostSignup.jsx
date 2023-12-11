@@ -3,26 +3,33 @@ import React, { useState, useEffect } from 'react'
 import { Input } from "../../components/ui/input"
 import { Label } from "../../components/ui/label"
 import { Button } from "../../components/ui/button"
-import user_icon from "../../public/assets/user_icon.png"
 import temp_icon from '../../public/assets/temp_icon.jpg'
 import supabase from '../../config/supabse'
 import Image from "next/image";
-import { darkModeAtom, onBoardCompleteAtom, isPostSignUpCompleteAtom, sessionAtom } from '../store';
+import { darkModeAtom, isPostSignUpCompleteAtom, sessionAtom } from '../store';
 import { useAtom } from 'jotai'
 import { Loader2 } from 'lucide-react'
+import { useRouter } from 'next/navigation'
 
 
 const PostSignup = () => {
     const [darkMode] = useAtom(darkModeAtom);
     const [isPostSignUpComplete, setIsPostSignUpComplete] = useAtom(isPostSignUpCompleteAtom);
-    
-    const [onBoard, setOnBoard] = useAtom(onBoardCompleteAtom);
-    
-
+    const [session, setSession] = useAtom(sessionAtom);
+    const [onBoard, setOnBoard] = useState(false);
     const [name, setName] = useState('');
+    const router = useRouter()
 
-if(onBoard){
-    return <Loader2 className='animate-spin' />
+   
+    useEffect(()=> {
+        
+        if(session?.user?.user_metadata?.onBoarding){
+            router.push('/chat')
+        }
+    }, [session]);
+
+if(session?.user?.user_metadata?.onBoarding){
+    return <Loader2 className='animate-spin'/>
 }
     return (
         <div className={`flex flex-col w-[22rem] gap-5 items-center box-border ${darkMode ? '' : 'text-white'}`}>

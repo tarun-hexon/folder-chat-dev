@@ -39,14 +39,19 @@ const Signup = () => {
       const { data, error } = await supabase.auth.signUp({
         email: userInput.email,
         password: userInput.password,
-      });
-      if (error) {
-        setInputError(error.message)
-      }else if (data.user?.identities?.length === 0) {
-        setInputError('User already registered');
-      }
-      else {
-        console.log(data)
+        options: {
+          data: {
+            onBoarding: false,
+          },
+        },
+        });
+        if (error) {
+          setInputError(error.message)
+        }else if (data.user?.identities?.length === 0) {
+          setInputError('User already registered');
+        }
+        else {
+          console.log(data)
         setEmailSent('Check Your Email For Confirmation Mail')
       }
       console.log(error)
@@ -134,7 +139,7 @@ const Signup = () => {
           <Input type={'password'} id="password" name='password' value={userInput.password} placeholder='Password' className='text-black mt-2 font-[400]' onChange={(e) => {handleOnchange(e); setInputError(false)}} />
 
           {userInput.password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('password')}>
-            <Image src={eye_icon} alt='show-password' title='Show Password' />
+            <Image src={eye_icon} alt='show-password' priority={false} title='Show Password' />
           </button>}
         </div>
 
@@ -143,7 +148,7 @@ const Signup = () => {
           <Input type={'password'} id="confirm_password" name='confirm_password' value={userInput.confirm_password} placeholder='Confirm Password' className='text-black mt-2 font-[400]' onChange={(e) => {handleOnchange(e); setInputError(false)}} />
 
           {userInput.confirm_password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('confirm_password')}>
-            <Image src={eye_icon} alt='show-password' title='Show Password' />
+            <Image src={eye_icon} alt='show-password' priority={false} title='Show Password' />
           </button>}
           <p className='tracking-tight text-xs text-red-400 mt-1'>{inputError}</p>
         </div>
@@ -156,7 +161,7 @@ const Signup = () => {
 
       <hr className='border border-[#CBD5E1] w-full' />
 
-      <Button variant="outline" className='w-full text-black border border-[#CBD5E1] rounded-[6px] leading-[20px] flex items-center justify-center gap-1' onClick={googleSignIn}><Image src={Google} alt="google" className='w-7 h-7' /><span className='font-[700] text-sm'>Continue With Google</span></Button>
+      <Button variant="outline" className='w-full text-black border border-[#CBD5E1] rounded-[6px] leading-[20px] flex items-center justify-center gap-1' onClick={googleSignIn}><Image src={Google} alt="google" priority={false} className='w-7 h-7' /><span className='font-[700] text-sm'>Continue With Google</span></Button>
 
       <div className='w-full text-sm opacity-75 text-center'>Already have an account &#63; <Link href={'/login'} className='font-[500] hover:underline '>Sign In</Link></div>
 
