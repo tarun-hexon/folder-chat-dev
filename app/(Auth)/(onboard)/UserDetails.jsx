@@ -1,20 +1,20 @@
 'use client'
 import { useAtom } from 'jotai'
 import React from 'react'
-import { darkModeAtom, isPostNameCompleteAtom, isPostUserCompleteAtom } from '../store'
+import { darkModeAtom, isPostNameCompleteAtom, isPostUserCompleteAtom } from '../../store'
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "../../components/ui/select"
-import { Button } from '../../components/ui/button'
-import { Label } from '../../components/ui/label'
-import { Input } from '../../components/ui/input'
+} from "../../../components/ui/select"
+import { Button } from '../../../components/ui/button'
+import { Label } from '../../../components/ui/label'
+import { Input } from '../../../components/ui/input'
 import { useRouter } from 'next/navigation'
-import { selectOptions } from '../../config/constants';
-import supabase from '../../config/supabse'
+import { selectOptions } from '../../../config/constants';
+import supabase from '../../../config/supabse'
 
 
 const SelectCard = (props) => {
@@ -23,7 +23,7 @@ const SelectCard = (props) => {
       <label htmlFor="option1" className='text-[14px] leading-[20px] font-[400] opacity-[50%]'>{props.title}</label>
       <Select id="option1">
         <SelectTrigger className="w-full text-black flex justify-between">
-          <SelectValue placeholder="Select a option" className='font-[400] text-[12px] leading-[20px]'/>
+          <SelectValue placeholder="Select an option" className='font-[400] text-[12px] leading-[20px]'/>
         </SelectTrigger>
         <SelectContent className="w-[382px] ">
           <SelectItem value="1">option 1</SelectItem>

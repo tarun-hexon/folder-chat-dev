@@ -1,16 +1,16 @@
 'use client'
 
 import React, { useState } from 'react'
-import supabase from '../../config/supabse';
-import { Button } from '../../components/ui/button';
-import { Input } from '../../components/ui/input';
-import { Label } from '../../components/ui/label';
+import supabase from '../../../config/supabse';
+import { Button } from '../../../components/ui/button';
+import { Input } from '../../../components/ui/input';
+import { Label } from '../../../components/ui/label';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import eye_icon from '../../public/assets/eye_icon.svg'
+import eye_icon from '../../../public/assets/eye_icon.svg'
 import { useAtom } from 'jotai';
-import { darkModeAtom, sessionAtom } from '../store';
-import Header from './Header';
+import { darkModeAtom, sessionAtom } from '../../store';
+import {Header} from '../../components';
 
 
 const UpdatePassword = () => {

@@ -1,10 +1,10 @@
-import PostSignup from "./PostSignup";
-import PostName from "./PostName";
-import UserDetails from "./UserDetails";
-import UpdatePassword from "./UpdatePassword";
+import PostSignup from "../(Auth)/(onboard)/PostSignup";
+import PostName from "../(Auth)/(onboard)/PostName";
+import UserDetails from "../(Auth)/(onboard)/UserDetails";
+import UpdatePassword from "../(Auth)/reset/UpdatePassword";
 import SideBar from "./SideBar"
 import Header from './Header';
-import Signup from './Signup';
+import Signup from '../(Auth)/signup/Signup';
 
 
 export {

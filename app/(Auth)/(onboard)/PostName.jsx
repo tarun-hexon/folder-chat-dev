@@ -1,12 +1,12 @@
 'use client'
 import React, { useState } from 'react'
-import social_role from "../../public/assets/social_role.svg"
-import illustration from "../../public/assets/illustration.svg"
-import { Button } from "../../components/ui/button"
+import social_role from "../../../public/assets/social_role.svg"
+import illustration from "../../../public/assets/illustration.svg"
+import { Button } from "../../../components/ui/button"
 import { FaCheckCircle } from "react-icons/fa";
 
 import Image from 'next/image'
-import { darkModeAtom, isPostNameCompleteAtom, sessionAtom, isPostOtpCompleteAtom } from '../store';
+import { darkModeAtom, isPostNameCompleteAtom, sessionAtom, isPostOtpCompleteAtom } from '../../store';
 import { useAtom } from 'jotai'
 
 

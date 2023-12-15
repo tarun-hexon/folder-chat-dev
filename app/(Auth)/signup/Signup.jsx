@@ -1,14 +1,14 @@
 'use client'
 import React, { useEffect, useState } from 'react';
-import { Input } from '../../components/ui/input';
-import { Label } from "../../components/ui/label";
-import { Button } from "../../components/ui/button";
-import Google from "../../public/assets/google.svg";
+import { Input } from '../../../components/ui/input';
+import { Label } from "../../../components/ui/label";
+import { Button } from "../../../components/ui/button";
+import Google from "../../../public/assets/google.svg";
 import Image from "next/image";
-import eye_icon from '../../public/assets/eye_icon.svg';
-import supabase from '../../config/supabse';
+import eye_icon from '../../../public/assets/eye_icon.svg';
+import supabase from '../../../config/supabse';
 import { useAtom } from 'jotai';
-import { darkModeAtom, isOnboardCompleteAtom, sessionAtom } from '../store';
+import { darkModeAtom, sessionAtom } from '../../store';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 
@@ -121,7 +121,7 @@ const Signup = () => {
 
 
   return (
-    <div className={`flex flex-col w-[22rem] gap-2 justify-center items-center box-border ${darkMode ? '' : 'text-white'} `}>
+    <div className={`flex flex-col w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'} `}>
 
       <h1 className='text-5xl w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-3'>Sign Up</h1>
 
