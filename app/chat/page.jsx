@@ -62,7 +62,7 @@ const Chat = () => {
   useEffect(() => {
     getSess();
     
-  }, [session]);
+  }, []);
 
 
 
