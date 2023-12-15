@@ -50,6 +50,7 @@ const MyProfile = () => {
                 throw error
             };
             getSess();
+            setPreName('');
             setNameDialogOpen(false)
         } catch (error) {
             console.log(error)
@@ -83,6 +84,7 @@ const MyProfile = () => {
             };
             getSess();
             setInputError(false);
+            setNewPassword('');
             setPwdDialogOpen(false);
         } catch (error) {
             console.log(error)
