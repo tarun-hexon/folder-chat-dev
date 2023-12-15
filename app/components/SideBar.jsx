@@ -111,9 +111,7 @@ const SideBar = () => {
 
     const [folder, setFolder] = useAtom(folderAtom);
 
-    useEffect(() => {
-        console.log(...folder)
-    }, [])
+   
     return (
         <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-5 font-Inter min-h-screen'>
             <Account />

@@ -20,7 +20,7 @@ const Plans = () => {
                 <div className='w-[35%] -ml-8 mr-5 flex flex-col gap-1'>
                     <h2 className='font-[500] text-sm leading-6 mb-4'>Includes</h2>
 
-                    {plans.map((plan, idx) => <p key={idx} className='font-[500] text-[12px] leading-5 opacity-[50%] inline-flex'><Image src={checkIcon} />{plan}</p>)}
+                    {plans.map((plan, idx) => <p key={idx} className='font-[500] text-[12px] leading-5 opacity-[50%] inline-flex'><Image src={checkIcon} alt='check'/>{plan}</p>)}
 
                 </div>
                 <div className='w-[30%]'>
@@ -42,7 +42,7 @@ const Plans = () => {
                 <div className='w-[35%] -ml-8 mr-5 flex flex-col gap-1'>
                     <h2 className='font-[500] text-sm leading-6 mb-4'>Includes</h2>
 
-                    {plans.map((plan, idx) => <p key={idx} className='font-[500] text-[12px] leading-5 opacity-[50%] inline-flex'><Image src={checkIcon} />{plan}</p>)}
+                    {plans.map((plan, idx) => <p key={idx} className='font-[500] text-[12px] leading-5 opacity-[50%] inline-flex'><Image src={checkIcon} alt='check'/>{plan}</p>)}
 
 
                 </div>
@@ -63,7 +63,7 @@ const Plans = () => {
                 <div className='w-[35%] -ml-8 mr-5 flex flex-col gap-1'>
                     <h2 className='font-[500] text-sm leading-6 mb-4'>Includes</h2>
 
-                    {plans.map((plan, idx) => <p key={idx} className='font-[500] text-[12px] leading-5 opacity-[50%] inline-flex'><Image src={checkIcon} />{plan}</p>)}
+                    {plans.map((plan, idx) => <p key={idx} className='font-[500] text-[12px] leading-5 opacity-[50%] inline-flex'><Image src={checkIcon} alt='check'/>{plan}</p>)}
 
 
                 </div>

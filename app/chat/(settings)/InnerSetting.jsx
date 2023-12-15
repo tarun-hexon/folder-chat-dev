@@ -15,7 +15,7 @@ const InnerSetting = () => {
                 <div className='w-full flex justify-between items-center'>
                     <div className='font-[400] text-sm leading-6'>
                         <p className='opacity-[50%]'>Show my view history</p>
-                        <p className='font-[500]'>People with edit or full access will be able to see when you've viewed a page. Learn more. </p>
+                        <p className='font-[500]'>People with edit or full access will be able to see when you&apos;ve viewed a page. Learn more. </p>
                     </div>
                     
                 </div>
