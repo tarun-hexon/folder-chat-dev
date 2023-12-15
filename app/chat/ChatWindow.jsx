@@ -5,9 +5,9 @@ import sendIcon from '../../public/assets/send.svg'
 import editIcon from '../../public/assets/edit-2.svg'
 import shareIcon from '../../public/assets/Navbar_Share.svg'
 import openDocIcon from '../../public/assets/Navbar_OpenDoc.svg'
-import xls from '../../public/assets/xls.png'
-import pdf from '../../public/assets/pdf 1.png'
-import doc from '../../public/assets/doc.png'
+import xls from '../../public/assets/xls.svg'
+import pdf from '../../public/assets/pdf.svg'
+import doc from '../../public/assets/doc.svg'
 import Image from 'next/image'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from '../../components/ui/dialog'
 import { Button } from '../../components/ui/button'
@@ -127,14 +127,14 @@ const ChatWindow = () => {
                     </Dialog>
                 </div>
                 <div className='flex gap-4 '>
-                    <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
-                        <Image src={shareIcon} alt='share' />
-                        <p className='text-[12px] font-[500] text-[#334155] opacity-[60%]'>Share</p>
+                    <div className='flex gap-2 justify-center items-center hover:cursor-pointer opacity-[60%] hover:opacity-100 text-[12px] font-[600] text-[#334155]'>
+                        <Image src={shareIcon} alt='share'/>
+                        <p>Share</p>
 
                     </div>
-                    <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
+                    <div className='flex gap-2 justify-center items-center hover:cursor-pointer text-[12px] font-[600] opacity-[60%] hover:opacity-100 text-[#334155]'>
                         <Image src={openDocIcon} alt='open' />
-                        <p className='text-[12px] font-[500] text-[#334155] opacity-[60%]'>Open Document</p>
+                        <p className=''>Open Document</p>
 
                     </div>
                 </div>

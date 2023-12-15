@@ -17,7 +17,8 @@ const Account = () => {
     const [isPostOtpComplete, setPostSignupComplete] = useAtom(isPostSignUpCompleteAtom);
     const [isPostUserComplete, setPostUserComplete] = useAtom(isPostUserCompleteAtom);
     const [open, setOpen] = useState(false)
-    const router = useRouter()
+    const router = useRouter();
+    
     async function signOut() {
         const { error } = await supabase.auth.signOut();
         if (error) {

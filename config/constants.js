@@ -1,7 +1,7 @@
 import user from '../public/assets/user.svg';
 import creditCardIcon from '../public/assets/credit-card.svg';
 import settingsIcon from '../public/assets/settings.svg';
-import {Cloud,CreditCard,Github,Keyboard,LifeBuoy,LogOut,Mail,MessageSquare,Plus,PlusCircle,Settings,User,UserPlus,Users,} from "lucide-react"
+import {CreditCard, Keyboard, Settings, Upload, User, Edit, Trash2 } from "lucide-react"
 
 
 export const selectOptions = [
@@ -66,4 +66,20 @@ export const setting = [
   },
 ];
 
-
+export const folderOptions = [
+  {
+    id:'edit',
+    title:'Edit',
+    icon: Edit
+  },
+  {
+    id:'upload',
+    title:'Upload New File',
+    icon: Upload
+  },
+  {
+    id:"delete",
+    title:'Delete',
+    icon:Trash2
+  }
+]

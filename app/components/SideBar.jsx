@@ -1,24 +1,16 @@
-import React, { useEffect, useState } from 'react'
-import { sidebarOptions } from '../../config/constants';
+import React, { useState } from 'react'
+import { folderOptions } from '../../config/constants';
 import Image from 'next/image';
-import Danswer from '../../public/assets/Danswer.svg'
-import rightArrow from '../../public/assets/secondary icon.svg'
-import { useRouter } from 'next/navigation';
 import threeDot from '../../public/assets/more-horizontal.svg'
-
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
 import { Account, NewFolder } from '../chat/(dashboard)'
-import Setting from '../chat/(settings)/Setting'
 import { useAtom } from 'jotai';
-import { sessionAtom, isPostSignUpCompleteAtom, isPostUserCompleteAtom, folderAtom, fileNameAtom } from '../store';
-import { Dialog, DialogTrigger } from '../../components/ui/dialog';
-import { DropdownMenu, DropdownMenuTrigger } from '../../components/ui/dropdown-menu'
-import docIcon from '../../public/assets/doc.png';
-import xlsIcon from '../../public/assets/xls.png';
-import pdfIcon from '../../public/assets/pdf 1.png';
-import Link from 'next/link';
+import { folderAtom, fileNameAtom } from '../store';
+import docIcon from '../../public/assets/doc.svg';
+import xlsIcon from '../../public/assets/xls.svg';
+import pdfIcon from '../../public/assets/pdf.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
-import { Edit, Trash2, Upload } from 'lucide-react';
+
 
 
 
@@ -60,19 +52,15 @@ const FolderCard = (props) => {
                         <Image src={threeDot} alt={'options'} className='w-4 h-4 hover:cursor-pointer' />
                         </PopoverTrigger>
                         <PopoverContent className="w-full flex flex-col p-1 gap-[2px]">
-                            <div className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md">
-                                <Edit className="mr-2 h-4 w-4" />
-                                <span className=" hover:cursor-pointer">Edit</span>
-                            </div>
-                            <div className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md" onClick={()=> {setFileName('upload'); setPopOpen(false)}}>
-                                <Upload className="mr-2 h-4 w-4" />
-                                <span className=" hover:cursor-pointer">Upload New File</span>
-                            </div>
-                            <hr />
-                            <div className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md">
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                <span className=" hover:cursor-pointer">Delete Folder</span>
-                            </div>
+                            {folderOptions.map((option, idx)=> {
+                                return (
+                                    <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer" onClick={()=> {option.id === 'upload' && setFileName(option.id); setPopOpen(false)}}>
+                                        <option.icon className="mr-2 h-4 w-4" />
+                                        <span>{option.title}</span>
+                                    </div>
+                                    )
+                            })}
+                            
                         </PopoverContent>
                     </Popover>
                 

@@ -10,11 +10,24 @@ import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/
 import { MyProfile, Notification, InnerSetting, Plans } from './index';
 import { setting } from '../../../config/constants';
 import rightArrow from '../../../public/assets/secondary icon.svg';
-
+import { Button } from '../../../components/ui/button';
+import { useToast } from '../../../components/ui/use-toast';
 const Setting = () => {
     const [session, setSession] = useAtom(sessionAtom);
+    const { toast } = useToast()
+    const [item, setItem] = useState('profile');
 
-    const [item, setItem] = useState('profile')
+
+    function shareByEmail() {
+        const subject = encodeURIComponent('Check out this awesome folder.chat !');
+        const body = encodeURIComponent('I wanted to share this with you. Check it out!');
+        const mailtoLink = `mailto:?subject=${subject}&body=${body}`;
+  
+        window.location.href = mailtoLink;
+      }
+
+
+
 
     return (
         <DialogContent className="sm:max-w-[65rem] h-[32rem] p-0 font-Inter flex flex-row">
@@ -52,7 +65,7 @@ const Setting = () => {
                         <PopoverContent className="w-full flex flex-col p-1 gap-[2px]">
                             <div className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md">
                                 <Mail className="mr-2 h-4 w-4" />
-                                <span className=" hover:cursor-pointer">Email</span>
+                                <span className=" hover:cursor-pointer" onClick={()=> shareByEmail()}>Email</span>
                             </div>
                             <div className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md">
                                 <MessageSquare className="mr-2 h-4 w-4" />
@@ -72,6 +85,9 @@ const Setting = () => {
                     </div>
 
                 </div>
+                <Button variant={'outline'} onClick={()=> toast({
+                    title: "Scheduled: Catch up",
+                })}>Toast</Button>
 
             </div>
             <div className='w-[75%] px-8 py-2 h-full overflow-y-scroll no-scrollbar'>

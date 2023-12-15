@@ -4,7 +4,7 @@ import { Inter } from 'next/font/google'
 import Intial from './Intial';
 
 const inter = Inter({ subsets: ['latin'] })
-
+import { Toaster } from '../components/ui/toaster';
 export const metadata = {
   title: 'Folder Chat',
   description: 'Developed By Hexon Global',
@@ -21,7 +21,10 @@ export default function RootLayout({ children }) {
       <body className={inter.className}>      
         <Provider>
         <Intial />
+        
           {children}
+
+          <Toaster />
         </Provider>
       </body>
       

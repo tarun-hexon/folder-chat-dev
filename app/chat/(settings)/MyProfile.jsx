@@ -11,6 +11,11 @@ import Image from 'next/image'
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../../components/ui/alert-dialog'
 import eye_icon from '../../../public/assets/eye_icon.svg'
 import supabase from '../../../config/supabse';
+import { useToast } from '../../../components/ui/use-toast';
+
+
+
+
 
 const MyProfile = () => {
     const [session, setSession] = useAtom(sessionAtom);
@@ -26,6 +31,10 @@ const MyProfile = () => {
     const [otpSent, setOtpSent] = useState(false);
     const [otpVerified, setOtpVerified] = useState(false);
     const [otp, setOtp] = useState(null)
+
+    const { toast } = useToast()
+
+
 
 
     function showPassword(id) {
@@ -51,7 +60,10 @@ const MyProfile = () => {
             };
             getSess();
             setPreName('');
-            setNameDialogOpen(false)
+            setNameDialogOpen(false);
+            toast({
+                title: "Name Updated Successfully !"
+              })
         } catch (error) {
             console.log(error)
         };
@@ -85,9 +97,15 @@ const MyProfile = () => {
             getSess();
             setInputError(false);
             setNewPassword('');
+            toast({
+                title: "Password Updated Successfully !"
+              })
             setPwdDialogOpen(false);
         } catch (error) {
-            console.log(error)
+            console.log(error);
+            toast({
+                title: "Some Error Occured !"
+              })
         };
 
     };
@@ -145,6 +163,18 @@ const MyProfile = () => {
     
         });
     };
+
+    async function signOut() {
+        const { error } = await supabase.auth.signOut({ scope: 'others' });
+        if (error) {
+            console.log(error)
+        } else {
+            toast({
+                title: "Successfully Logged out from other Devices!"
+              })
+        }
+    };
+
 
 
     return (
@@ -309,7 +339,7 @@ const MyProfile = () => {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction className='bg-[#14B8A6] hover:bg-[#14B8A6] hover:opacity-75'>Continue</AlertDialogAction>
+                                <AlertDialogAction className='bg-[#14B8A6] hover:bg-[#14B8A6] hover:opacity-75' onClick={signOut}>Continue</AlertDialogAction>
                             </AlertDialogFooter>
 
                         </AlertDialogContent>
