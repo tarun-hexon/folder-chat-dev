@@ -8,8 +8,6 @@ import { useAtom } from 'jotai';
 import { danswerItemAtom, fileNameAtom } from '../../store';
 
 
-
-
 const Danswer = () => {
 
 
