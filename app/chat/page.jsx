@@ -1,16 +1,17 @@
 'use client'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
-import { fileNameAtom, sessionAtom } from '../store'
+import { fileNameAtom, openMenuAtom, sessionAtom } from '../store'
 import { usePathname, useRouter } from 'next/navigation'
 import supabase from '../../config/supabse'
 import uploadIcon from '../../public/assets/upload-cloud.svg'
 import { SideBar, Header } from '../components'
-import { Loader2 } from 'lucide-react'
+import { ChevronRightCircle, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { Label } from '../../components/ui/label';
 import { useDropzone } from 'react-dropzone';
-import ChatWindow from './ChatWindow'
+import ChatWindow from './ChatWindow';
+import { DanswerPage, Indexing } from '../components'
 
 
 
@@ -20,7 +21,7 @@ const Chat = () => {
   const [userSession, setUserSession] = useAtom(sessionAtom);
   const [loading, setLoading] = useState(true);
   const [files, setFiles] = useState(false);
-
+  const [openMenu, setOpenMenu] = useAtom(openMenuAtom)
   const router = useRouter();
   const [fileName, setFileName] = useAtom(fileNameAtom)
 
@@ -81,7 +82,8 @@ const Chat = () => {
     !loading &&
 
     <div className='w-full flex text-center font-Inter'>
-      <div className='w-[25%] min-h-screen'>
+      
+     <div className={`w-[22%] min-h-screen ${openMenu ? 'flex' : 'hidden'} sm:flex `}>
         <SideBar />
       </div>
       {fileName === 'upload' ?
@@ -113,8 +115,8 @@ const Chat = () => {
           <p className='text-black bg-slate-100 p-2 rounded-lg'>{files.name}</p>
       </div>
       :
-      <div className='sticky top-0 self-start'>
-      <ChatWindow />
+      <div className='w-full sticky top-0 self-start'>
+        {fileName === 'danswer' ? <DanswerPage/> : <ChatWindow />}
       </div>
       }
       

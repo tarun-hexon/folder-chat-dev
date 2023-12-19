@@ -333,8 +333,7 @@ const MyProfile = () => {
                                     Are you absolutely sure?
                                 </AlertDialogTitle>
                                 <AlertDialogDescription>
-                                    This action cannot be undone. This will permanently delete your
-                                    account and remove your data from our servers.
+                                    This action cannot be undone. This will logged out you from all other devices.
                                 </AlertDialogDescription>
                             </AlertDialogHeader>
                             <AlertDialogFooter>

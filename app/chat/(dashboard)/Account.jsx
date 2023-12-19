@@ -34,7 +34,7 @@ const Account = () => {
     return (
         <div className='w-full'>
             <Accordion type="single" collapsible className='w-full'>
-                <AccordionItem value="item-1" className='p-2 gap-4 flex flex-col shadow-n'>
+                <AccordionItem value="item-1" className='p-2 gap-4 flex flex-col'>
                     <AccordionTrigger className='flex-row-reverse justify-between items-center gap-2'>
                         <Image src={threeDot} alt={'options'} className='w-4 h-4 ' />
                         <h1 className='font-[600] text-sm leading-5 mr-10'>{userSession?.user?.email}</h1>

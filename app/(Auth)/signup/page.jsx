@@ -31,7 +31,7 @@ const Page = () => {
 
   return (
     <Header>
-      <div className={`flex font-Inter justify-center items-center w-full h-screen box-border ${darkMode ? 'bg-[#EFF5F5] text-black' : 'bg-[#115E59]'} flex-col gap-10`}>
+      <div className={`flex font-Inter justify-center items-center w-full h-screen box-border ${darkMode ? 'bg-[#EFF5F5] text-black' : 'bg-[#115E59]'} flex-col gap-10 `}>
 
         {loading ? <Loader2 className='animate-spin' /> :
           !session && !session?.user?.user_metadata?.onBoarding ? <div>
