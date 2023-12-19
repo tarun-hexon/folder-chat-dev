@@ -5,13 +5,12 @@ import { fileNameAtom, openMenuAtom, sessionAtom } from '../store'
 import { usePathname, useRouter } from 'next/navigation'
 import supabase from '../../config/supabse'
 import uploadIcon from '../../public/assets/upload-cloud.svg'
-import { SideBar, Header } from '../components'
 import { ChevronRightCircle, Loader2 } from 'lucide-react'
 import Image from 'next/image'
 import { Label } from '../../components/ui/label';
 import { useDropzone } from 'react-dropzone';
 import ChatWindow from './ChatWindow';
-import { DanswerPage, Indexing } from '../components'
+import { SideBar, DanswerPage } from '../(components)'
 
 
 

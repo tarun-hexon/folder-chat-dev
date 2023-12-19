@@ -1,7 +1,7 @@
 import React from 'react'
 import Image from 'next/image';
-import danswerIcon from '../../../public/assets/danswer_w.svg';
-import filter from '../../../public/assets/danswer-filter-default.svg';
+import danswerIcon from '../../../public/assets/Danswer-web.svg';
+import filter from '../../../public/assets/Danswer-filter-Default.svg';
 import { danswerOption } from '../../../config/constants';
 import album from '../../../public/assets/album.svg';
 import { useAtom } from 'jotai';
