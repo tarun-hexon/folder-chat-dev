@@ -85,9 +85,6 @@ const Setting = () => {
                     </div>
 
                 </div>
-                <Button variant={'outline'} onClick={()=> toast({
-                    title: "Scheduled: Catch up",
-                })}>Toast</Button>
 
             </div>
             <div className='w-[75%] px-8 py-2 h-full overflow-y-scroll no-scrollbar'>

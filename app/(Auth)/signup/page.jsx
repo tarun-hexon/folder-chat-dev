@@ -1,9 +1,8 @@
 'use client'
 import { useEffect, useState } from 'react';
-import { PostSignup, Signup, UserDetails } from '../../(components)/index'
+import { PostSignup, Signup, UserDetails, PostName, Header } from '../../(components)/index'
 import { useAtom } from 'jotai'
 import { darkModeAtom, isPostSignUpCompleteAtom, isPostNameCompleteAtom, sessionAtom } from '../../store';
-import { PostName, Header } from '../../components'
 import { useRouter } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 
