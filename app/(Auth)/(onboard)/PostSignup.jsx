@@ -10,6 +10,8 @@ import { darkModeAtom, isPostSignUpCompleteAtom, sessionAtom } from '../../store
 import { useAtom } from 'jotai'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { useToast } from '../../../components/ui/use-toast';
+
 
 
 const PostSignup = () => {
@@ -18,8 +20,36 @@ const PostSignup = () => {
     const [session, setSession] = useAtom(sessionAtom);
     const [onBoard, setOnBoard] = useState(false);
     const [name, setName] = useState('');
-    const router = useRouter()
+    const router = useRouter();
+    const {toast} = useToast();
 
+
+    async function updateUserName(name) {
+        if (name === '') return toast({
+                    variant: "destructive",
+                    title: "Uh oh! Name cannot be empty.",
+                  });
+
+        try {
+            const { user, error } = await supabase.auth.updateUser({
+                data: { full_name: name }
+            });
+            if (error) {
+                toast({
+                    variant: "destructive",
+                    title: "Uh oh! Something went wrong.",
+                    description: "There was a problem with your request.",
+                  })
+                throw error
+            };
+            setName('');
+            setIsPostSignUpComplete(true);
+            
+        } catch (error) {
+            console.log(error)
+        };
+
+    };
 
     useEffect(() => {
 
@@ -55,7 +85,7 @@ const PostSignup = () => {
                 </div>
 
                 <Button variant="outline" className={`w-full mt-2 text-sm text-white font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center ${false ? 'opacity-5' : ''}`} disabled={name == ''}
-                    onClick={() => setIsPostSignUpComplete(true)}
+                    onClick={() => updateUserName(name)}
                 >Continue</Button>
 
                 <div className='w-[33rem] text-xs opacity-60 text-center mt-4 leading-[20px] font-[300]'>You may unsubscribe from receiving marketing communications at any time. Folder.chat&apos;s websites and communications are subjects to our Privacy Policy</div>

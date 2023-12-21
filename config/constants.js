@@ -1,7 +1,7 @@
 import user from '../public/assets/user.svg';
 import creditCardIcon from '../public/assets/credit-card.svg';
 import settingsIcon from '../public/assets/settings.svg';
-import {CreditCard, Keyboard, Settings, Upload, User, Edit, Trash2 } from "lucide-react"
+import {CreditCard, Keyboard, Settings, Upload, User, Edit, Trash2 } from "lucide-react";
 import showAllIcon from '../public/assets/Danswer-All.svg';
 import gDriveIcon from '../public/assets/Danswer-google.svg';
 import slackIcon from '../public/assets/Danswer-slack.svg';
@@ -13,15 +13,19 @@ import filesIcon from '../public/assets/Danswer-doc.svg';
 
 export const selectOptions = [
     {
+      id:'option_1',
       title: 'What kind of work you do?'
     },
     {
+      id:'option_2',
       title: 'What is your role?'
     },
     {
+      id:'option_3',
       title: 'Roughly how many people work at your company?'
     },
     {
+      id:'option_4',
       title: 'What are you planning to use folder.chat for?'
     }
 ];
@@ -127,4 +131,6 @@ export const danswerOption = [
     title:'Files',
     icon: filesIcon
   }
-]
+];
+
+

@@ -34,3 +34,8 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+slack
+hooks.ts
+int.ts
+interfaces.ts
+types.ts

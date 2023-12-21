@@ -12,53 +12,85 @@ import Image from 'next/image'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from '../../components/ui/dialog'
 import { Button } from '../../components/ui/button'
 import { useAtom } from 'jotai'
-import { fileNameAtom, openMenuAtom } from '../store'
+import { fileNameAtom, folderAtom, folderIdAtom, openMenuAtom, showDanswerAtom } from '../store'
 import { ChevronRightCircle } from 'lucide-react'
 
 const ChatWindow = () => {
     
-    const [chatMsg, setChatMsg] = useState([
-    {
-        id: 'bot',
-        message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-        id: 'user',
-        message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-        id: 'bot',
-        message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-        id: 'user',
-        message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-        id: 'bot',
-        message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    },
-    {
-        id: 'user',
-        message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-    }
+    // const [chatMsg, setChatMsg] = useState([
+    // {
+    //     id: 'bot',
+    //     message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    // },
+    // {
+    //     id: 'user',
+    //     message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    // },
+    // {
+    //     id: 'bot',
+    //     message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    // },
+    // {
+    //     id: 'user',
+    //     message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    // },
+    // {
+    //     id: 'bot',
+    //     message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    // },
+    // {
+    //     id: 'user',
+    //     message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+    // }
 
-    ]);
-    const [fileName, setFileName] = useAtom(fileNameAtom)
+    // ]);
+    
+    const [fileName, setFileName] = useAtom(fileNameAtom);
     const [userMsg, setUserMsg] = useState('');
     const [docName, setDocName] = useState('');
-    
+    const [showDanswer, setShowDanswer] = useAtom(showDanswerAtom);
+    const [folderId, setFolderId] = useAtom(folderIdAtom);
+    const [folder, setFolder] = useAtom(folderAtom);
+
     const textareaRef = useRef(null);
     const [openMenu, setOpenMenu] = useAtom(openMenuAtom)
-
+    const [chatMsgs, setChatMsgs] = useState(folder.filter(fol => fol.id === folderId));
+    const currentFol = folder.filter(fol => fol.id === folderId);
+    const [chatMsg, setChatMsg] = useState([
+        {
+            id: 'bot',
+            message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        },
+        {
+            id: 'user',
+            message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        },
+        {
+            id: 'bot',
+            message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        },
+        {
+            id: 'user',
+            message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        },
+        {
+            id: 'bot',
+            message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        },
+        {
+            id: 'user',
+            message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+        }
+    
+        ]);
 
     function iconName(file){
         if(file === 'pdf'){
             return pdf
-        }else if (file === 'doc'){
-            return doc
-        }else{
+        }else if (file === 'xls'){
             return xls
+        }else{
+            return doc
         }
     }
     function sendMsg(data) {
@@ -90,18 +122,19 @@ const ChatWindow = () => {
     }, [userMsg]);
 
     useEffect(() => {
+        setShowDanswer(false);
+        setChatMsgs(currentFol);
         
-        
-    }, [chatMsg])
+    }, [folder])
 
 
     return (
-        <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border'>
+        <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-16'>
             <div className='w-full flex justify-between px-4 py-2'>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
                     <ChevronRightCircle size={30} className='sm:hidden' onClick={()=> setOpenMenu(true)}/>
                     <Image src={iconName(fileName.split('.')[1])} alt='edit' className='w-6 h-6'/>
-                    <p className='text-sm font-[500] leading-5'>{fileName}</p>
+                    <p className='text-sm font-[500] leading-5'>{chatMsgs[0]?.files[0]?.name || 'New Doc 001'}</p>
                     <Dialog onOpenChange={() => setDocName('')}>
                         <DialogTrigger asChild>
                             <Image src={editIcon} alt='edit' />
@@ -140,13 +173,13 @@ const ChatWindow = () => {
                     </div>
                 </div>
             </div>
-            <div className='sm:w-[70%] sm:h-[30rem] w-full h-screen rounded-[6px] flex flex-col justify-between box-border'  >
+            <div className='w-[70%] h-full rounded-[6px] flex flex-col justify-between box-border'  >
                 {chatMsg.length == 0 ?
                     <div className='border'>
                         <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>The chat is empty</p>
                         <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Ask your document a question using message panel ...</p>
                     </div> :
-                    <div className='flex w-full flex-col-reverse gap-2 overflow-y-scroll no-scrollbar px-3 sm:px-1' >
+                    <div className='flex w-full flex-col-reverse gap-2 overflow-y-scroll no-scrollbar px-3' >
                         <hr className='w-full bg-transparent border-transparent' />
                         {chatMsg.map((msg, idx) => msg.id === 'user' ?
                             <p key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.message}</p>
@@ -157,7 +190,7 @@ const ChatWindow = () => {
                     </div>
                 }
 
-                <div className="w-full sm:flex justify-center sm:bg-transparent sticky bottom-0 sm:p-0 p-2 pt-0 bg-white" >
+                <div className="w-full sm:flex justify-center sm:bg-transparent p-2 pt-0 bg-white" >
                     <div className="flex bg-[#F7F7F7] w-full justify-around rounded-xl border-2 border-transparent "
                         style={{ boxShadow: '0 0 2px 0 rgb(18, 18, 18, 0.5)' }}>
 

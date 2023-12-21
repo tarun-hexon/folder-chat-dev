@@ -14,61 +14,56 @@ import check from '../../../public/assets/check-circle.svg';
 const Indexing = () => {
 
     const tableData = [{
-        id:'drive',
+        id: 'drive',
         title: 'Google Drive',
         icon: gDriveIcon,
-        status:'Enabled',
-        lastIndex:'2 minutes ago',
-        docsIndex:'6'
+        status: 'Enabled',
+        lastIndex: '2 minutes ago',
+        docsIndex: '6'
     },
     {
-        id:'git',
+        id: 'git',
         title: 'Git PRs',
         icon: gitIcon,
-        status:'Enabled',
-        lastIndex:'2 minutes ago',
-        docsIndex:'6'
+        status: 'Enabled',
+        lastIndex: '2 minutes ago',
+        docsIndex: '6'
     },
     {
-        id:'confluence',
+        id: 'confluence',
         title: 'Confluence',
         icon: confluenceIcon,
-        status:'Enabled',
-        lastIndex:'2 minutes ago',
-        docsIndex:'6'
+        status: 'Enabled',
+        lastIndex: '2 minutes ago',
+        docsIndex: '6'
     },
     {
-        id:'slack',
+        id: 'slack',
         title: 'Slack',
         icon: slackIcon,
-        status:'Enabled',
-        lastIndex:'2 minutes ago',
-        docsIndex:'6'
+        status: 'Enabled',
+        lastIndex: '2 minutes ago',
+        docsIndex: '6'
     },
     {
-        id:'web',
+        id: 'web',
         title: 'Web',
         icon: webIcon,
-        status:'Enabled',
-        lastIndex:'2 minutes ago',
-        docsIndex:'6'
+        status: 'Enabled',
+        lastIndex: '2 minutes ago',
+        docsIndex: '6'
     },
     {
-        id:'file',
+        id: 'file',
         title: 'Files',
         icon: fileIcon,
-        status:'Enabled',
-        lastIndex:'2 minutes ago',
-        docsIndex:'6'
+        status: 'Enabled',
+        lastIndex: '2 minutes ago',
+        docsIndex: '6'
     }]
     return (
-        <div className='w-full flex flex-col rounded-[6px] gap-5 items-center justify-center overflow-scroll no-scrollbar box-border text-[#64748B] h-full'>
-            <div className='w-full flex justify-between px-4 py-2'>
-                <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
-                    <Image src={danswerIcon} alt='edit' className='w-4 h-4' />
-                    <p className='text-sm font-[500] leading-5 text-[#334155]'>Danswer</p>
-                </div>
-            </div>
+        <>
+
             <div className='w-[80%] h-[30rem] rounded-[6px] flex flex-col box-border space-y-2 gap-2'>
                 <div className='flex justify-start items-center gap-2'>
                     <Image src={threeLines} alt='more' className='w-5 h-5' />
@@ -76,22 +71,22 @@ const Indexing = () => {
                 </div>
                 <hr />
                 <table className='w-full text-sm'>
-                    <thead className='p-2'>
+                    <thead className='p-2 w-full'>
                         <tr className='border-b p-2'>
-                            <th className="w-96 text-left p-2">Connector</th>
+                            <th className="text-left p-2">Connector</th>
                             <th className='text-center'>Status</th>
                             <th className='text-center'>Last Indexed</th>
                             <th className="text-center">Docs Indexed</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody className='w-full'>
                         {tableData.map((item, idx) => {
                             return (
-                                <tr className='border-b' key={item.id}>
-                                    <td className="font-medium w-96 text-left p-2 py-3 inline-flex gap-2 items-center"><Image src={item.icon} alt={item.id}/>{item.title}</td>
+                                <tr className='border-b hover:cursor-pointer w-full' key={item.id}>
+                                    <td className="font-medium flex text-left justify-start p-2 py-3 gap-2"><Image src={item.icon} alt={item.id} />{item.title}</td>
                                     <td className=''>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
-                                        <Image src={check} alt='checked' className='w-4 h-4'/>{item.status}
+                                            <Image src={check} alt='checked' className='w-4 h-4' />{item.status}
                                         </div>
                                     </td>
                                     <td>{item.lastIndex}</td>
@@ -103,7 +98,7 @@ const Indexing = () => {
                 </table>
 
             </div>
-        </div>
+        </>
     )
 }
 

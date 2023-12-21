@@ -20,28 +20,21 @@ const Files = () => {
     const [file, setFiles] = useState([]);
     function uploadFile(file) {
         console.log(file)
-      }
-      const onDrop = (acceptedFiles) => {
+    }
+    const onDrop = (acceptedFiles) => {
         if (acceptedFiles && acceptedFiles.length > 0) {
-          const file = acceptedFiles[0];
-          setFiles(prev => [...prev, file])
-          uploadFile(file);
+            const file = acceptedFiles[0];
+            setFiles(prev => [...prev, file])
+            uploadFile(file);
         } else {
-          // console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
+            // console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
         }
-      };
+    };
 
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
     return (
-        <div className='w-full flex flex-col rounded-[6px] gap-5 items-center justify-center overflow-scroll no-scrollbar font-Inter box-border text-[#64748B] h-full'>
-            <div className='w-full flex justify-between px-4 py-2'>
-                <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
-                    <Image src={danswerIcon} alt='edit' className='w-4 h-4' />
-                    <p className='text-sm font-[500] leading-5 text-[#334155]'>Danswer</p>
-                </div>
-
-            </div>
+        <>
 
             <div className='sm:w-[80%] sm:h-[30rem] w-full rounded-[6px] flex flex-col box-border space-y-2 gap-2'>
                 <div className='flex justify-start items-center gap-2'>
@@ -98,7 +91,7 @@ const Files = () => {
                 </table>
             </div>
 
-        </div>
+        </>
     )
 }
 

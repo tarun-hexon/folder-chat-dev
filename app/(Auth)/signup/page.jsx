@@ -24,7 +24,7 @@ const Page = () => {
     } else {
       setLoading(false)
     }
-    console.log(session)
+    
   }, [session]);
 
 

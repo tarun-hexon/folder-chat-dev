@@ -1,14 +1,16 @@
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { folderOptions } from '../../config/constants';
 import Image from 'next/image';
 import threeDot from '../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
 import { Account, NewFolder } from '../chat/(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom, fileNameAtom, openMenuAtom } from '../store';
+import { folderAtom, fileNameAtom, openMenuAtom, showDanswerAtom, folderIdAtom } from '../store';
 import docIcon from '../../public/assets/doc.svg';
 import xlsIcon from '../../public/assets/xls.svg';
 import pdfIcon from '../../public/assets/pdf.svg';
+import danswerIcon from '../../public/assets/Group 2.svg'
+import rightArrow from '../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
 import { X, ChevronRightCircle } from 'lucide-react';
 
@@ -17,25 +19,27 @@ import { Danswer } from './index'
 
 
 const FolderCard = (props) => {
-    const { title } = props.fol
+    
+    const { title, id, files } = props.fol
+    const [folderFiles, setFlderFiles] = useState([])
 
-    const [fileName, setFileName] = useAtom(fileNameAtom)
+    const [fileName, setFileName] = useAtom(fileNameAtom);
+    const [folderId, setFolderId] = useAtom(folderIdAtom)
+
     const [popOpen, setPopOpen] = useState(false)
-    const [data, setData] = useState([
-        {
-            title: 'Document 001.pdf',
-            icon: pdfIcon
-        },
-        {
-            title: 'Document 002.doc',
-            icon: docIcon
-        },
-        {
-            title: 'Document 003.xls',
-            icon: xlsIcon
-        }
-    ]);
 
+    function iconName(file){
+        if(file === 'pdf'){
+            return pdfIcon
+        }else if (file === 'doc'){
+            return docIcon
+        }else{
+            return xlsIcon
+        }
+    }
+
+
+    
     return (
 
         <Accordion type="single" collapsible>
@@ -51,7 +55,7 @@ const FolderCard = (props) => {
                         <PopoverContent className="w-full flex flex-col p-1 gap-[2px]">
                             {folderOptions.map((option, idx) => {
                                 return (
-                                    <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer" onClick={() => { option.id === 'upload' && setFileName(option.id); setPopOpen(false) }}>
+                                    <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer" onClick={() => { option.id === 'upload' && setFileName(option.id); setFolderId(id); setPopOpen(false) }}>
                                         <option.icon className="mr-2 h-4 w-4" />
                                         <span>{option.title}</span>
                                     </div>
@@ -64,18 +68,18 @@ const FolderCard = (props) => {
                 </div>
                 <AccordionContent className='flex flex-col gap-2 p-1'>
                     {
-                        data.length === 0 ?
-                            <div>
-                                <span >Upload Document</span>
+                        files.length === 0 ?
+                            <div className='flex justify-between bg-[#EFF5F5] p-2 rounded-lg' onClick={()=> {setFileName('upload'); setFolderId(id)}}>
+                                <span className='text-sm font-[500] leading-5 hover:cursor-pointer'>Upload Document</span>
                                 <Image src={threeDot} alt={'options'} className='w-4 h-4 hover:cursor-pointer' />
                             </div>
                             :
-                            data.map((data, idx) => {
+                            files.map((data, idx) => {
                                 return (
-                                    <div key={idx} className='flex justify-between items-center h-fit bg-[#EFF5F5] rounded-lg p-2 hover:cursor-pointer' onClick={() => setFileName(`${data.title}`)}>
+                                    <div key={idx} className='flex justify-between items-center h-fit bg-[#EFF5F5] rounded-lg p-2 hover:cursor-pointer' onClick={() => setFileName(`${data}`)}>
                                         <div className='inline-flex gap-1 items-center'>
-                                            <Image src={data.icon} alt={'icon'} className='w-4 h-4 hover:cursor-pointer' />
-                                            <span className='font-[500] text-sm leading-5'>{data.title}</span>
+                                            <Image src={iconName(data.name.split('.')[1])} alt={'icon'} className='w-4 h-4 hover:cursor-pointer' />
+                                            <span className='font-[500] text-sm leading-5'>{data.name}</span>
                                         </div>
                                         <Image src={threeDot} alt={'options'} className='w-4 h-4 hover:cursor-pointer' />
                                     </div>
@@ -95,19 +99,27 @@ const FolderCard = (props) => {
 const SideBar = () => {
     const [openMenu, setOpenMenu] = useAtom(openMenuAtom)
     const [folder, setFolder] = useAtom(folderAtom);
+    const [showDanswer, setShowDanswer] = useAtom(showDanswerAtom);
 
 
     return (
-        <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-5 font-Inter relative '>
+        <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-5 font-Inter relative h-full'>
 
-            <X size={20} className='top-2 absolute right-2 sm:hidden' onClick={() => setOpenMenu(false)} />
+            {/* <X size={20} className='top-2 absolute right-2 sm:hidden' onClick={() => setOpenMenu(false)} /> */}
             <div className='w-full overflow-x-scroll no-scrollbar px-2'>
             <Account />
             </div>
 
+            {!showDanswer ? <div className='w-full flex justify-between items-center bg-[#DEEAEA] p-3 rounded-md hover:cursor-pointer' onClick={ ()=> setShowDanswer(true) }>
+                <div className='flex items-center gap-2'>
+                    
+                    <h1 className='font-[600] text-sm leading-5'>Advance</h1>
+                </div>
+                <Image src={rightArrow} alt='open' />
+            </div> :
             <div className='w-full h-fit bg-[#0EA5E9] text-[#FFFFFF] rounded-lg shadow-md'>
                 <Danswer />
-            </div>
+            </div>}
             <div className='flex flex-col gap-2'>
                 {folder.map((fol, idx) => {
                     return (

@@ -23,15 +23,20 @@ import Image from 'next/image';
 import { useAtom } from 'jotai';
 import { folderAtom } from '../../store';
 import { Folder } from 'lucide-react';
+import { v4 as uuidv4 } from 'uuid';
+
 
 const NewFolder = () => {
     const [folder, setFolder] = useAtom(folderAtom);
     const [open, setOpen] = useState(false);
-    const [inputError, setInputError] = useState(false)
+    const [inputError, setInputError] = useState(false);
+    const id = uuidv4()
     const [fol, setFol] = useState({
+        id: id,
         title: '',
         description: '',
         function: 'General',
+        files:[]
     });
 
     function addFolder(data) {
@@ -43,7 +48,7 @@ const NewFolder = () => {
             return null
         } else {
             setFolder([...folder, data]);
-            console.log(folder)
+            
 
             setOpen(false)
         }
@@ -53,9 +58,11 @@ const NewFolder = () => {
     return (
         <Dialog open={open} onOpenChange={() => {
             setOpen(!open); setInputError(false); setFol({
+                id:id,
                 title: '',
                 description: '',
                 function: 'General',
+                files: []
             })
         }}>
             <DialogTrigger className='w-full'>

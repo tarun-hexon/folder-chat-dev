@@ -1,8 +1,8 @@
 'use client'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
-import { fileNameAtom, openMenuAtom, sessionAtom } from '../store'
-import { usePathname, useRouter } from 'next/navigation'
+import { fileNameAtom, folderAtom, folderIdAtom, openMenuAtom, sessionAtom } from '../store'
+import { useRouter } from 'next/navigation'
 import supabase from '../../config/supabse'
 import uploadIcon from '../../public/assets/upload-cloud.svg'
 import { ChevronRightCircle, Loader2 } from 'lucide-react'
@@ -11,19 +11,20 @@ import { Label } from '../../components/ui/label';
 import { useDropzone } from 'react-dropzone';
 import ChatWindow from './ChatWindow';
 import { SideBar, DanswerPage } from '../(components)'
-
-
-
+import { useToast } from '../../components/ui/use-toast'
 
 
 const Chat = () => {
   const [userSession, setUserSession] = useAtom(sessionAtom);
   const [loading, setLoading] = useState(true);
   const [files, setFiles] = useState(false);
-  const [openMenu, setOpenMenu] = useAtom(openMenuAtom)
+  const [openMenu, setOpenMenu] = useAtom(openMenuAtom);
   const router = useRouter();
-  const [fileName, setFileName] = useAtom(fileNameAtom)
+  const [fileName, setFileName] = useAtom(fileNameAtom);
+  const [folder, setFolder] = useAtom(folderAtom);
+  const [folderId, setFolderId] = useAtom(folderIdAtom);
 
+  const { toast } = useToast()
   async function getSess() {
     await supabase.auth.getSession().then(({ data: { session } }) => {
       if (session) {
@@ -44,11 +45,31 @@ const Chat = () => {
 
 
   function uploadFile(file) {
-    console.log(file)
+    const fileReader = new FileReader();
+    fileReader.readAsText(file, 'utf-8');
+    fileReader.onload = e => {
+      const content = e.target.result;
+      const currentFol = folder.filter(fol => fol.id === folderId);
+      currentFol[0].files = [...currentFol[0].files, {name:file.name, content:content}]
+      
+      setFolder([...folder])      
+    };
+    
+    
+    
   }
   const onDrop = (acceptedFiles) => {
     if (acceptedFiles && acceptedFiles.length > 0) {
       const file = acceptedFiles[0];
+      
+      const fileType = file.name.split('.')[1]
+      if(fileType !== 'pdf' && fileType !== 'doc' && fileType !== 'xls'){
+        toast({
+          title: "This File type is not supported!"
+        });
+        return null
+      }
+       
       setFiles(file)
       uploadFile(file);
     } else {
@@ -80,19 +101,19 @@ const Chat = () => {
     
     !loading &&
 
-    <div className='w-full flex text-center font-Inter'>
+    <div className='w-full flex text-center font-Inter box-border'>
       
-     <div className={`w-[22%] min-h-screen ${openMenu ? 'flex' : 'hidden'} sm:flex `}>
+     <div className={`w-[28%] min-h-screen `}>
         <SideBar />
       </div>
-      {fileName === 'upload' ?
-        <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5'>
-        <div>
-          <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>This folder is empty</p>
-          <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Upload a document to start</p>
-        </div> 
+      {fileName === 'upload' ? 
+        <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5 sticky top-0 self-start p-10 min-h-screen'>
+          <div>
+            <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>This folder is empty</p>
+            <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Upload a document to start</p>
+          </div> 
           <div
-              className={`w-[60%] h-[60%] border flex justify-center items-center bg-[#EFF5F5] ${isDragActive ? 'opacity-50' : ''}`}
+              className={`w-[70%] border flex justify-center items-center bg-[#EFF5F5] p-32 ${isDragActive ? 'opacity-50' : ''}`}
               {...getRootProps()}
             >
               <Label htmlFor='upload-files' className='flex flex-col items-center justify-center' > 
@@ -111,10 +132,10 @@ const Chat = () => {
                 style={{ display: 'none' }}
               />
           </div>
-          <p className='text-black bg-slate-100 p-2 rounded-lg'>{files.name}</p>
-      </div>
+          
+        </div>
       :
-      <div className='w-full sticky top-0 self-start'>
+      <div className='w-full sticky top-0 self-start h-screen'>
         {fileName === 'danswer' ? <DanswerPage/> : <ChatWindow />}
       </div>
       }

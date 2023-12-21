@@ -1,6 +1,6 @@
 import React from 'react'
 import Image from 'next/image';
-import danswerIcon from '../../../public/assets/Danswer-web.svg';
+import danswerIcon from '../../../public/assets/danswer-white-icon.svg';
 import filter from '../../../public/assets/Danswer-filter-Default.svg';
 import { danswerOption } from '../../../config/constants';
 import album from '../../../public/assets/album.svg';
@@ -24,10 +24,7 @@ const Danswer = () => {
     return (
         <>
             <div className='flex gap-2 hover:cursor-pointer items-center justify-between p-3 rounded-md'>
-                <div className='flex gap-2 items-center'>
-                    <Image src={danswerIcon} alt={'danswer'} className='w-4 h-4' />
-                    <span className='font-[700] text-sm leading-5'>Filters</span>
-                </div>
+                <span className='font-[700] text-sm leading-5'>Filters</span>
                 <Image src={filter} alt={'open'} className='w-4 h-4' />
             </div>
            
@@ -43,7 +40,7 @@ const Danswer = () => {
                     })}
             </div>
 
-            <div className='flex gap-2 hover:cursor-pointer items-center justify-between p-3 rounded-md'>
+            <div className='flex gap-2 hover:cursor-pointer items-center justify-between p-3 rounded-md' onClick={()=> handleOnClick('indexing')}>
                 <span className='font-[700] text-sm leading-5'>Indexing</span>
                 <Image src={album} alt={'album'} className='w-4 h-4' />
             </div>
