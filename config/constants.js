@@ -95,9 +95,9 @@ export const folderOptions = [
   }
 ];
 
-export const danswerOption = [
+export const advanceOption = [
   {
-    id:'danswer',
+    id:'advance',
     title:'Show All',
     icon: showAllIcon
   },

@@ -1,6 +1,5 @@
 'use client'
 import React, { useState } from 'react'
-import danswerIcon from '../../../public/assets/Group 2.svg';
 import Image from 'next/image';
 import slackIcon from '../../../public/assets/Danswer-slack-B.svg'
 import { Input } from '../../../components/ui/input';
@@ -47,7 +46,7 @@ const Files = () => {
                     <div className='text-start flex flex-col gap-4 '>
                         <div className='space-y-1'>
                             <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Upload Files</h2>
-                            <p className='font-[400] text-sm leading-5'>Specify files below, click the Upload button, and the contents of these files will be searchable via Danswer!</p>
+                            <p className='font-[400] text-sm leading-5'>Specify files below, click the Upload button, and the contents of these files will be searchable via Advance!</p>
                         </div>
                         <div className={`w-full border rounded-lg flex flex-col justify-center items-center p-5 gap-4 ${isDragActive && 'opacity-50'}`} {...getRootProps()}>
                             <div >

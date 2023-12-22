@@ -5,12 +5,12 @@ import UpdatePassword from "../(Auth)/reset/UpdatePassword";
 import SideBar from "./SideBar"
 import Header from './Header';
 import Signup from '../(Auth)/signup/Signup';
-import Danswer from './(Danswer)/Danswer'
-import DanswerPage from './(Danswer)/DanswerPage';
-import Indexing from './(Danswer)/Indexing';
-import Slack from './(Danswer)/Slack';
-import GitPrs from './(Danswer)/GitPrs';
-import Files from './(Danswer)/Files'
+import Advance from './(Advance)/Advance'
+import AdvancePage from './(Advance)/AdvancePage';
+import Indexing from './(Advance)/Indexing';
+import Slack from './(Advance)/Slack';
+import GitPrs from './(Advance)/GitPrs';
+import Files from './(Advance)/Files'
 
 export {
     Header,
@@ -20,8 +20,8 @@ export {
     UserDetails,
     UpdatePassword,
     SideBar,
-    Danswer,
-    DanswerPage,
+    Advance,
+    AdvancePage,
     Indexing,
     Slack,
     GitPrs,

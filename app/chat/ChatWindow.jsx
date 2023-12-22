@@ -12,7 +12,7 @@ import Image from 'next/image'
 import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger} from '../../components/ui/dialog'
 import { Button } from '../../components/ui/button'
 import { useAtom } from 'jotai'
-import { fileNameAtom, folderAtom, folderIdAtom, openMenuAtom, showDanswerAtom } from '../store'
+import { fileNameAtom, folderAtom, folderIdAtom, openMenuAtom, showAdvanceAtom } from '../store'
 import { ChevronRightCircle } from 'lucide-react'
 
 const ChatWindow = () => {
@@ -48,7 +48,7 @@ const ChatWindow = () => {
     const [fileName, setFileName] = useAtom(fileNameAtom);
     const [userMsg, setUserMsg] = useState('');
     const [docName, setDocName] = useState('');
-    const [showDanswer, setShowDanswer] = useAtom(showDanswerAtom);
+    const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [folder, setFolder] = useAtom(folderAtom);
 
@@ -122,7 +122,7 @@ const ChatWindow = () => {
     }, [userMsg]);
 
     useEffect(() => {
-        setShowDanswer(false);
+        setShowAdvance(false);
         setChatMsgs(currentFol);
         
     }, [folder])

@@ -1,22 +1,21 @@
 import React from 'react'
 import Image from 'next/image';
-import danswerIcon from '../../../public/assets/danswer-white-icon.svg';
 import filter from '../../../public/assets/Danswer-filter-Default.svg';
-import { danswerOption } from '../../../config/constants';
+import { advanceOption } from '../../../config/constants';
 import album from '../../../public/assets/album.svg';
 import { useAtom } from 'jotai';
-import { danswerItemAtom, fileNameAtom } from '../../store';
+import { advanceItemAtom, fileNameAtom } from '../../store';
 
 
-const Danswer = () => {
+const Advance = () => {
 
 
-    const [item, setItem] = useAtom(danswerItemAtom);
+    const [item, setItem] = useAtom(advanceItemAtom);
     const [fileName, setFileName] = useAtom(fileNameAtom)
 
 
     function handleOnClick(name){
-        setFileName('danswer')
+        setFileName('advance')
         setItem(name);
         
     }
@@ -30,7 +29,7 @@ const Danswer = () => {
            
             
             <div className='w-full flex flex-col p-1 border-t border-b'>
-                    {danswerOption.map(setting => {
+                    {advanceOption.map(setting => {
                         return (
                             <div key={setting.id} className={`inline-flex p-2 items-center text-sm leading-5 rounded-md hover:cursor-pointer gap-2 hover:bg-[#FFFFFF33]`} onClick={()=> handleOnClick(setting.id)}>
                                 <Image src={setting.icon} alt={setting.id}/>
@@ -49,4 +48,4 @@ const Danswer = () => {
     )
 }
 
-export default Danswer
+export default Advance

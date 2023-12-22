@@ -1,6 +1,5 @@
 import React from 'react'
 import Image from 'next/image';
-import danswerIcon from '../../../public/assets/Group 2.svg';
 import threeLines from '../../../public/assets/Danswer-All-B.svg'
 import gDriveIcon from '../../../public/assets/Danswer-google-B.svg'
 import webIcon from '../../../public/assets/Danswer-web-B.svg'

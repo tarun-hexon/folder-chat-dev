@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import danswerIcon from '../../../public/assets/Group 2.svg';
 import Image from 'next/image';
 import slackIcon from '../../../public/assets/Danswer-slack-B.svg'
 import { Input } from '../../../components/ui/input';

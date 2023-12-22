@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import danswerIcon from '../../../public/assets/Group 2.svg';
 import Image from 'next/image';
 import slackIcon from '../../../public/assets/Danswer-slack-B.svg'
 import { Input } from '../../../components/ui/input';
@@ -22,6 +21,37 @@ const GitPrs = () => {
     const [repoName, setRepoName] = useState('')
     const {toast} = useToast();
 
+
+
+    async function validateGitHubAccessToken(accessToken) {
+        const apiUrl = 'https://api.github.com';
+        const userEndpoint = '/user';
+      
+        const headers = {
+          Authorization: `token ${accessToken}`,
+          
+        };
+      
+        try {
+          const response = await fetch(apiUrl + userEndpoint, { headers });
+      
+          if (response.status === 200) {
+            const userData = response.data;
+            console.log('Token is valid.');
+            console.log('GitHub User Information:');
+            console.log(`Username: ${userData.login}`);
+            console.log(`Name: ${userData.name}`);
+            console.log(`Email: ${userData.email}`);
+            console.log(`Public Repositories: ${userData.public_repos}`);
+          } else {
+            console.log(`Token validation failed. HTTP status: ${response.status}`);
+          }
+        } catch (error) {
+          console.error(`Error validating GitHub access token: ${error.message}`);
+        }
+      };
+
+      
     async function addRepo(){
         if(repoName === '' || repoOwner === ''){
             return toast({
@@ -29,7 +59,10 @@ const GitPrs = () => {
             })
         }
         try {
-            const data = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`);
+            const headers = {
+                Authorization: `Bearer ${git_token}`,
+              };              
+            const data = await fetch(`https://api.github.com/repos/${repoOwner}/${repoName}`, { headers });
             const json = await data.json();
             if(json.message === 'Not Found'){
                 throw new Error('Not Found')
@@ -56,9 +89,9 @@ const GitPrs = () => {
                     <h2 className='font-[600]  text-start'>Step 1: Provide your access token</h2>
                     {git_token !== '' ? <span className='font-[400] inline-flex items-center'>Existing Access Token: {'****...*** ' + git_token.slice(0,5)} <Image src={trash} alt='remove' className='w-4 h-4 inline hover:cursor-pointer' onClick={()=> setGitToken('')}/></span>
                     :
-                    <div className='w-full space-y-2'>
+                    <div className='w-full space-y-2 text-start'>
                         <Input type='password' className='w-full' value={value} onChange={(e)=> setValue(e.target.value)}/>
-                        <Button onClick={()=> {setGitToken(value); setValue('')}}>Add</Button>
+                        <Button onClick={()=> {setGitToken(value); setValue('');}}>Add</Button>
                     </div>
                     }
 
@@ -67,7 +100,7 @@ const GitPrs = () => {
                     <h2 className='font-[600]  text-start'>Step 2: Which repositories do you want to make searchable?</h2>
                     <span className='font-[400]'>We pull the latest Pull Requests from each Repository listed below every <span className='font-[600]'>10</span> minutes</span>
                 </div>
-                <table className='w-full text-sm'>
+                {repos.length > 0 && <table className='w-full text-sm'>
                     <thead className='p-2 w-full'>
                         <tr className='border-b p-2'>
                             <th className="text-left p-2">Repository</th>
@@ -92,7 +125,7 @@ const GitPrs = () => {
                             )
                         })}
                     </tbody>
-                </table>
+                </table>}
                 <div className='w-full self-start p-5 border rounded-lg'>
                     <div className='text-start flex flex-col gap-4'>
                         <h2 className='font-[500] text-[16px] leading-6 text-[#0F172A]'>Connect to a New Repository</h2>

@@ -1,5 +1,4 @@
 import React, { useState } from 'react'
-import danswerIcon from '../../../public/assets/Group 2.svg';
 import Image from 'next/image';
 import { Indexing, Slack, GitPrs, Files } from '../index' 
 import { Input } from '../../../components/ui/input';
@@ -9,13 +8,13 @@ import webIcon from '../../../public/assets/Danswer-web-B.svg'
 import slackIcon from '../../../public/assets/Danswer-slack-B.svg'
 import confluenceIcon from '../../../public/assets/Danswer-confluence-B.svg'
 import { useAtom } from 'jotai';
-import { danswerItemAtom, fileNameAtom } from '../../store';
+import { advanceItemAtom, fileNameAtom } from '../../store';
 
 
-const DanswerPage = () => {
+const AdvancePage = () => {
     const [selected, setSelected] = useState('auto');
     const [search, setSearch] = useState('');
-    const [item, setItem] = useAtom(danswerItemAtom);
+    const [item, setItem] = useAtom(advanceItemAtom);
     const results = [
         {
             id:'drive',
@@ -44,7 +43,7 @@ const DanswerPage = () => {
             </div>
         </div> */}
         
-        {item === "danswer" && <div className='sm:w-[80%] sm:h-[30rem] w-full rounded-[6px] flex flex-col box-border space-y-2 gap-2 '>
+        {item === "advance" && <div className='sm:w-[80%] sm:h-[30rem] w-full rounded-[6px] flex flex-col box-border space-y-2 gap-2 '>
             <div className='self-start space-x-2 border p-1 rounded-md text-[14px] font-[500] leading-5'>
                 <button className={`${selected === 'auto' && 'bg-[#0EA5E9] text-white'} p-3 rounded-lg px-5`} onClick={()=> setSelected('auto')}>Auto</button>
                 <button className={`${selected === 'ai' && 'bg-[#0EA5E9] text-white'} p-3 rounded-lg`} onClick={()=> setSelected('ai')}>AI Search</button>
@@ -57,7 +56,7 @@ const DanswerPage = () => {
             <div className='flex flex-col justify-between p-2 px-3 gap-4 text-sm border rounded-md'>
                 <h2 className='font-[600]  leading-5 self-start'>AI Answer</h2>
                 <div className='font-[400] leading-6 text-justify'>
-                        The updated onboarding flow features a smoother login process using SSO with Google Accounts, allowing users with existing Google Account to avoid creating new Dawnswer account, and giving existing users the option to link their Danswer account to a Google Account.
+                        The updated onboarding flow features a smoother login process using SSO with Google Accounts, allowing users with existing Google Account to avoid creating new Folder Chat, and giving existing users the option to link their Folder Chat to a Google Account.
                 </div>
 
                 <div className='flex flex-col font-[500] text-[12px] leading-5 '>
@@ -69,7 +68,7 @@ const DanswerPage = () => {
                         </div>
                         <div className='p-2 border rounded-md inline-flex gap-2 hover:cursor-pointer'>
                             <Image src={webIcon} alt='drive'/>
-                            <span>Onboarding - Danswer Document</span>
+                            <span>Onboarding - Advance Document</span>
                         </div>
                     </div>
                 </div>
@@ -82,10 +81,10 @@ const DanswerPage = () => {
                         <div className='w-full relative flex flex-col gap-2 hover:cursor-pointer' key={res.id}>
                         <div className='inline-flex gap-2 '>
                             <Image src={res.icon} alt='icon'/>
-                            <span className='font-[600] text-[12px] leading-5'>Onboarding - Danswer Document</span>
+                            <span className='font-[600] text-[12px] leading-5'>Onboarding - Advance Document</span>
                         </div>
                         <div className='font-[400] text-sm leading-6 text-justify'>
-                        The updated onboarding flow features a smoother login process using SSO with Google Accounts, allowing users with existing Google Account to avoid creating new Dawnswer account, and giving existing users the option to link their Danswer account to a Google Account.
+                        The updated onboarding flow features a smoother login process using SSO with Google Accounts, allowing users with existing Google Account to avoid creating new Folder Chat, and giving existing users the option to link their Folder Chat to a Google Account.
                         </div>
                 </div>
                     )
@@ -103,4 +102,4 @@ const DanswerPage = () => {
   )
 }
 
-export default DanswerPage
+export default AdvancePage

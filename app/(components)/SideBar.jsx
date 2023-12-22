@@ -5,16 +5,15 @@ import threeDot from '../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
 import { Account, NewFolder } from '../chat/(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom, fileNameAtom, openMenuAtom, showDanswerAtom, folderIdAtom } from '../store';
+import { folderAtom, fileNameAtom, openMenuAtom, showAdvanceAtom, folderIdAtom } from '../store';
 import docIcon from '../../public/assets/doc.svg';
 import xlsIcon from '../../public/assets/xls.svg';
 import pdfIcon from '../../public/assets/pdf.svg';
-import danswerIcon from '../../public/assets/Group 2.svg'
 import rightArrow from '../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
 import { X, ChevronRightCircle } from 'lucide-react';
 
-import { Danswer } from './index'
+import { Advance } from './index'
 
 
 
@@ -99,7 +98,7 @@ const FolderCard = (props) => {
 const SideBar = () => {
     const [openMenu, setOpenMenu] = useAtom(openMenuAtom)
     const [folder, setFolder] = useAtom(folderAtom);
-    const [showDanswer, setShowDanswer] = useAtom(showDanswerAtom);
+    const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
 
 
     return (
@@ -110,7 +109,7 @@ const SideBar = () => {
             <Account />
             </div>
 
-            {!showDanswer ? <div className='w-full flex justify-between items-center bg-[#DEEAEA] p-3 rounded-md hover:cursor-pointer' onClick={ ()=> setShowDanswer(true) }>
+            {!showAdvance ? <div className='w-full flex justify-between items-center bg-[#DEEAEA] p-3 rounded-md hover:cursor-pointer' onClick={ ()=> setShowAdvance(true) }>
                 <div className='flex items-center gap-2'>
                     
                     <h1 className='font-[600] text-sm leading-5'>Advance</h1>
@@ -118,7 +117,7 @@ const SideBar = () => {
                 <Image src={rightArrow} alt='open' />
             </div> :
             <div className='w-full h-fit bg-[#0EA5E9] text-[#FFFFFF] rounded-lg shadow-md'>
-                <Danswer />
+                <Advance />
             </div>}
             <div className='flex flex-col gap-2'>
                 {folder.map((fol, idx) => {

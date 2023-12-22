@@ -10,7 +10,7 @@ import Image from 'next/image'
 import { Label } from '../../components/ui/label';
 import { useDropzone } from 'react-dropzone';
 import ChatWindow from './ChatWindow';
-import { SideBar, DanswerPage } from '../(components)'
+import { SideBar, AdvancePage } from '../(components)'
 import { useToast } from '../../components/ui/use-toast'
 
 
@@ -136,7 +136,7 @@ const Chat = () => {
         </div>
       :
       <div className='w-full sticky top-0 self-start h-screen'>
-        {fileName === 'danswer' ? <DanswerPage/> : <ChatWindow />}
+        {fileName === 'advance' ? <AdvancePage/> : <ChatWindow />}
       </div>
       }
       

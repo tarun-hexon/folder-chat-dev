@@ -11,8 +11,8 @@ export const folderAtom = atom([]);
 export const folderIdAtom = atom('');
 export const fileNameAtom = atom('');
 export const openMenuAtom = atom(false);
-export const danswerItemAtom = atom('danswer');
-export const showDanswerAtom = atom(false);
+export const advanceItemAtom = atom('advance');
+export const showAdvanceAtom = atom(false);
 export const selectOptionAtom = atom([
     {
         name:'option_1',
