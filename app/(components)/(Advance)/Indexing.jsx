@@ -9,6 +9,16 @@ import gitIcon from '../../../public/assets/Danswer-github-B.svg';
 import fileIcon from '../../../public/assets/Danswer-doc-B.svg';
 import check from '../../../public/assets/check-circle.svg';
 import { timeAgo } from '../../../config/time';
+import {
+    Table,
+    TableBody,
+    TableCaption,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "../../../components/ui/table";
+  
 
 const Indexing = () => {
     const [tableData, setTableData] = useState([]);
@@ -38,6 +48,15 @@ const Indexing = () => {
             return confluenceIcon
         }else{
             return gDriveIcon
+        }
+    };
+    function statusBackGround(status){
+        if(status === "success"){
+            return ('text-[#22C55E]')
+        }else if(status === "failed"){
+            return ('text-[#eb3838]')
+        }else if(status === "in_progress"){
+            return ('text-[#f7f14a]')
         }
     }
 
@@ -102,32 +121,32 @@ const Indexing = () => {
                     <h1 className='font-[600] text-[20px] leading-7 tracking-[-0.5%] text-start'>Indexing Status</h1>
                 </div>
                 <hr />
-                <table className='w-full text-sm'>
-                    <thead className='p-2 w-full'>
-                        <tr className='border-b p-2'>
-                            <th className="text-left p-2 max-w-[50%]">Connector</th>
-                            <th className='text-center w-[16%]'>Status</th>
-                            <th className='text-center w-[16%]'>Last Indexed</th>
-                            <th className="text-center w-[16%]">Docs Indexed</th>
-                        </tr>
-                    </thead>
-                    <tbody className='w-full'>
+                <Table className='w-full text-sm'>
+                    <TableHeader className='p-2 w-full'>
+                        <TableRow className='border-b p-2 hover:bg-transparent'>
+                            <TableHead className="text-left p-2">Connector</TableHead>
+                            <TableHead className='text-center '>Status</TableHead>
+                            <TableHead className='text-center '>Last Indexed</TableHead>
+                            <TableHead className="text-center ">Docs Indexed</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    <TableBody className='w-full'>
                         {tableData?.map((item, idx) => {
                             return (
-                                <tr className='border-b hover:cursor-pointer w-full hover:bg-[#eaeaea]' key={item?.cc_pair_id}>
-                                    <td className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1 max-w-[80%]"><Image src={iconSelectore(item?.connector?.source)} alt={item?.connector?.source} />{item?.name}</td>
-                                    <td className='w-[16%]'>
-                                        <div className={`flex justify-center items-center gap-1 ${item?.latest_index_attempt?.status === 'success' ? 'text-[#22C55E]' : "text-[#000]"}`}>
+                                <TableRow className='border-b hover:cursor-pointer w-full hover:bg-[#eaeaea]' key={item?.cc_pair_id}>
+                                    <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1"><Image src={iconSelectore(item?.connector?.source)} alt={item?.connector?.source} />{item?.name}</TableCell>
+                                    <TableCell className=''>
+                                        <div className={`flex justify-center items-center gap-1 ${statusBackGround(item?.latest_index_attempt?.status)}`}>
                                             {`${item?.latest_index_attempt?.status || 'Processsing'}`}
                                         </div>
-                                    </td>
-                                    <td className='w-[16%]'>{timeAgo(item?.latest_index_attempt?.time_updated)}</td>
-                                    <td className="text-center w-[16%]">{`${item?.docs_indexed} ${item?.docs_indexed > 1 ?'documents' : 'document'}`} </td>
-                                </tr>
+                                    </TableCell>
+                                    <TableCell className=''>{timeAgo(item?.latest_index_attempt?.time_updated)}</TableCell>
+                                    <TableCell className="text-center ">{`${item?.docs_indexed} ${item?.docs_indexed > 1 ?'documents' : 'document'}`} </TableCell>
+                                </TableRow>
                             )
                         })}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
 
             </div>
         </>
