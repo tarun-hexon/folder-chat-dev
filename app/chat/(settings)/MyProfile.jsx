@@ -34,9 +34,6 @@ const MyProfile = () => {
 
     const { toast } = useToast()
 
-
-
-
     function showPassword(id) {
         var input = document.getElementById(id);
         if (input) {
@@ -281,9 +278,10 @@ const MyProfile = () => {
                                             value={newPassword}
                                             onChange={(e) => { setNewPassword(e.target.value); setInputError(false) }}
                                         />
-                                        {newPassword !== '' && <button className="absolute top-5 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('password')}>
+                                        {newPassword !== '' && 
+                                        <div className="absolute top-5 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('password')}>
                                             <Image src={eye_icon} alt='show-password' title='Show Password' />
-                                        </button>}
+                                        </div>}
                                     </div>
                                     <div className='w-full relative'>
                                         <Input
@@ -294,9 +292,9 @@ const MyProfile = () => {
                                             value={confirmNewPassword}
                                             onChange={(e) => { setConfirmNewPassword(e.target.value); setInputError(false); }}
                                         />
-                                        {confirmNewPassword !== '' && <button className="absolute top-5 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('cpassword')}>
+                                        {confirmNewPassword !== '' && <div className="absolute top-5 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('cpassword')}>
                                             <Image src={eye_icon} alt='show-password' title='Show Password' />
-                                        </button>}
+                                        </div>}
                                         <p className='tracking-tight text-xs text-red-400 mt-1'>{inputError}</p>
                                     </div>
                                 </div>

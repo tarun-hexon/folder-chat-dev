@@ -3,6 +3,7 @@ import React, { useEffect, useState, useRef } from 'react'
 import { Input } from '../../components/ui/input'
 import sendIcon from '../../public/assets/send.svg'
 import editIcon from '../../public/assets/edit-2.svg'
+import Logo from "../../public/assets/Logo.svg"
 import shareIcon from '../../public/assets/Navbar_Share.svg'
 import openDocIcon from '../../public/assets/Navbar_OpenDoc.svg'
 import xls from '../../public/assets/xls.svg'
@@ -35,31 +36,7 @@ const ChatWindow = () => {
     const [msgLoader, setMsgLoader] = useState(false);
     const [botMsg, setBotMsg] = useState('');
     const [chatMsg, setChatMsg] = useState([
-        {
-            id: 'bot',
-            message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-        },
-        {
-            id: 'user',
-            message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-        },
-        {
-            id: 'bot',
-            message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-        },
-        {
-            id: 'user',
-            message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-        },
-        {
-            id: 'bot',
-            message: 'Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-        },
-        {
-            id: 'user',
-            message: 'cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
-        }
-
+        
     ]);
 
     function iconName(file) {
@@ -70,7 +47,8 @@ const ChatWindow = () => {
         } else {
             return doc
         }
-    }
+    };
+
     async function sendMsg(data) {
 
         if (data === '') return null;
@@ -118,38 +96,42 @@ const ChatWindow = () => {
     }
 
     async function sendChatMsgs(userMsg) {
-        const sendMessageResponse = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/send-message`, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                "chat_session_id": 7,
-                "parent_message_id": 32,
-                "message": userMsg,
-                "prompt_id": 0,
-                "search_doc_ids": null,
-                "retrieval_options": {
-                    "run_search": "auto",
-                    "real_time": true,
-                    "filters": {
-                        "source_type": null,
-                        "document_set": null,
-                        "time_cutoff": null
+        try {
+            const sendMessageResponse = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/send-message`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "chat_session_id": 7,
+                    "parent_message_id": null,
+                    "message": userMsg,
+                    "prompt_id": 0,
+                    "search_doc_ids": null,
+                    "retrieval_options": {
+                        "run_search": "auto",
+                        "real_time": true,
+                        "filters": {
+                            "source_type": null,
+                            "document_set": null,
+                            "time_cutoff": null
+                        }
                     }
-                }
-            })
-        });
-
-        if (!sendMessageResponse.ok) {
-            const errorJson = await sendMessageResponse.json();
-            const errorMsg = errorJson.message || errorJson.detail || "";
-            throw new Error(`Failed to send message - ${errorMsg}`);
+                })
+            });
+    
+            if (!sendMessageResponse.ok) {
+                const errorJson = await sendMessageResponse.json();
+                const errorMsg = errorJson.message || errorJson.detail || "";
+                throw new Error(`Failed to send message - ${errorMsg}`);
+            }
+    
+            await handleStream(
+                sendMessageResponse
+            )
+        } catch (error) {
+            setMsgLoader(false)
         }
-
-        await handleStream(
-            sendMessageResponse
-        )
     };
 
     async function handleStream(streamingResponse) {
@@ -260,8 +242,8 @@ const ChatWindow = () => {
         <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2'>
             <div className='w-full flex justify-between px-4 py-2'>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
-                    <Image src={iconName(fileName.split('.')[1])} alt='edit' className='w-6 h-6' />
-                    <p className='text-sm font-[500] leading-5'>{chatMsgs[0]?.files[0]?.name || 'New Doc 001'}</p>
+                    <Image src={Logo} alt='folder.chat'/>
+                    {/* <p className='text-sm font-[500] leading-5'>{chatMsgs[0]?.files[0]?.name || 'New Doc 001'}</p>
                     <Dialog onOpenChange={() => setDocName('')}>
                         <DialogTrigger asChild>
                             <Image src={editIcon} alt='edit' />
@@ -285,9 +267,9 @@ const ChatWindow = () => {
                             </DialogFooter>
 
                         </DialogContent>
-                    </Dialog>
+                    </Dialog> */}
                 </div>
-                {/* <Button onClick={sendChatMsgs}>Test API</Button> */}
+                
                 <div className='flex gap-4 '>
                     <div className='flex gap-2 justify-center items-center hover:cursor-pointer opacity-[60%] hover:opacity-100 text-[12px] font-[600] text-[#334155]'>
                         <Image src={shareIcon} alt='share' />
@@ -303,7 +285,7 @@ const ChatWindow = () => {
             </div>
             <div className='w-[70%] h-[90%] rounded-[6px] flex flex-col justify-between box-border'  >
                 {chatMsg.length == 0 ?
-                    <div className='border'>
+                    <div>
                         <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>The chat is empty</p>
                         <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Ask your document a question using message panel ...</p>
                     </div> :

@@ -103,7 +103,7 @@ const Chat = () => {
 
     <div className='w-full flex text-center font-Inter box-border'>
       
-     <div className={`w-[28%] min-h-screen`}>
+     <div className={`w-[28%] min-h-screen `}>
         <SideBar />
       </div>
       {fileName === 'upload' ? 
