@@ -16,26 +16,137 @@ import { Label } from '../../../components/ui/label';
 
 const Files = () => {
 
-    const [file, setFiles] = useState([]);
-    function uploadFile(file) {
-        console.log(file)
-    }
+    const [files, setFiles] = useState([]);
+    const [filePath, setFilePath] = useState('')
+    const [connectorId, setConnectorId] = useState(null);
+    const [credentialID ,setCredentialID] = useState(null);
+    const [fileName, setFileName] = useState('');
+
+
+    async function uploadFile(file, name) {
+
+        try {
+            let formData = new FormData();
+            formData.append('files', file)
+            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/file/upload`, {
+                method: "POST",
+                body: formData
+            });
+            const json = await data.json();
+            
+            setFilePath(json.file_paths[0]);
+            connectorRequest(json.file_paths[0], name, file)
+        } catch (error) {
+            console.log(error)
+        }
+    };
+
+
+
+    async function connectorRequest(path, name, file) {
+        try {
+            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "name": "FileConnector-" + Date.now(),
+                    "source": "file",
+                    "input_type": "load_state",
+                    "connector_specific_config": {
+                        "file_locations": [
+                            path
+                        ]
+                    },
+                    "refresh_freq": null,
+                    "disabled": false
+                })
+            }
+
+            );
+            const json = await data.json();
+            setConnectorId(json.id)
+            console.log(json.id)
+            getCredentials(json.id, name, file)
+        } catch (error) {
+            console.log('error while connectorRequest :', error)
+        }
+    };
+
+    async function getCredentials(connectID, name, file) {
+        try {
+            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/credential`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    // 'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: JSON.stringify({
+                    "credential_json": {},
+                    "admin_public": true
+                })
+            });
+            const json = await data.json();
+            setCredentialID(json.id);
+            sendURL(connectID, json.id, name, file)
+        } catch (error) {
+            console.log('error while getCredentials:', error)
+        }
+    };
     const onDrop = (acceptedFiles) => {
         if (acceptedFiles && acceptedFiles.length > 0) {
             const file = acceptedFiles[0];
-            setFiles(prev => [...prev, file])
-            uploadFile(file);
+            
+            setFileName(file.name)
+            uploadFile(file, file.name);
         } else {
             // console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
         }
     };
 
+async function runOnce(id){
+    try {
+        const data = await fetch('http://52.53.122.186/api/manage/admin/connector/run-once',{
+        method:'POST',
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body:JSON.stringify({
+            "connector_id": id,
+            "credentialIds": [
+                0
+            ]
+        })
+    })
+    } catch (error) {
+        console.log('error in runOnce :', error)
+    }
+}
+async function sendURL(connectID, credID, name, file){
+        try {
+            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/connector/${connectID}/credential/${credID}`, {
+            method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json",
+                    
+                },
+                body: JSON.stringify({'name':name})
+            });
+            const json = await data.json();
+            runOnce(connectID);
+           console.log(json);
+           setFiles(prev => [...prev, file]);
+        } catch (error) {
+            console.log('error while sendURL:', error)
+        }
+    }
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
     return (
         <>
 
-            <div className='sm:w-[80%] sm:h-[30rem] w-full rounded-[6px] flex flex-col box-border space-y-2 gap-2'>
+            <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2'>
                 <div className='flex justify-start items-center gap-2'>
                     <Image src={fileIcon} alt='file' className='w-5 h-5' />
                     <h1 className='font-[600] text-[20px] leading-7 tracking-[-0.5%] text-start'>Files</h1>
@@ -64,7 +175,7 @@ const Files = () => {
                         </div>
                     </div>
                 </div>
-                <table className='w-full text-sm'>
+                {files.length > 0 && <table className='w-full text-sm'>
                     <thead className='p-2'>
                         <tr className='border-b p-2'>
                             <th className="w-96 text-left p-2">File Name</th>
@@ -73,7 +184,7 @@ const Files = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {file.map((item, idx) => {
+                        {files.map((item, idx) => {
                             return (
                                 <tr className='border-b' key={idx}>
                                     <td className="font-medium w-96 text-left p-2 py-3 ">{item.name}</td>
@@ -87,7 +198,7 @@ const Files = () => {
                             )
                         })}
                     </tbody>
-                </table>
+                </table>}
             </div>
 
         </>

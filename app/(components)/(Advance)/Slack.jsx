@@ -19,7 +19,7 @@ const Slack = () => {
     return (
         <>
 
-            <div className='sm:w-[80%] sm:h-[30rem] w-full rounded-[6px] flex flex-col box-border space-y-2 gap-2'>
+            <div className='w-[80%] sm:h-[30rem] rounded-[6px] flex flex-col box-border space-y-2 gap-2'>
                 <div className='flex justify-start items-center gap-2'>
                     <Image src={slackIcon} alt='slack' className='w-5 h-5' />
                     <h1 className='font-[600] text-[20px] leading-7 tracking-[-0.5%] text-start'>Slack</h1>

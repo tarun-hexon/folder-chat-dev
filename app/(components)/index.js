@@ -11,6 +11,11 @@ import Indexing from './(Advance)/Indexing';
 import Slack from './(Advance)/Slack';
 import GitPrs from './(Advance)/GitPrs';
 import Files from './(Advance)/Files'
+import Drive from './(Advance)/Drive'
+import Confluence from './(Advance)/Confluence';
+import Web from './(Advance)/Web'
+
+
 
 export {
     Header,
@@ -25,5 +30,8 @@ export {
     Indexing,
     Slack,
     GitPrs,
-    Files
+    Files,
+    Drive,
+    Confluence,
+    Web
 }

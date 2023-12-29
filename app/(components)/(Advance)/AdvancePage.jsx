@@ -1,6 +1,6 @@
 import React, { useState } from 'react'
 import Image from 'next/image';
-import { Indexing, Slack, GitPrs, Files } from '../index' 
+import { Indexing, Slack, GitPrs, Files, Drive, Confluence, Web } from '../index' 
 import { Input } from '../../../components/ui/input';
 import searchIcon from '../../../public/assets/search.svg';
 import gDriveIcon from '../../../public/assets/Danswer-google-B.svg'
@@ -45,9 +45,9 @@ const AdvancePage = () => {
         
         {item === "advance" && <div className='sm:w-[80%] sm:h-[30rem] w-full rounded-[6px] flex flex-col box-border space-y-2 gap-2 '>
             <div className='self-start space-x-2 border p-1 rounded-md text-[14px] font-[500] leading-5'>
-                <button className={`${selected === 'auto' && 'bg-[#0EA5E9] text-white'} p-3 rounded-lg px-5`} onClick={()=> setSelected('auto')}>Auto</button>
-                <button className={`${selected === 'ai' && 'bg-[#0EA5E9] text-white'} p-3 rounded-lg`} onClick={()=> setSelected('ai')}>AI Search</button>
-                <button className={`${selected === 'key' && 'bg-[#0EA5E9] text-white'} p-3 rounded-lg`} onClick={()=> setSelected('key')}>Keyword Search</button>
+                <button className={`${selected === 'auto' && 'bg-[#14B8A6] text-white'} p-3 rounded-lg px-5`} onClick={()=> setSelected('auto')}>Auto</button>
+                <button className={`${selected === 'ai' && 'bg-[#14B8A6] text-white'} p-3 rounded-lg`} onClick={()=> setSelected('ai')}>AI Search</button>
+                <button className={`${selected === 'key' && 'bg-[#14B8A6] text-white'} p-3 rounded-lg`} onClick={()=> setSelected('key')}>Keyword Search</button>
             </div>
             <div className='w-full relative flex '>
                 <Input type='text' placeholder='Search' className='pr-10' onChange={(e) => setSearch(e.target.value)}/>
@@ -96,6 +96,9 @@ const AdvancePage = () => {
         { item === 'slack' && <Slack />}
         { item === 'git' && <GitPrs />}
         { item === 'files' && <Files />}
+        { item === 'drive' && <Drive />}
+        { item === 'confluence' && <Confluence />}
+        { item === 'web' && <Web />}
     </div>
     
     </>

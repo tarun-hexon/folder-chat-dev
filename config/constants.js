@@ -102,7 +102,7 @@ export const advanceOption = [
     icon: showAllIcon
   },
   {
-    id:'g-drive',
+    id:'drive',
     title:'Google Drive',
     icon: gDriveIcon
   },

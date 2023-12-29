@@ -34,8 +34,13 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# temp files and folder
 slack
 hooks.ts
 int.ts
 interfaces.ts
 types.ts
+danswerApi
+sample.json
+testApi

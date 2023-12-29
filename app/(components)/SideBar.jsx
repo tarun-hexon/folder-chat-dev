@@ -102,30 +102,31 @@ const SideBar = () => {
 
 
     return (
-        <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-5 font-Inter relative h-full'>
+        <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-4 font-Inter relative h-full'>
 
-            {/* <X size={20} className='top-2 absolute right-2 sm:hidden' onClick={() => setOpenMenu(false)} /> */}
             <div className='w-full overflow-x-scroll no-scrollbar px-2'>
             <Account />
             </div>
 
-            {!showAdvance ? <div className='w-full flex justify-between items-center bg-[#DEEAEA] p-3 rounded-md hover:cursor-pointer' onClick={ ()=> setShowAdvance(true) }>
+            {!showAdvance ? 
+            <div className='w-full flex justify-between items-center bg-[#DEEAEA] p-3 rounded-md hover:cursor-pointer' onClick={ ()=> setShowAdvance(true) }>
                 <div className='flex items-center gap-2'>
                     
                     <h1 className='font-[600] text-sm leading-5'>Advance</h1>
                 </div>
                 <Image src={rightArrow} alt='open' />
-            </div> :
-            <div className='w-full h-fit bg-[#0EA5E9] text-[#FFFFFF] rounded-lg shadow-md'>
+            </div> 
+            :
+            <div className='w-full h-fit bg-[#14B8A6] text-[#FFFFFF] rounded-lg shadow-md'>
                 <Advance />
             </div>}
-            <div className='flex flex-col gap-2'>
+            {folder.length > 0 && <div className='flex flex-col gap-2'>
                 {folder.map((fol, idx) => {
                     return (
                         <FolderCard key={idx} fol={fol} />
                     )
                 })}
-            </div>
+            </div>}
             <div>
                 <NewFolder />
             </div>

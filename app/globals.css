@@ -91,3 +91,6 @@ body {
       scrollbar-width: none;  /* Firefox */
 }
 }
+/* html {
+  overflow-y: scroll;
+} */
