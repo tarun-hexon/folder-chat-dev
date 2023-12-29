@@ -34,10 +34,8 @@ const ChatWindow = () => {
     const [chatMsgs, setChatMsgs] = useState(folder.filter(fol => fol.id === folderId));
     const currentFol = folder.filter(fol => fol.id === folderId);
     const [msgLoader, setMsgLoader] = useState(false);
-    const [botMsg, setBotMsg] = useState('');
-    const [chatMsg, setChatMsg] = useState([
-        
-    ]);
+    const [chatSessionId, setChatSessionId] = useState(null);
+    const [chatMsg, setChatMsg] = useState([]);
 
     function iconName(file) {
         if (file === 'pdf') {
@@ -49,6 +47,27 @@ const ChatWindow = () => {
         }
     };
 
+    async function getSessionId(userMsgdata){
+        try {
+            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/create-chat-session`, {
+                method:'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "persona_id": 0
+                })
+            });
+            const json = await data.json();
+            console.log(json.chat_session_id)
+            sendChatMsgs(userMsgdata, json.chat_session_id)
+            setChatSessionId(json?.chat_session_id)
+
+        } catch (error) {
+            setMsgLoader(false)
+            console.log('error while creating chat id:', error)
+        }
+    }
     async function sendMsg(data) {
 
         if (data === '') return null;
@@ -75,12 +94,11 @@ const ChatWindow = () => {
             setMsgLoader(true)
         }, 1000);
 
-        await handleMsgStream(data).then(() => {
-
-            // console.log('rcvd', botMsg)
-
-        });
-
+        if(chatSessionId === null){
+            await getSessionId(data);
+        }else{
+            await sendChatMsgs(data, chatSessionId)
+        }
 
     };
 
@@ -93,9 +111,9 @@ const ChatWindow = () => {
     function resize() {
         const { current } = textareaRef;
         current.style.minHeight = "35px";
-    }
+    };
 
-    async function sendChatMsgs(userMsg) {
+    async function sendChatMsgs(userMsg, chatID) {
         try {
             const sendMessageResponse = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/send-message`, {
                 method: 'POST',
@@ -103,7 +121,7 @@ const ChatWindow = () => {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    "chat_session_id": 7,
+                    "chat_session_id": chatID,
                     "parent_message_id": null,
                     "message": userMsg,
                     "prompt_id": 0,
@@ -130,6 +148,7 @@ const ChatWindow = () => {
                 sendMessageResponse
             )
         } catch (error) {
+            console.log(error)
             setMsgLoader(false)
         }
     };
@@ -146,7 +165,6 @@ const ChatWindow = () => {
             }
             const { done, value } = rawChunk;
             if (done) {
-
                 break;
             }
 
@@ -161,9 +179,9 @@ const ChatWindow = () => {
             previousPartialChunk = partialChunk;
 
             const response = await Promise.resolve(completedChunks);
-            //   console.log(response)
+              
             if (response.length > 0) {
-
+                
                 for (const obj of response) {
                     if (obj.answer_piece) {
                         setRcvdMsg(prev => prev + obj.answer_piece);
@@ -217,15 +235,9 @@ const ChatWindow = () => {
     };
 
 
-    async function handleMsgStream(userMsg) {
-        await sendChatMsgs(userMsg)
-
-    };
 
 
-    useEffect(() => {
-        setBotMsg(prev => prev + rcvdMsg)
-    }, [rcvdMsg])
+
     useEffect(() => {
         resizeTextarea();
 
