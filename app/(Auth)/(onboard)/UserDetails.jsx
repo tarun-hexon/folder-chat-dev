@@ -20,7 +20,7 @@ import { useToast } from '../../../components/ui/use-toast'
 
 const SelectCard = (props) => {
   const {id} = props
-  const [selectedValue, setSelectedValue] = useState('1');
+  const [selectedValue, setSelectedValue] = useState("1");
   const [selectValue, setSelectValue] = useAtom(selectOptionAtom);
 
   const handleChange = (e) => {
@@ -31,19 +31,19 @@ const SelectCard = (props) => {
     setSelectValue(selectValue)
   }
 
-  useEffect(()=> {
-    console.log(selectValue)
-  }, [selectedValue])
+  // useEffect(()=> {
+  //   console.log(selectValue)
+  // }, [selectedValue])
 
 
   return (
-    <div className='w-full flex flex-col text-start gap-1'>
-      <label htmlFor={props.id} className='text-[14px] leading-[20px] font-[400] opacity-[50%]'>{props.title}</label>
-      <Select id={props.id}  value={selectedValue} onValueChange={(e)=> handleChange(e)}>
-        <SelectTrigger className="w-full text-black flex justify-between">
+    <div className='w-full flex flex-col text-start gap-1 select-none'>
+      <Label htmlFor={props.id} className='text-[14px] leading-[20px] font-[400] opacity-[50%]'>{props.title}</Label>
+      <Select id={props.id}  value={selectedValue} onValueChange={(e)=> handleChange(e)} className='select-none'>
+        <SelectTrigger className="w-full text-black flex justify-between select-none">
           <SelectValue placeholder="Select an option" className='font-[400] text-[12px] leading-[20px]' />
         </SelectTrigger>
-        <SelectContent className="w-full" >
+        <SelectContent className="w-full select-none" >
           <SelectItem value="1">option 1</SelectItem>
           <SelectItem value="2">option 2</SelectItem>
           <SelectItem value="3">option 3</SelectItem>
@@ -122,14 +122,14 @@ const UserDetails = () => {
     <div className={`flex flex-col w-full gap-10 items-center box-border ${darkMode ? '' : 'text-white'}`}>
     {!isPostUserComplete ? 
     <>
-      <div className='w-full text-center'>
+      <div className='w-full text-center select-none'>
                 <h1 className='font-[600] text-[20px]'>Tell us about <span className='text-[#14B8A6]'>yourself</span></h1>
                 <p className='text-[12px] leading-[20px] opacity-90 font-[300]'>We’ll customize your folder.chat experience based on your choices</p>
       </div>
-      <div className='w-full flex flex-col gap-5'>
-        {selectOptions.map(item => <SelectCard key={item.id} title={item.title} id={item.id}/>)}
+      <div className='w-full flex flex-col gap-5 select-none'>
+        {selectOptions.map(item => <SelectCard key={item.id} title={item.title} id={item.id} className='select-none'/>)}
       </div>
-      <div className='w-full'>
+      <div className='w-full select-none'>
 
       <Button variant="outline" className={`w-full text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center text-white`} onClick={()=>submitOption()}>Continue</Button>
 

@@ -141,7 +141,7 @@ const GitPrs = () => {
                 <hr className='w-full' />
                 {!tokenStatus ? <div className='self-start text-sm leading-5 flex flex-col gap-2 w-full'>
                     <h2 className='font-[600]  text-start'>Step 1: Provide your access token</h2>
-                    <p className='font-[400] text-start'>To use Confluence connector, you must first follow the guide described here to generate an Access Token</p>
+                    {con_token !== '' && <p className='font-[400] text-start'>To use Confluence connector, you must first follow the guide described here to generate an Access Token</p>}
                     {con_token !== '' ? <span className='font-[400] inline-flex items-center'>Existing Access Token: {'****...*** ' + con_token.slice(0, 5)} <Image src={trash} alt='remove' className='w-4 h-4 inline hover:cursor-pointer' onClick={() => handleRemoveToken()} /></span>
                         :
                         <div className='w-full space-y-2 text-start border p-4 rounded-lg'>

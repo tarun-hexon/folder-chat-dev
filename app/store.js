@@ -16,18 +16,18 @@ export const showAdvanceAtom = atom(false);
 export const selectOptionAtom = atom([
     {
         name:'option_1',
-        value:''
+        value:'1'
     },
     {
         name:'option_2',
-        value:''
+        value:'1'
     },
     {
         name:'option_3',
-        value:''
+        value:'1'
     },
     {
         name:'option_4',
-        value:''
+        value:'1'
     }
 ]);

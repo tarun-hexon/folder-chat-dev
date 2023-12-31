@@ -96,12 +96,13 @@ const Indexing = () => {
                     <TableBody className='w-full'>
                         {tableData?.map((item) => {
                             return (
-                                <Dialog key={item?.cc_pair_id} className={cn('w-full')}>
+                                // <Dialog key={item?.cc_pair_id} className={cn('w-full')}>
+                                //     <DialogTrigger asChild className={cn('w-full')}>
+                                    <TableRow className='border-b hover:cursor-pointer hover:bg-[#eaeaea]' >
                                         
-                                            
-                                    <DialogTrigger asChild className={cn('w-full')}>
-                                    <TableRow className='border-b hover:cursor-pointer w-full hover:bg-[#eaeaea]' >
-                                            <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1"><Image src={iconSelectore(item?.connector?.source)} alt={item?.connector?.source} />{item?.name}</TableCell>
+                                            <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1 ">
+                                                <Image src={iconSelectore(item?.connector?.source)} alt={item?.connector?.source} />{item?.name}
+                                            </TableCell>
                                             <TableCell className=''>
                                                 <div className={`flex justify-center items-center gap-1 ${statusBackGround(item?.latest_index_attempt?.status)}`}>
                                                     {`${item?.latest_index_attempt?.status || 'Processsing'}`}
@@ -109,13 +110,13 @@ const Indexing = () => {
                                             </TableCell>
                                             <TableCell className=''>{timeAgo(item?.latest_index_attempt?.time_updated)}</TableCell>
                                             <TableCell className="text-center ">{`${item?.docs_indexed} ${item?.docs_indexed > 1 ?'documents' : 'document'}`} </TableCell>
-                                            
-                                        </TableRow>
-                                        </DialogTrigger>
-                                    <DialogContent className={cn('w-full')}>
-                                        <EditIndex cc_pair_id={item?.cc_pair_id}/>
-                                    </DialogContent>
-                                </Dialog>
+                                        
+                                    </TableRow>
+                                //     </DialogTrigger>
+                                //     <DialogContent className={cn('w-full')}>
+                                //         <EditIndex cc_pair_id={item?.cc_pair_id}/>
+                                //     </DialogContent>
+                                // </Dialog>
                             )
                         })}
                     </TableBody>
