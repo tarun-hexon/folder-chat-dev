@@ -48,7 +48,8 @@ const Web = () => {
                     "source": "web",
                     "input_type": "load_state",
                     "connector_specific_config": {
-                        "base_url": baseName
+                        "base_url": baseName,
+                        "web_connector_type": "single"
                     },
                     "refresh_freq": 86400,
                     "disabled": false

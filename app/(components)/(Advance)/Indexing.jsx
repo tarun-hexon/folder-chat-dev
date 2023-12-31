@@ -8,6 +8,8 @@ import confluenceIcon from '../../../public/assets/Danswer-confluence-B.svg'
 import gitIcon from '../../../public/assets/Danswer-github-B.svg';
 import fileIcon from '../../../public/assets/Danswer-doc-B.svg';
 import check from '../../../public/assets/check-circle.svg';
+import { Dialog, DialogTrigger, DialogContent } from '../../../components/ui/dialog';
+
 import { timeAgo } from '../../../config/time';
 import {
     Table,
@@ -18,6 +20,8 @@ import {
     TableHeader,
     TableRow,
   } from "../../../components/ui/table";
+import { cn } from '../../../lib/utils';
+import EditIndex from './EditIndex';
   
 
 const Indexing = () => {
@@ -56,62 +60,21 @@ const Indexing = () => {
         }else if(status === "failed"){
             return ('text-[#eb3838]')
         }else if(status === "in_progress"){
-            return ('text-[#f7f14a]')
+            return ('text-[#FF5737]')
         }
     }
 
     useEffect(()=> {
         indexingStatus()
+        const int = setInterval(()=> {
+            indexingStatus()
+        }, 10000);
+        return ()=> {
+            clearInterval(int)
+        }
     }, [])
 
-    // const tableData = [{
-    //     id: 'drive',
-    //     title: 'Google Drive',
-    //     icon: gDriveIcon,
-    //     status: 'Enabled',
-    //     lastIndex: '2 minutes ago',
-    //     docsIndex: '6'
-    // },
-    // {
-    //     id: 'git',
-    //     title: 'Git PRs',
-    //     icon: gitIcon,
-    //     status: 'Enabled',
-    //     lastIndex: '2 minutes ago',
-    //     docsIndex: '6'
-    // },
-    // {
-    //     id: 'confluence',
-    //     title: 'Confluence',
-    //     icon: confluenceIcon,
-    //     status: 'Enabled',
-    //     lastIndex: '2 minutes ago',
-    //     docsIndex: '6'
-    // },
-    // {
-    //     id: 'slack',
-    //     title: 'Slack',
-    //     icon: slackIcon,
-    //     status: 'Enabled',
-    //     lastIndex: '2 minutes ago',
-    //     docsIndex: '6'
-    // },
-    // {
-    //     id: 'web',
-    //     title: 'Web',
-    //     icon: webIcon,
-    //     status: 'Enabled',
-    //     lastIndex: '2 minutes ago',
-    //     docsIndex: '6'
-    // },
-    // {
-    //     id: 'file',
-    //     title: 'Files',
-    //     icon: fileIcon,
-    //     status: 'Enabled',
-    //     lastIndex: '2 minutes ago',
-    //     docsIndex: '6'
-    // }]
+    
     return (
         <>
 
@@ -131,18 +94,28 @@ const Indexing = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody className='w-full'>
-                        {tableData?.map((item, idx) => {
+                        {tableData?.map((item) => {
                             return (
-                                <TableRow className='border-b hover:cursor-pointer w-full hover:bg-[#eaeaea]' key={item?.cc_pair_id}>
-                                    <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1"><Image src={iconSelectore(item?.connector?.source)} alt={item?.connector?.source} />{item?.name}</TableCell>
-                                    <TableCell className=''>
-                                        <div className={`flex justify-center items-center gap-1 ${statusBackGround(item?.latest_index_attempt?.status)}`}>
-                                            {`${item?.latest_index_attempt?.status || 'Processsing'}`}
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className=''>{timeAgo(item?.latest_index_attempt?.time_updated)}</TableCell>
-                                    <TableCell className="text-center ">{`${item?.docs_indexed} ${item?.docs_indexed > 1 ?'documents' : 'document'}`} </TableCell>
-                                </TableRow>
+                                <Dialog key={item?.cc_pair_id} className={cn('w-full')}>
+                                        
+                                            
+                                    <DialogTrigger asChild className={cn('w-full')}>
+                                    <TableRow className='border-b hover:cursor-pointer w-full hover:bg-[#eaeaea]' >
+                                            <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1"><Image src={iconSelectore(item?.connector?.source)} alt={item?.connector?.source} />{item?.name}</TableCell>
+                                            <TableCell className=''>
+                                                <div className={`flex justify-center items-center gap-1 ${statusBackGround(item?.latest_index_attempt?.status)}`}>
+                                                    {`${item?.latest_index_attempt?.status || 'Processsing'}`}
+                                                </div>
+                                            </TableCell>
+                                            <TableCell className=''>{timeAgo(item?.latest_index_attempt?.time_updated)}</TableCell>
+                                            <TableCell className="text-center ">{`${item?.docs_indexed} ${item?.docs_indexed > 1 ?'documents' : 'document'}`} </TableCell>
+                                            
+                                        </TableRow>
+                                        </DialogTrigger>
+                                    <DialogContent className={cn('w-full')}>
+                                        <EditIndex cc_pair_id={item?.cc_pair_id}/>
+                                    </DialogContent>
+                                </Dialog>
                             )
                         })}
                     </TableBody>

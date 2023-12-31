@@ -24,10 +24,11 @@ const Files = () => {
 
 
     async function uploadFile(file, name) {
-
+        console.log(file)
         try {
-            let formData = new FormData();
-            formData.append('files', file)
+            const formData = new FormData();
+            formData.append('files', file);
+            console.log(formData)
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/file/upload`, {
                 method: "POST",
                 body: formData
@@ -80,7 +81,7 @@ const Files = () => {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
-                    // 'Content-Type': 'application/x-www-form-urlencoded',
+                    
                 },
                 body: JSON.stringify({
                     "credential_json": {},
@@ -105,7 +106,7 @@ const Files = () => {
         }
     };
 
-async function runOnce(id){
+async function runOnce(conID, credID){
     try {
         const data = await fetch('http://52.53.122.186/api/manage/admin/connector/run-once',{
         method:'POST',
@@ -113,9 +114,9 @@ async function runOnce(id){
             "Content-Type": "application/json",
         },
         body:JSON.stringify({
-            "connector_id": id,
+            "connector_id": conID,
             "credentialIds": [
-                0
+                credID
             ]
         })
     })
@@ -134,7 +135,7 @@ async function sendURL(connectID, credID, name, file){
                 body: JSON.stringify({'name':name})
             });
             const json = await data.json();
-            runOnce(connectID);
+            runOnce(connectID, credID);
            console.log(json);
            setFiles(prev => [...prev, file]);
         } catch (error) {

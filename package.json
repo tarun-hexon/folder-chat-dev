@@ -20,6 +20,7 @@
     "@radix-ui/react-slot": "^1.0.2",
     "@radix-ui/react-switch": "^1.0.3",
     "@radix-ui/react-toast": "^1.1.5",
+    "@radix-ui/react-tooltip": "^1.0.7",
     "@supabase/supabase-js": "^2.39.0",
     "@syncfusion/ej2-react-pdfviewer": "^24.1.41",
     "@tremor/react": "^3.12.1",
