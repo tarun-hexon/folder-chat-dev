@@ -98,7 +98,7 @@ const Indexing = () => {
                             return (
                                 // <Dialog key={item?.cc_pair_id} className={cn('w-full')}>
                                 //     <DialogTrigger asChild className={cn('w-full')}>
-                                    <TableRow className='border-b hover:cursor-pointer hover:bg-[#eaeaea]' >
+                                    <TableRow key={item?.cc_pair_id} className='border-b hover:cursor-pointer hover:bg-[#eaeaea]' >
                                         
                                             <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1 ">
                                                 <Image src={iconSelectore(item?.connector?.source)} alt={item?.connector?.source} />{item?.name}
