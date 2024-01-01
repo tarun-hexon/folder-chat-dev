@@ -234,10 +234,6 @@ const ChatWindow = () => {
         }
     };
 
-
-
-
-
     useEffect(() => {
         resizeTextarea();
 
@@ -255,6 +251,7 @@ const ChatWindow = () => {
             <div className='w-full flex justify-between px-4 py-2'>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
                     <Image src={Logo} alt='folder.chat'/>
+                    
                     {/* <p className='text-sm font-[500] leading-5'>{chatMsgs[0]?.files[0]?.name || 'New Doc 001'}</p>
                     <Dialog onOpenChange={() => setDocName('')}>
                         <DialogTrigger asChild>

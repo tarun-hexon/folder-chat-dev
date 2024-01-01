@@ -68,7 +68,7 @@ const Indexing = () => {
         indexingStatus()
         const int = setInterval(()=> {
             indexingStatus()
-        }, 10000);
+        }, 5000);
         return ()=> {
             clearInterval(int)
         }

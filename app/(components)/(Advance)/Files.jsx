@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import slackIcon from '../../../public/assets/Danswer-slack-B.svg'
 import { Input } from '../../../components/ui/input';
@@ -13,6 +13,7 @@ import check from '../../../public/assets/check-circle.svg';
 import trash from '../../../public/assets/trash-2.svg';
 import { useDropzone } from 'react-dropzone';
 import { Label } from '../../../components/ui/label';
+import { fetchAllConnector } from '../../../lib/helpers';
 
 const Files = () => {
 
@@ -106,25 +107,25 @@ const Files = () => {
         }
     };
 
-async function runOnce(conID, credID){
-    try {
-        const data = await fetch('http://52.53.122.186/api/manage/admin/connector/run-once',{
-        method:'POST',
-        headers: {
-            "Content-Type": "application/json",
-        },
-        body:JSON.stringify({
-            "connector_id": conID,
-            "credentialIds": [
-                credID
-            ]
+    async function runOnce(conID, credID){
+        try {
+            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/run-once`,{
+            method:'POST',
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body:JSON.stringify({
+                "connector_id": conID,
+                "credentialIds": [
+                    credID
+                ]
+            })
         })
-    })
-    } catch (error) {
-        console.log('error in runOnce :', error)
+        } catch (error) {
+            console.log('error in runOnce :', error)
+        }
     }
-}
-async function sendURL(connectID, credID, name, file){
+    async function sendURL(connectID, credID, name, file){
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/connector/${connectID}/credential/${credID}`, {
             method: 'PUT',
@@ -136,14 +137,32 @@ async function sendURL(connectID, credID, name, file){
             });
             const json = await data.json();
             runOnce(connectID, credID);
-           console.log(json);
-           setFiles(prev => [...prev, file]);
+            await getAllExistingConnector();
+           
         } catch (error) {
             console.log('error while sendURL:', error)
+        }
+    };
+
+    async function getAllExistingConnector() {
+        try {
+            const data = await fetchAllConnector();
+            const currentConnector = data.filter(conn => conn.source === 'file');
+            if(currentConnector.length > 0){
+                setFiles(currentConnector)
+            };
+            
+        } catch (error) {
+            console.log(error)
         }
     }
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+
+
+    useEffect(()=> {
+        getAllExistingConnector()
+    }, [])
     return (
         <>
 
@@ -188,7 +207,7 @@ async function sendURL(connectID, credID, name, file){
                         {files.map((item, idx) => {
                             return (
                                 <tr className='border-b' key={idx}>
-                                    <td className="font-medium w-96 text-left p-2 py-3 ">{item.name}</td>
+                                    <td className="font-medium w-96 text-left p-2 py-3 ">{item?.connector_specific_config?.file_locations[0].split('/')[4]}</td>
                                     <td>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Enabled

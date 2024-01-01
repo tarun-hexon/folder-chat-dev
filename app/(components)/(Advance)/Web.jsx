@@ -12,6 +12,7 @@ import trash from '../../../public/assets/trash-2.svg';
 
 import { Label } from '../../../components/ui/label';
 import { useToast } from '../../../components/ui/use-toast';
+import { fetchAllConnector } from '../../../lib/helpers';
 
 const Web = () => {
 
@@ -88,7 +89,6 @@ const Web = () => {
 
     async function sendURL(connectID, credID, url){
         
-        console.log(connectID, credID, url);
         if(connectID === null || credID === null || url === '') return null
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/connector/${connectID}/credential/${credID}`, {
@@ -99,7 +99,7 @@ const Web = () => {
                 body: JSON.stringify({'name':url})
             });
             const json = await data.json();
-            setWebList(prev => [...prev, url]);
+            await getAllExistingConnector()
                 setWebUrl('');
                 setCredentialID(null);
                 setConnectorId(null)
@@ -107,7 +107,21 @@ const Web = () => {
             console.log('error while sendURL:', error)
         }
     };
-    
+    async function getAllExistingConnector() {
+        try {
+            const data = await fetchAllConnector();
+            const currentConnector = data.filter(conn => conn.source === 'web');
+            if(currentConnector.length > 0){
+                setWebList(currentConnector)
+            };
+            
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    useEffect(()=> {
+        getAllExistingConnector()
+    }, [])
     return (
         <>
 
@@ -124,8 +138,8 @@ const Web = () => {
                             <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Specify which websites to index</h2>
                             <p className='font-[400] text-sm leading-5'>We re-fetch the latest state of the website once a day</p>
                         </div>
-                        <div className={`w-full border rounded-lg flex flex-col justify-center text-start items-center p-5 gap-4`}>
-                            <div className='w-full space-y-2 text-start'>
+                        <div className={`w-full border rounded-lg flex flex-col justify-center text-start items-center p-5 gap-4 bg-slate-100 shadow-md`}>
+                            <div className='w-full space-y-2 text-start '>
                                 <Label htmlFor='web_url'>URL to index:</Label>
                                 <Input type='text' id='web_url' className='w-full' placeholder='web url' value={webUrl} onChange={(e) => {
                                     setWebUrl(e.target.value)
@@ -147,7 +161,7 @@ const Web = () => {
                         {webList.map((item, idx) => {
                             return (
                                 <tr className='border-b' key={idx}>
-                                    <td className="font-medium w-96 text-left p-2 py-3 ">{item}</td>
+                                    <td className="font-medium w-96 text-left p-2 py-3 break-words">{item?.connector_specific_config?.base_url}</td>
                                     <td>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Running!
