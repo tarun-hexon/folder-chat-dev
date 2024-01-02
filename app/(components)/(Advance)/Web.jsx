@@ -12,7 +12,7 @@ import trash from '../../../public/assets/trash-2.svg';
 
 import { Label } from '../../../components/ui/label';
 import { useToast } from '../../../components/ui/use-toast';
-import { fetchAllConnector } from '../../../lib/helpers';
+import { deleteConnectorFromTable, fetchAllConnector } from '../../../lib/helpers';
 
 const Web = () => {
 
@@ -118,6 +118,18 @@ const Web = () => {
         } catch (error) {
             console.log(error)
         }
+    };
+
+    async function deleteConnector(id1, id2){
+        try {
+            const body = {
+                "connector_id": id1,
+    		    "credential_id": id2
+            };
+            const res = await deleteConnectorFromTable(body)
+        } catch (error) {
+            console.log(error)
+        }
     }
     useEffect(()=> {
         getAllExistingConnector()
@@ -159,6 +171,7 @@ const Web = () => {
                     </thead>
                     <tbody>
                         {webList.map((item, idx) => {
+                            console.log(item)
                             return (
                                 <tr className='border-b' key={idx}>
                                     <td className="font-medium w-96 text-left p-2 py-3 break-words">{item?.connector_specific_config?.base_url}</td>
@@ -167,7 +180,7 @@ const Web = () => {
                                             <Image src={check} alt='checked' className='w-4 h-4' />Running!
                                         </div>
                                     </td>
-                                    <td><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' /></td>
+                                    <td><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' onClick={()=> deleteConnector(item.id, item.credential_ids[0])}/></td>
                                 </tr>
                             )
                         })}

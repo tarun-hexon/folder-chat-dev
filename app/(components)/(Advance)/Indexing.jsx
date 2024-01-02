@@ -26,7 +26,8 @@ import EditIndex from './EditIndex';
 
 const Indexing = () => {
     const [tableData, setTableData] = useState([]);
-
+    const [ccPairId, setCcPairId] = useState(null);
+    const [open, setOpen] = useState(ccPairId !== null);
     async function indexingStatus(){
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
@@ -63,7 +64,11 @@ const Indexing = () => {
             return ('text-[#FF5737]')
         }
     }
-
+    function dialogTrgr(id){
+        setCcPairId(id)
+        const dialog = document.getElementById('dialog');
+        dialog.click()
+    }
     useEffect(()=> {
         indexingStatus()
         const int = setInterval(()=> {
@@ -96,9 +101,8 @@ const Indexing = () => {
                     <TableBody className='w-full'>
                         {tableData?.map((item) => {
                             return (
-                                // <Dialog key={item?.cc_pair_id} className={cn('w-full')}>
-                                //     <DialogTrigger asChild className={cn('w-full')}>
-                                    <TableRow key={item?.cc_pair_id} className='border-b hover:cursor-pointer hover:bg-[#eaeaea]' >
+                                
+                                    <TableRow key={item?.cc_pair_id} className='border-b hover:cursor-pointer hover:bg-[#eaeaea]' onClick={()=> dialogTrgr(item?.cc_pair_id)}>
                                         
                                             <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1 ">
                                                 <Image src={iconSelectore(item?.connector?.source)} alt={item?.connector?.source} />{item?.name}
@@ -112,16 +116,19 @@ const Indexing = () => {
                                             <TableCell className="text-center ">{`${item?.docs_indexed} ${item?.docs_indexed > 1 ?'documents' : 'document'}`} </TableCell>
                                         
                                     </TableRow>
-                                //     </DialogTrigger>
-                                //     <DialogContent className={cn('w-full')}>
-                                //         <EditIndex cc_pair_id={item?.cc_pair_id}/>
-                                //     </DialogContent>
-                                // </Dialog>
+                               
                             )
                         })}
                     </TableBody>
                 </Table>
-
+                <Dialog open={open} onOpenChange={setOpen}  className={cn('w-full')}>
+                    <DialogTrigger asChild className={cn('w-full')}>
+                        <div id='dialog'></div>
+                    </DialogTrigger>
+                        <DialogContent className={cn('w-full')}>
+                                <EditIndex cc_pair_id={ccPairId}/>
+                        </DialogContent>
+                    </Dialog>
             </div>
         </>
     )

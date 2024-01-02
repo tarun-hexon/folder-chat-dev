@@ -3,11 +3,8 @@ import Image from 'next/image';
 import slackIcon from '../../../public/assets/Danswer-slack-B.svg'
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
-import gDriveIcon from '../../../public/assets/Danswer-google-B.svg'
-import webIcon from '../../../public/assets/Danswer-web-B.svg'
-import confluenceIcon from '../../../public/assets/Danswer-confluence-B.svg'
-import gitIcon from '../../../public/assets/Danswer-github-B.svg';
-import fileIcon from '../../../public/assets/Danswer-doc-B.svg';
+import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow,
+  } from "../../../components/ui/table";
 import check from '../../../public/assets/check-circle.svg';
 import trash from '../../../public/assets/trash-2.svg';
 import { Label } from '../../../components/ui/label';
@@ -15,7 +12,7 @@ import { Label } from '../../../components/ui/label';
 const Slack = () => {
     const [token, setToken] = useState('');
     const [value, setValue] = useState('');
-
+    const [slackList, setSlackList] = useState([1])
     return (
         <>
 
@@ -45,7 +42,7 @@ const Slack = () => {
                         <Button className='w-20'>Connect</Button>
                     </div>
                 </div>
-                <table className='w-full text-sm'>
+                <table className='w-full text-sm pb-5'>
                     <thead className='p-2'>
                         <tr className='border-b p-2'>
                             <th className="w-96 text-left p-2">Workplace</th>
@@ -55,10 +52,10 @@ const Slack = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {new Array(1).fill(null).map((item, idx) => {
+                        {slackList.map((item, idx) => {
                             return (
                                 <tr className='border-b' key={idx}>
-                                    <td className="font-medium w-96 text-left p-2 py-3 ">Workplace</td>
+                                    <td className="font-medium w-96 text-left p-2 py-3 ">ChannelName</td>
                                     <td className=''>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt={'checked'} className='w-4 h-4' />Enabled

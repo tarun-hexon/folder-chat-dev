@@ -13,7 +13,7 @@ import check from '../../../public/assets/check-circle.svg';
 import trash from '../../../public/assets/trash-2.svg';
 import { useDropzone } from 'react-dropzone';
 import { Label } from '../../../components/ui/label';
-import { fetchAllConnector } from '../../../lib/helpers';
+import { deleteConnectorFromTable, fetchAllConnector } from '../../../lib/helpers';
 
 const Files = () => {
 
@@ -157,6 +157,20 @@ const Files = () => {
         }
     }
 
+
+    async function deleteConnector(id1, id2){
+        try {
+            const body = {
+                "connector_id": id1,
+    		    "credential_id": id2
+            };
+            const res = await deleteConnectorFromTable(body)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+
+
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
 
@@ -205,6 +219,7 @@ const Files = () => {
                     </thead>
                     <tbody>
                         {files.map((item, idx) => {
+                            console.log(item)
                             return (
                                 <tr className='border-b' key={idx}>
                                     <td className="font-medium w-96 text-left p-2 py-3 ">{item?.connector_specific_config?.file_locations[0].split('/')[4]}</td>
@@ -213,7 +228,7 @@ const Files = () => {
                                             <Image src={check} alt='checked' className='w-4 h-4' />Enabled
                                         </div>
                                     </td>
-                                    <td><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' /></td>
+                                    <td><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' onClick={()=> deleteConnector(item.id, item.credential_ids[0])}/></td>
                                 </tr>
                             )
                         })}

@@ -7,7 +7,8 @@ import check from '../../../public/assets/check-circle.svg';
 import trash from '../../../public/assets/trash-2.svg';
 import { useToast } from '../../../components/ui/use-toast';
 import { deleteAdminCredentails, fetchAllCredentials, fetchCredentialID, generateConnectorId, addNewInstance, fetchAllConnector } from '../../../lib/helpers';
-
+import { Dialog, DialogTrigger, DialogContent } from '../../../components/ui/dialog';
+import EditIndex from './EditIndex';
 
 const GitPrs = () => {
 
@@ -20,7 +21,7 @@ const GitPrs = () => {
     const [connectorId, setConnectorId] = useState(null);
     const [credentialID, setCredentialID] = useState(null);
     const [adminCredential, setAdminCredential] = useState(null);
-
+    const [ccPairId ,setCCPairId] = useState(null)
     const { toast } = useToast();
 
 
@@ -255,16 +256,26 @@ const GitPrs = () => {
                     </thead>
                     <tbody className='w-full'>
                         {repos.map((item, idx) => {
+                            
                             return (
-                                <tr className='border-b hover:cursor-pointer w-full' key={idx}>
+                                <tr className='border-b hover:cursor-pointer w-full' key={item.id} onClick={()=> setCCPairId(item.id)}>
                                     <td className="font-medium text-left justify-start p-2 py-3">{item?.connector_specific_config?.repo_owner}/{item?.connector_specific_config?.repo_name}</td>
                                     <td className=''>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Enabled
                                         </div>
                                     </td>
-                                    <td className=''>{'****...*** ' + git_token.slice(0, 5)}</td>
-                                    <td><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' /></td>
+                                    <td className=''>{adminCredential?.credential_json?.github_access_token}</td>
+                                    <td>
+                                        <Dialog>
+                                            <DialogTrigger asChild>
+                                                <Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' />
+                                            </DialogTrigger>
+                                            <DialogContent>
+                                                <EditIndex cc_pair_id={ccPairId}/>
+                                            </DialogContent>
+                                        </Dialog>
+                                    </td>
                                 </tr>
                             )
                         })}

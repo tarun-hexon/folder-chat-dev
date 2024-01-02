@@ -15,7 +15,7 @@ import { useToast } from '../../../components/ui/use-toast';
 
 const EditIndex = ({ cc_pair_id }) => {
     const { toast } = useToast();
-
+    console.log(cc_pair_id)
     const [connectorDetails, setConnectorDetails] = useState(null);
     const body = useRef(null)
 
@@ -111,7 +111,7 @@ const EditIndex = ({ cc_pair_id }) => {
                             <Button variant={'destructive'} className={cn(connectorDetails?.connector.disabled ? 'cursor-pointer ' : 'cursor-not-allowed opacity-50')} onClick={()=> deleteConnector(body)}>Delete</Button>
                             
                         </TooltipTrigger>
-                        <TooltipContent className={cn('w-[60%] m-auto text-justify bg-gray-500 text-white opacity-60')}>
+                        <TooltipContent className={cn('w-[60%] m-auto text-justify bg-gray-500 text-white opacity-90')}>
                                 <p className='text-sm leading-5 font-[400]'>You Must Disabled the connector first before deleting it</p>
                             </TooltipContent>
                     </Tooltip>

@@ -143,7 +143,7 @@ const Confluence = () => {
                 variant:"destructive",
                 description:'Must Delete All Confluence Connector Before Delete Credentials'
             })
-            console.log(error)
+            
         }
         
     }
@@ -242,7 +242,7 @@ const Confluence = () => {
                                             <Image src={check} alt='checked' className='w-4 h-4' />Enabled
                                         </div>
                                     </td>
-                                    <td className=''>{'****...*** ' + con_token.slice(0, 5)}</td>
+                                    <td className=''>{conJson?.credential_json?.confluence_access_token}</td>
                                     <td><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' /></td>
                                 </tr>
                             )
