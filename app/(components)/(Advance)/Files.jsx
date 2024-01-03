@@ -1,13 +1,7 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import slackIcon from '../../../public/assets/Danswer-slack-B.svg'
-import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
-import gDriveIcon from '../../../public/assets/Danswer-google-B.svg'
-import webIcon from '../../../public/assets/Danswer-web-B.svg'
-import confluenceIcon from '../../../public/assets/Danswer-confluence-B.svg'
-import gitIcon from '../../../public/assets/Danswer-github-B.svg';
 import fileIcon from '../../../public/assets/Danswer-doc-B.svg';
 import check from '../../../public/assets/check-circle.svg';
 import trash from '../../../public/assets/trash-2.svg';
@@ -25,7 +19,7 @@ const Files = () => {
 
 
     async function uploadFile(file, name) {
-        console.log(file)
+        
         try {
             const formData = new FormData();
             formData.append('files', file);
@@ -42,8 +36,6 @@ const Files = () => {
             console.log(error)
         }
     };
-
-
 
     async function connectorRequest(path, name, file) {
         try {
@@ -96,6 +88,7 @@ const Files = () => {
             console.log('error while getCredentials:', error)
         }
     };
+
     const onDrop = (acceptedFiles) => {
         if (acceptedFiles && acceptedFiles.length > 0) {
             const file = acceptedFiles[0];
@@ -124,7 +117,8 @@ const Files = () => {
         } catch (error) {
             console.log('error in runOnce :', error)
         }
-    }
+    };
+
     async function sendURL(connectID, credID, name, file){
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/connector/${connectID}/credential/${credID}`, {
@@ -155,7 +149,7 @@ const Files = () => {
         } catch (error) {
             console.log(error)
         }
-    }
+    };
 
 
     async function deleteConnector(id1, id2){
@@ -168,7 +162,7 @@ const Files = () => {
         } catch (error) {
             console.log(error)
         }
-    }
+    };
 
 
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
@@ -219,7 +213,7 @@ const Files = () => {
                     </thead>
                     <tbody>
                         {files.map((item, idx) => {
-                            console.log(item)
+                            // console.log(item)
                             return (
                                 <tr className='border-b' key={idx}>
                                     <td className="font-medium w-96 text-left p-2 py-3 ">{item?.connector_specific_config?.file_locations[0].split('/')[4]}</td>

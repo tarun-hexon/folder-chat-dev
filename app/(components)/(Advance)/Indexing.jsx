@@ -121,11 +121,11 @@ const Indexing = () => {
                         })}
                     </TableBody>
                 </Table>
-                <Dialog open={open} onOpenChange={setOpen}  className={cn('w-full')}>
-                    <DialogTrigger asChild className={cn('w-full')}>
+                <Dialog open={open} onOpenChange={setOpen}>
+                    <DialogTrigger asChild >
                         <div id='dialog'></div>
                     </DialogTrigger>
-                        <DialogContent className={cn('w-full')}>
+                        <DialogContent>
                                 <EditIndex cc_pair_id={ccPairId}/>
                         </DialogContent>
                     </Dialog>

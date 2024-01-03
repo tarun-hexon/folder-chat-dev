@@ -108,6 +108,7 @@ const GitPrs = () => {
         try {
             
             const json = await addNewInstance(conId, credId, name);
+            await getAllExistingConnector();
             setTokenStatus(true)
             console.log(json)
         } catch (error) {
