@@ -8,29 +8,30 @@ import trash from '../../../public/assets/trash-2.svg';
 import { useDropzone } from 'react-dropzone';
 import { Label } from '../../../components/ui/label';
 import { deleteConnectorFromTable, fetchAllConnector } from '../../../lib/helpers';
+import { useAtom } from 'jotai';
+import { sessionAtom } from '../../store';
 
 const Files = () => {
 
     const [files, setFiles] = useState([]);
-    const [filePath, setFilePath] = useState('')
-    const [connectorId, setConnectorId] = useState(null);
-    const [credentialID ,setCredentialID] = useState(null);
-    const [fileName, setFileName] = useState('');
-
+   
+    // const [connectorId, setConnectorId] = useState(null);
+    // const [credentialID ,setCredentialID] = useState(null);
+    // const [fileName, setFileName] = useState('');
+    const [session, setSession] = useAtom(sessionAtom)
 
     async function uploadFile(file, name) {
-        
         try {
             const formData = new FormData();
             formData.append('files', file);
-            console.log(formData)
+           
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/file/upload`, {
                 method: "POST",
                 body: formData
             });
             const json = await data.json();
             
-            setFilePath(json.file_paths[0]);
+            // setFilePath(json.file_paths[0]);
             connectorRequest(json.file_paths[0], name, file)
         } catch (error) {
             console.log(error)
@@ -60,8 +61,8 @@ const Files = () => {
 
             );
             const json = await data.json();
-            setConnectorId(json.id)
-            console.log(json.id)
+            // setConnectorId(json.id)
+            // console.log(json.id)
             getCredentials(json.id, name, file)
         } catch (error) {
             console.log('error while connectorRequest :', error)
@@ -82,7 +83,7 @@ const Files = () => {
                 })
             });
             const json = await data.json();
-            setCredentialID(json.id);
+            // setCredentialID(json.id);
             sendURL(connectID, json.id, name, file)
         } catch (error) {
             console.log('error while getCredentials:', error)
@@ -93,7 +94,15 @@ const Files = () => {
         if (acceptedFiles && acceptedFiles.length > 0) {
             const file = acceptedFiles[0];
             
-            setFileName(file.name)
+            const fileType = file.name.split('.')[1]
+            if(fileType !== 'pdf' && fileType !== 'txt'){
+                toast({
+                    variant:'destructive',
+                    title: "This File type is not supported!"
+                });
+                return null
+            }
+            // setFileName(file.name)
             uploadFile(file, file.name);
         } else {
             // console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
@@ -169,7 +178,8 @@ const Files = () => {
 
 
     useEffect(()=> {
-        getAllExistingConnector()
+        getAllExistingConnector();
+        console.log(session);
     }, [])
     return (
         <>
@@ -187,7 +197,7 @@ const Files = () => {
                             <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Upload Files</h2>
                             <p className='font-[400] text-sm leading-5'>Specify files below, click the Upload button, and the contents of these files will be searchable via Advance!</p>
                         </div>
-                        <div className={`w-full border rounded-lg flex flex-col justify-center items-center p-5 gap-4 ${isDragActive && 'opacity-50'}`} {...getRootProps()}>
+                        <div className={`w-full bg-slate-100 shadow-md border rounded-lg flex flex-col justify-center items-center p-5 gap-4 ${isDragActive && 'opacity-50'}`} {...getRootProps()}>
                             <div >
                                 <Label htmlFor='upload-files' className={`font-[500] text-[16px] leading-6`}>Drag and drop files here, or click ‘Upload’ button and select files</Label>
                                 <div

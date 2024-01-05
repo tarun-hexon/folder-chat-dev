@@ -25,8 +25,8 @@ const Slack = () => {
                 <div className='self-start text-sm leading-5 flex flex-col gap-4 w-full'>
                     <h2 className='font-[600]  text-start'>Step 1: Provide Credentials</h2>
                     {token !== '' ? <span className='font-[400] inline-flex items-center'>Existing Slack Bot Token: {'****...***' + token.slice(token.length-5, token.length)} <Image src={trash} alt='remove' className='w-4 h-4 inline hover:cursor-pointer' onClick={()=> setToken('')}/></span>:
-                    <div className='w-full text-left items-center space-y-3'>
-                        <Label>Slack Bot Token:</Label>
+                    <div className='w-full text-left items-center space-y-3 bg-slate-100 shadow-md p-5'>
+                        <Label className='font-[500] text-[16px] leading-6 text-[#0F172A]'>Slack Bot Token:</Label>
                         <Input className='w-full' placeholder='slack bot token' onChange={(e) => setValue(e.target.value)}/>  
                         <Button onClick={()=> {setToken(value),setValue('')}}>Update</Button>  
                     </div>}
@@ -35,7 +35,7 @@ const Slack = () => {
                     <h2 className='font-[600]  text-start'>Step 2: Which workplaces do you want to make searchable?</h2>
                     <span className='font-[400]'>We pull the latest messages from each workspace listed below every <span className='font-[600]'>10</span> minutes</span>
                 </div>
-                <div className='w-full self-start p-5 border rounded-lg'>
+                <div className='w-full self-start p-5 border rounded-lg bg-slate-100 shadow-md'>
                     <div className='text-start flex flex-col gap-4'>
                         <h2 className='font-[500] text-[16px] leading-6 text-[#0F172A]'>Connect to a New Workspace</h2>
                         <Input placeholder='Workplace Name' type='text' />

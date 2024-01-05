@@ -5,7 +5,7 @@ import threeDot from '../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
 import { Account, NewFolder } from '../chat/(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom, fileNameAtom, openMenuAtom, showAdvanceAtom, folderIdAtom } from '../store';
+import { folderAtom, fileNameAtom, openMenuAtom, showAdvanceAtom, folderIdAtom, sessionAtom } from '../store';
 import docIcon from '../../public/assets/doc.svg';
 import xlsIcon from '../../public/assets/xls.svg';
 import pdfIcon from '../../public/assets/pdf.svg';
@@ -14,14 +14,16 @@ import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/pop
 import { X, ChevronRightCircle } from 'lucide-react';
 
 import { Advance } from './index'
+import supabase from '../../config/supabse';
+import { isUserExist } from '../../config/lib';
 
 
 
 const FolderCard = (props) => {
-    
-    const { title, id, files } = props.fol
-    const [folderFiles, setFlderFiles] = useState([])
 
+    const { name, id  } = props.fol
+    const [folderFiles, setFlderFiles] = useState([])
+    const[files, setFiles] = useState([])
     const [fileName, setFileName] = useAtom(fileNameAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom)
 
@@ -41,11 +43,11 @@ const FolderCard = (props) => {
     
     return (
 
-        <Accordion type="single" collapsible>
-            <AccordionItem value="item-1" className='rounded-lg bg-[#ffffff] py-3 px-2 gap-2 flex flex-col'>
+        <Accordion type="single" collapsible onClick={()=> console.log("hi")}>
+            <AccordionItem value="item-1" className='rounded-lg bg-[#ffffff] py-3 px-2 gap-2 flex flex-col' >
                 <div className='w-full flex justify-between'>
-                    <AccordionTrigger className='flex-row-reverse items-center gap-2 w-full '>
-                        <h2 className='text-sm leading-5 font-[600]'>{title}</h2>
+                    <AccordionTrigger className='flex-row-reverse items-center gap-2 w-full ' >
+                        <h2 className='text-sm leading-5 font-[600]'>{name}</h2>
                     </AccordionTrigger>
                     <Popover open={popOpen} onOpenChange={setPopOpen}>
                         <PopoverTrigger asChild>
@@ -97,10 +99,32 @@ const FolderCard = (props) => {
 
 const SideBar = () => {
     const [openMenu, setOpenMenu] = useAtom(openMenuAtom)
-    const [folder, setFolder] = useAtom(folderAtom);
+    const [folder, setFolder] = useState([]);
     const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
     const [fileName, setFileName] = useAtom(fileNameAtom);
-
+    const [session, setSession] = useAtom(sessionAtom);
+    const [folderAdded, setFolderAdded] = useState(false)
+    async function getFolders(){
+        try {
+            const userID = await isUserExist('users', 'id', 'email',session.user.email);
+            const wkID = await isUserExist('workspaces', 'id', 'created_by',userID[0].id);
+            let { data: folders, error } = await supabase
+                .from('folders')
+                .select("*")
+                .eq('workspace_id', wkID[0].id);
+                if(folders){
+                    
+                    setFolder([...folders]);
+                    return
+                };
+                throw error
+        } catch (error) {
+            console.log(error)
+        }
+    };
+    useEffect(()=> {
+        getFolders()
+    }, [folderAdded])
     return (
         <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-4 font-Inter relative h-full'>
             
@@ -129,7 +153,7 @@ const SideBar = () => {
                 })}
             </div>}
             <div>
-                <NewFolder />
+                <NewFolder setFolderAdded={setFolderAdded}/>
             </div>
 
 

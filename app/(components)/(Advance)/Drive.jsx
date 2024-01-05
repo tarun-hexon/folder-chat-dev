@@ -45,7 +45,7 @@ const Drive = () => {
                             <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Step 1: Provide your app Credentials</h2>
                             <p className='font-[400] text-sm leading-5'>Follow the guide here to setup your google app in your company workplace. Download the credentials.json, and upload it here.</p>
                         </div>
-                        <div className={`w-full border rounded-lg flex flex-col justify-start items-start p-5 gap-4 `}>
+                        <div className={`w-full border rounded-lg flex flex-col justify-start items-start p-5 gap-4 bg-slate-100 shadow-md`}>
                             <Input 
                             type='file' 
                             accept=".json"

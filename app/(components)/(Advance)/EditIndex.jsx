@@ -15,7 +15,7 @@ import { useToast } from '../../../components/ui/use-toast';
 
 const EditIndex = ({ cc_pair_id }) => {
     const { toast } = useToast();
-    console.log(cc_pair_id)
+   
     const [connectorDetails, setConnectorDetails] = useState(null);
     const body = useRef(null)
 
@@ -92,6 +92,7 @@ const EditIndex = ({ cc_pair_id }) => {
     }
     
     useEffect(() => {
+        
         connectorStatus(cc_pair_id)
     }, []);
 
@@ -103,7 +104,7 @@ const EditIndex = ({ cc_pair_id }) => {
         <div className='w-full space-y-10'>
             <h1 className='text-lg font-[600]'>{connectorDetails.name}</h1>
             <div className='w-full flex justify-around'>
-                <Button variant={'default'} className={cn('bg-yellow-500 hover:bg-yellow-500 hover:opacity-70')} onClick={()=> disableConnector(body)}>{body.current.connector.disabled ? 'Re-Enable' : 'Disable'}</Button>
+                <Button className={cn(`${body.current.connector.disabled ? 'bg-[#14B8A6] hover:bg-[#14B8A6]' : 'bg-red-500 hover:bg-red-500'} hover:opacity-75`)} onClick={()=> disableConnector(body)}>{body.current.connector.disabled ? 'Re-Enable' : 'Disable'}</Button>
 
                 <TooltipProvider >
                     <Tooltip>
@@ -111,9 +112,9 @@ const EditIndex = ({ cc_pair_id }) => {
                             <Button variant={'destructive'} className={cn(connectorDetails?.connector.disabled ? 'cursor-pointer ' : 'cursor-not-allowed opacity-50')} onClick={()=> deleteConnector(body)}>Delete</Button>
                             
                         </TooltipTrigger>
-                        <TooltipContent className={cn('w-[60%] m-auto text-justify bg-gray-500 text-white opacity-90')}>
+                        {!connectorDetails?.connector.disabled && <TooltipContent className={cn('w-[60%] m-auto text-justify bg-gray-500 text-white opacity-90')}>
                                 <p className='text-sm leading-5 font-[400]'>You Must Disabled the connector first before deleting it</p>
-                            </TooltipContent>
+                        </TooltipContent>}
                     </Tooltip>
                 </TooltipProvider>
             </div>

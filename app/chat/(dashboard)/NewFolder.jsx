@@ -21,15 +21,17 @@ import { Button } from "../../../components/ui/button";
 import plus from '../../../public/assets/plus - light.svg'
 import Image from 'next/image';
 import { useAtom } from 'jotai';
-import { folderAtom } from '../../store';
+import { folderAtom, sessionAtom } from '../../store';
 import { Folder } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
+import { isUserExist } from '../../../config/lib';
+import supabase from '../../../config/supabse';
 
-
-const NewFolder = () => {
+const NewFolder = ( {setFolderAdded}) => {
     const [folder, setFolder] = useAtom(folderAtom);
     const [open, setOpen] = useState(false);
     const [inputError, setInputError] = useState(false);
+    const [session, setSession] = useAtom(sessionAtom)
     const id = uuidv4()
     const [fol, setFol] = useState({
         id: id,
@@ -39,7 +41,8 @@ const NewFolder = () => {
         files:[]
     });
 
-    function addFolder(data) {
+    async function addFolder(data) {
+        
         if (data.title === '') {
             setInputError('Write some valid folder name');
             return null
@@ -47,13 +50,34 @@ const NewFolder = () => {
             setInputError('Write some valid folder description');
             return null
         } else {
-            setFolder([...folder, data]);
+            await createFolder(data); 
             
-
-            setOpen(false)
         }
     };
 
+    async function createFolder(folderData){
+        try {
+            const userID = await isUserExist('users', 'id', 'email',session.user.email);
+            const wkID = await isUserExist('workspaces', 'id', 'created_by',userID[0].id);
+            
+            const { data, error } = await supabase
+                .from('folders')
+                .insert([
+                    { workspace_id: wkID[0].id, user_id: userID[0].id, name:folderData.title, description:folderData.description, function:folderData.function, is_active:true, chat_enabled:true},
+                ])
+                .select();
+                if(data){
+                    console.log(data);
+                    setFolder([...folder, data]);
+                    setFolderAdded(prev => !prev)
+                    setOpen(false)
+                    return 
+                }
+                throw error
+        } catch (error) {
+            console.log(error)
+        }
+    }
 
     return (
         <Dialog open={open} onOpenChange={() => {

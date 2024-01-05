@@ -61,7 +61,7 @@ const Web = () => {
             const json = await data.json();
             setConnectorId(json.id)
             
-            getCredentials(json.id, baseName)
+            await getCredentials(json.id, baseName)
         } catch (error) {
             console.log('error while connectorRequest :', error)
         }        
@@ -75,8 +75,12 @@ const Web = () => {
                     "Content-Type": "application/json",
                     
                 },
-                body: JSON.stringify({"credential_json": {},
-                "admin_public": true})
+                body: JSON.stringify(
+                    {
+                        "credential_json": {},
+                        "admin_public": false
+                    }
+                )
             });
             const json = await data.json();
             
@@ -171,7 +175,6 @@ const Web = () => {
                     </thead>
                     <tbody>
                         {webList.map((item, idx) => {
-                            console.log(item)
                             return (
                                 <tr className='border-b' key={idx}>
                                     <td className="font-medium w-96 text-left p-2 py-3 break-words">{item?.connector_specific_config?.base_url}</td>

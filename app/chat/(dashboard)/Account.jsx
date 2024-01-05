@@ -1,22 +1,24 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../components/ui/accordion";
 import threeDot from '../../../public/assets/more-horizontal.svg'
 import supabase from '../../../config/supabse';
 import Image from 'next/image';
 import { useAtom } from 'jotai'
-import { sessionAtom, isPostSignUpCompleteAtom, isPostUserCompleteAtom } from '../../store';
+import { sessionAtom, isPostSignUpCompleteAtom, isPostUserCompleteAtom, supabaseUserDataAtom } from '../../store';
 import { useRouter } from 'next/navigation';
 import { sidebarOptions } from '../../../config/constants';
 import { Dialog, DialogTrigger } from '../../../components/ui/dialog';
 import { Setting } from '../(settings)/index'
 import { LogOut } from 'lucide-react';
+import { isUserExist } from '../../../config/lib';
 
 const Account = () => {
     const [userSession, setUserSession] = useAtom(sessionAtom);
     const [isPostOtpComplete, setPostSignupComplete] = useAtom(isPostSignUpCompleteAtom);
     const [isPostUserComplete, setPostUserComplete] = useAtom(isPostUserCompleteAtom);
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState(false);
+    const [workSpace, setWorkSpace] = useState(null)
     const router = useRouter();
     
     async function signOut() {
@@ -30,7 +32,24 @@ const Account = () => {
             setPostUserComplete(false);
         }
     };
-
+    async function getInfo(){
+        try {
+            const data = await isUserExist('users', '*', 'email', userSession.user.email)
+            let { data: workspaces, error } = await supabase
+            .from('workspaces')
+            .select('name')
+            .eq('created_by', data[0].id);
+            if(error){
+                throw error
+            }
+            setWorkSpace(workspaces[0].name)
+        } catch (error) {
+            console.log(error)
+        }
+    };
+    useEffect(()=> {
+        getInfo()
+    }, [])
     return (
         <div className='w-full'>
             <Accordion type="single" collapsible className='w-full'>
@@ -38,7 +57,7 @@ const Account = () => {
                     <AccordionTrigger className='flex-row-reverse justify-between items-center gap-2'>
                         <div className='flex w-full justify-between'>
                         
-                            <h1 className='font-[600] text-sm leading-5 mr-10'>{userSession?.user?.user_metadata?.workPlace_name}</h1>
+                            <h1 className='font-[600] text-sm leading-5 mr-10'>{workSpace}</h1>
                             <Image src={threeDot} alt={'options'} className='w-4 h-4 ' />
                         </div>
                     </AccordionTrigger>

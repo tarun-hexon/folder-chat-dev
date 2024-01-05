@@ -11,6 +11,7 @@ import { useAtom } from 'jotai'
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import { useToast } from '../../../components/ui/use-toast';
+import { insertData, isUserExist } from '../../../config/lib'
 
 
 
@@ -20,6 +21,8 @@ const PostSignup = () => {
     const [session, setSession] = useAtom(sessionAtom);
     const [onBoard, setOnBoard] = useState(false);
     const [name, setName] = useState('');
+    const [userExist, setUserExist] = useState(false);
+
     const router = useRouter();
     const {toast} = useToast();
 
@@ -28,9 +31,10 @@ const PostSignup = () => {
         if (name === '') return toast({
                     variant: "destructive",
                     title: "Uh oh! Name cannot be empty.",
-                  });
-
+                });
+        
         try {
+            await updateUsersTable(name);
             const { user, error } = await supabase.auth.updateUser({
                 data: { full_name: name }
             });
@@ -51,8 +55,50 @@ const PostSignup = () => {
 
     };
 
-    useEffect(() => {
+    async function checkIfUserExist(){
+        try {
+            const id = await isUserExist('users', 'email', 'email', session.user.email);
+            if(id.length > 0){
+                setUserExist(id[0].email)
+            }else{
+                setUserExist(false)
+            }
+            console.log(id)
+        } catch (error) {
+            console.log(error)
+        }
+    };
 
+    async function updateUsersTable(name){
+        if(userExist == false){
+            try {
+                const { data, error } = await supabase
+                .from('users')
+                .insert([
+                { name: name, email: session.user.email, email_verified: true },
+                ])
+                .select()
+                console.log(data)
+            } catch (error) {
+                console.log(error)
+            }
+        }else{
+            try {
+
+            const { data, error } = await supabase
+            .from('users')
+            .update({ name: name })
+            .eq('email', userExist)
+            .select()
+
+            console.log(data)
+            } catch (error) {
+                console.log(error)
+            }
+        }
+    }
+    useEffect(() => {
+        checkIfUserExist()
         if (session?.user?.user_metadata?.onBoarding) {
             router.push('/chat')
         }

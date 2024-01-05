@@ -1,14 +1,14 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import social_role from "../../../public/assets/social_role.svg"
 import illustration from "../../../public/assets/illustration.svg"
 import { Button } from "../../../components/ui/button"
 import { FaCheckCircle } from "react-icons/fa";
-
+import supabase from '../../../config/supabse'
 import Image from 'next/image'
 import { darkModeAtom, isPostNameCompleteAtom, sessionAtom, isPostOtpCompleteAtom } from '../../store';
 import { useAtom } from 'jotai'
-
+import { getUserId, insertData, isUserExist } from '../../../config/lib'
 
 
 const PostName = () => {
@@ -18,6 +18,26 @@ const PostName = () => {
     const [isPostNameComplete, setIsPostNameComplete] = useAtom(isPostNameCompleteAtom);
     const [session, setSession1] = useAtom(sessionAtom);
 
+
+    async function updateProfile(){
+        if(selected === '') return null
+        try {
+            const value = selected === 'personal' ? true : false
+            const { user, error } = await supabase.auth.updateUser({
+                data: { is_for_personal: value }
+            });
+            if(error){
+                throw error
+            }
+            setIsPostNameComplete(true);
+            setSelected('')
+        } catch (error) {
+            console.log(error)
+        }
+    };
+    useEffect(()=> {
+        
+    },[])
     return (
         <div className={`flex flex-col w-full gap-8 items-center box-border ${darkMode ? '' : 'text-white'}`}>
             <div className='w-full text-center'>
@@ -40,7 +60,7 @@ const PostName = () => {
                     {selected === 'personal' && <FaCheckCircle className='absolute top-3 right-5' size={'1rem'}/>}
                 </div>
             </div>
-            <Button variant="outline" className={`w-[50%] text-white mt-2 text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center`} disabled={selected === ""} onClick={()=> setIsPostNameComplete(true)}>Continue</Button>
+            <Button variant="outline" className={`w-[50%] text-white mt-2 text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center`} disabled={selected === ""} onClick={()=> updateProfile()}>Continue</Button>
 
             <div className={`w-[33rem] ${darkMode ? 'text-black' : 'text-white'}  text-xs opacity-60 text-center mt-4 leading-[20px] font-[300]`}>You may unsubscribe from receiving marketing communications at any time. Folder.chat&apos;s websites and communications are subjects to our Privacy Policy</div>
         </div>

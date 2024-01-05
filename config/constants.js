@@ -9,7 +9,12 @@ import confluenceIcon from '../public/assets/Danswer-confluence.svg';
 import gitPrsIcon from '../public/assets/Danswer-github.svg';
 import webIcon from '../public/assets/Danswer-web.svg';
 import filesIcon from '../public/assets/Danswer-doc.svg';
-
+import fileIconB from '../public/assets/Danswer-doc-B.svg';
+import gDriveIconB from '../public/assets/Danswer-google-B.svg'
+import webB from '../public/assets/Danswer-web-B.svg'
+import slackIconB from '../public/assets/Danswer-slack-B.svg'
+import confluenceIconB from '../public/assets/Danswer-confluence-B.svg'
+import gitIconB from '../public/assets/Danswer-github-B.svg';
 
 export const selectOptions = [
     {
@@ -133,4 +138,18 @@ export const advanceOption = [
   }
 ];
 
-
+export function iconSelector(icon){
+  if(icon === "web"){
+      return webB
+  }else if(icon === "file"){
+      return fileIconB
+  }else if(icon === "github"){
+      return gitIconB
+  }else if(icon === "slack"){
+      return slackIconB
+  }else if(icon === "confluence"){
+      return confluenceIconB
+  }else{
+      return gDriveIconB
+  }
+};

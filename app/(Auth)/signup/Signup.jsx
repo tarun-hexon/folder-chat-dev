@@ -51,7 +51,7 @@ const Signup = () => {
           setInputError('User already registered');
         }
         else {
-          console.log(data)
+        
         setEmailSent('Check Your Email For Confirmation Mail')
       }
       console.log(error)

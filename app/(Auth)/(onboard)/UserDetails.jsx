@@ -1,7 +1,7 @@
 'use client'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
-import { darkModeAtom, isPostNameCompleteAtom, isPostUserCompleteAtom, selectOptionAtom } from '../../store'
+import { darkModeAtom, isPostNameCompleteAtom, isPostUserCompleteAtom, selectOptionAtom, sessionAtom } from '../../store'
 import {
   Select,
   SelectContent,
@@ -16,6 +16,7 @@ import { useRouter } from 'next/navigation'
 import { selectOptions } from '../../../config/constants';
 import supabase from '../../../config/supabse'
 import { useToast } from '../../../components/ui/use-toast'
+import { isUserExist } from '../../../config/lib'
 
 
 const SelectCard = (props) => {
@@ -58,15 +59,16 @@ const SelectCard = (props) => {
 const WorkPlace = () => {
   const [darkMode] = useAtom(darkModeAtom);
   const [workPlaceName, setWorkPlaceName] = useState('');
+  const [session, setSession] = useAtom(sessionAtom);
 
   const router = useRouter();
 
   async function updateUser(){
     try {
+      await createWorkPlace(workPlaceName)
       const { user, error } = await supabase.auth.updateUser({
         data:{
           onBoarding: true,
-          workPlace_name:workPlaceName
         }
       });
       if(error){
@@ -77,8 +79,26 @@ const WorkPlace = () => {
       console.log(error)
     };
     
-  }
+  };
 
+  async function createWorkPlace(name){
+    try {
+      const foreign_details = await isUserExist('users', '*', 'email', session.user.email);
+      const { data, error } = await supabase
+      .from('workspaces')
+      .insert([
+        { name: name, is_active: true, created_by:foreign_details[0].id, subscription_active:false },
+      ])
+      .select();
+      if(data){
+        console.log(data)
+      }else{
+        throw error
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
 
   return (
     <div className={`flex flex-col w-96 gap-5 items-center box-border ${darkMode ? '' : 'text-white'}`}>
@@ -103,11 +123,82 @@ const UserDetails = () => {
   const [isPostUserComplete, setIsPostUserComplete] = useAtom(isPostUserCompleteAtom);
   const [isPostNameComplete, setIsPostNameComplete] = useAtom(isPostNameCompleteAtom);
   const [selectValue, setSelectValue] = useAtom(selectOptionAtom);
-  const {toast} = useToast()
-  function submitOption(){
+  const [existingUser, setExistingUser] = useState(null);
+  const [session, setSession] = useAtom(sessionAtom);
+  const [userExist, setUserExist] = useState(false);
+  const {toast} = useToast();
+
+
+  async function updateProfile(){
+    
+    
+    try {
+        const foreign_details = await isUserExist('users', '*', 'email', session.user.email);
+        const checkIfUser = await isUserExistByFK('profile', 'id', ('user_id', foreign_details[0].id));
+        setExistingUser(foreign_details[0]);
+        console.log(checkIfUser, foreign_details)
+        if(checkIfUser.length === 0){
+          const { data, error } = await supabase
+        .from('profile')
+        .insert([
+        { is_for_personal: session?.user?.user_metadata?.is_for_personal, 
+          user_id: foreign_details[0].id,
+          department:selectValue[0].value,
+          designation:selectValue[1].value,
+          purpose:selectValue[3].value
+        },
+        ])
+        .select();
+        console.log(data)
+        if(data){
+          setIsPostUserComplete(true);
+        }
+        }else{
+          const { data, error } = await supabase
+        .from('profile')
+        .update([
+        { is_for_personal: session?.user?.user_metadata?.is_for_personal, 
+          user_id: foreign_details[0].id,
+          department:selectValue[0].value,
+          designation:selectValue[1].value,
+          purpose:selectValue[3].value
+        },
+        ])
+        .eq('id', checkIfUser[0].id)
+        .select();
+        console.log(data)
+        if(data){
+          setIsPostUserComplete(true);
+        }
+        }
+    } catch (error) {
+        console.log(error)
+    }
+};
+
+async function isUserExistByFK(fromTable, selectParam, data){
+    
+  try {
+    let { data: users, error } = await supabase
+    .from(fromTable)
+    .select(selectParam)
+    .eq('user_id', data);
+    
+    if(error){
+      throw error
+    }
+    return users
+  } catch (error) {
+    console.log(error)
+  }
+
+}
+  async function submitOption(){
     const search = selectValue.filter(item => item.value === '');
     if(search.length === 0){
-      setIsPostUserComplete(true)
+      
+      await updateProfile()
+
     }else{
        toast({
         variant: "destructive",
@@ -116,7 +207,11 @@ const UserDetails = () => {
       });
       return null
     }
-  }
+  };
+
+useEffect(()=> {
+  console.log(selectValue)
+}, [selectValue])
   return (
     <>
     <div className={`flex flex-col w-full gap-10 items-center box-border ${darkMode ? '' : 'text-white'}`}>

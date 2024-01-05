@@ -10,19 +10,20 @@ import xls from '../../public/assets/xls.svg'
 import pdf from '../../public/assets/pdf.svg'
 import doc from '../../public/assets/doc.svg'
 import Image from 'next/image'
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '../../components/ui/dialog'
-import { Button } from '../../components/ui/button'
+import { iconSelector } from '../../config/constants'
+
 import { useAtom } from 'jotai'
-import { fileNameAtom, folderAtom, folderIdAtom, openMenuAtom, showAdvanceAtom } from '../store'
+import { fileNameAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom } from '../store'
 import ReactMarkdown from "react-markdown";
 
 import { MoreHorizontal } from 'lucide-react';
+import { useToast } from '../../components/ui/use-toast'
 
 
 const ChatWindow = () => {
 
 
-    const [fileName, setFileName] = useAtom(fileNameAtom);
+    const [session, setSession] = useAtom(sessionAtom);
     const [userMsg, setUserMsg] = useState('');
     const [docName, setDocName] = useState('');
     const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
@@ -30,12 +31,14 @@ const ChatWindow = () => {
     const [folder, setFolder] = useAtom(folderAtom);
     const [rcvdMsg, setRcvdMsg] = useState('');
     const textareaRef = useRef(null);
-    const [openMenu, setOpenMenu] = useAtom(openMenuAtom)
+    const [responseObj, setResponseObj] = useState(null)
     const [chatMsgs, setChatMsgs] = useState(folder.filter(fol => fol.id === folderId));
     const currentFol = folder.filter(fol => fol.id === folderId);
     const [msgLoader, setMsgLoader] = useState(false);
-    const [chatSessionId, setChatSessionId] = useState(null);
+    const [chatSessionId, setChatSessionId] = useState(37);
     const [chatMsg, setChatMsg] = useState([]);
+    const [parentMessageId, setParentMessageId] = useState(null);
+    const { toast } = useToast()
 
     function iconName(file) {
         if (file === 'pdf') {
@@ -59,8 +62,8 @@ const ChatWindow = () => {
                 })
             });
             const json = await data.json();
-            console.log(json.chat_session_id)
-            sendChatMsgs(userMsgdata, json.chat_session_id)
+            
+            sendChatMsgs(userMsgdata, json.chat_session_id, parentMessageId)
             setChatSessionId(json?.chat_session_id)
 
         } catch (error) {
@@ -79,7 +82,8 @@ const ChatWindow = () => {
                 message: rcvdMsg
             }, ...prev]);
             setMsgLoader(false);
-            setRcvdMsg('')
+            setRcvdMsg('');
+            setResponseObj(null)
 
         }
         setChatMsg((prev) => [{
@@ -97,7 +101,7 @@ const ChatWindow = () => {
         if(chatSessionId === null){
             await getSessionId(data);
         }else{
-            await sendChatMsgs(data, chatSessionId)
+            await sendChatMsgs(data, chatSessionId, parentMessageId)
         }
 
     };
@@ -113,7 +117,8 @@ const ChatWindow = () => {
         current.style.minHeight = "35px";
     };
 
-    async function sendChatMsgs(userMsg, chatID) {
+    async function sendChatMsgs(userMsg, chatID, parent_ID) {
+
         try {
             const sendMessageResponse = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/send-message`, {
                 method: 'POST',
@@ -122,7 +127,7 @@ const ChatWindow = () => {
                 },
                 body: JSON.stringify({
                     "chat_session_id": chatID,
-                    "parent_message_id": null,
+                    "parent_message_id": parent_ID,
                     "message": userMsg,
                     "prompt_id": 0,
                     "search_doc_ids": null,
@@ -185,6 +190,17 @@ const ChatWindow = () => {
                 for (const obj of response) {
                     if (obj.answer_piece) {
                         setRcvdMsg(prev => prev + obj.answer_piece);
+                    }else if(obj.parent_message){
+                        setResponseObj(obj)
+                    }
+                    else if(obj.parent_message && parentMessageId === null){
+                        setParentMessageId(obj.parent_message)
+                    }else if(obj.error){
+                        setMsgLoader(false);
+                        return toast({
+                            variant:'destructive',
+                            description:'Something Went Wrong!'
+                        })
                     }
                 }
             };
@@ -236,7 +252,7 @@ const ChatWindow = () => {
 
     useEffect(() => {
         resizeTextarea();
-
+       
     }, [userMsg]);
 
     useEffect(() => {
@@ -302,41 +318,49 @@ const ChatWindow = () => {
                         <hr className='w-full bg-transparent border-transparent' />
 
                         {msgLoader &&
-                            <p className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px]'>
-                                {rcvdMsg === '' ? <MoreHorizontal className='m-auto animate-pulse' /> :
-                                    <ReactMarkdown
-                                        className='w-full'
-                                        components={{
-                                            a: ({ node, ...props }) => (
-                                                <a
-                                                    {...props}
-                                                    className="text-blue-500 hover:text-blue-700"
-                                                    target="_blank"
-                                                    rel="noopener noreferrer"
-                                                />
-                                            ),
-                                            pre: ({ node, ...props }) => (
-                                                <div className="overflow-auto  max-w-[18rem] w-full text-white my-2 bg-[#121212] p-2 rounded-lg">
-                                                    <pre {...props} />
-                                                </div>
-                                            ),
-                                            code: ({ node, ...props }) => (
-                                                <code className="bg-[#121212] text-white rounded-lg p-1 w-full" {...props} />
-                                            ),
-                                            ul: ({ node, ...props }) => (
-                                                <ul className="md:pl-10 leading-8 list-disc" {...props} />
-                                            ),
-                                            ol: ({ node, ...props }) => (
-                                                <ol className="md:pl-10 leading-8 list-decimal" {...props} />
-                                            ),
-                                            menu: ({ node, ...props }) => (
-                                                <p className="md:pl-10 leading-8" {...props} />
-                                            ),
-                                        }}
-                                    >
-                                        {rcvdMsg.replaceAll("\\n", "\n")}
-                                    </ReactMarkdown>}
-                            </p>}
+                            <>
+                             {responseObj?.context_docs?.top_documents.length > 0 && <div className='max-w-[70%] self-start float-left text-justify '>
+                                    <h1 className='font-[600] text-sm leading-6'>Sources:</h1>
+                                    <a href={responseObj?.context_docs?.top_documents[0]?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(responseObj?.context_docs?.top_documents[0]?.source_type)} alt={responseObj?.context_docs?.top_documents[0]?.source_type}/>{responseObj?.context_docs?.top_documents[0]?.semantic_identifier}</a>
+                                </div>}
+                                <p className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px]'>
+                                    {rcvdMsg === '' ? <MoreHorizontal className='m-auto animate-pulse' /> :
+                                        <ReactMarkdown
+                                            className='w-full'
+                                            components={{
+                                                a: ({ node, ...props }) => (
+                                                    <a
+                                                        {...props}
+                                                        className="text-blue-500 hover:text-blue-700"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    />
+                                                ),
+                                                pre: ({ node, ...props }) => (
+                                                    <div className="overflow-auto  max-w-[18rem] w-full text-white my-2 bg-[#121212] p-2 rounded-lg">
+                                                        <pre {...props} />
+                                                    </div>
+                                                ),
+                                                code: ({ node, ...props }) => (
+                                                    <code className="bg-[#121212] text-white rounded-lg p-1 w-full" {...props} />
+                                                ),
+                                                ul: ({ node, ...props }) => (
+                                                    <ul className="md:pl-10 leading-8 list-disc" {...props} />
+                                                ),
+                                                ol: ({ node, ...props }) => (
+                                                    <ol className="md:pl-10 leading-8 list-decimal" {...props} />
+                                                ),
+                                                menu: ({ node, ...props }) => (
+                                                    <p className="md:pl-10 leading-8" {...props} />
+                                                ),
+                                            }}
+                                        >
+                                            {rcvdMsg.replaceAll("\\n", "\n")}
+                                        </ReactMarkdown>}
+                                </p>
+                               
+                            </>
+                            }
 
                         {chatMsg.map((msg, idx) => msg.id === 'user' ?
                             <p key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.message}</p>

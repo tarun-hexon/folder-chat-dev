@@ -9,7 +9,7 @@ import gitIcon from '../../../public/assets/Danswer-github-B.svg';
 import fileIcon from '../../../public/assets/Danswer-doc-B.svg';
 import check from '../../../public/assets/check-circle.svg';
 import { Dialog, DialogTrigger, DialogContent } from '../../../components/ui/dialog';
-
+import { iconSelector } from '../../../config/constants'
 import { timeAgo } from '../../../config/time';
 import {
     Table,
@@ -28,6 +28,7 @@ const Indexing = () => {
     const [tableData, setTableData] = useState([]);
     const [ccPairId, setCcPairId] = useState(null);
     const [open, setOpen] = useState(ccPairId !== null);
+
     async function indexingStatus(){
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
@@ -105,7 +106,7 @@ const Indexing = () => {
                                     <TableRow key={item?.cc_pair_id} className='border-b hover:cursor-pointer hover:bg-[#eaeaea]' onClick={()=> dialogTrgr(item?.cc_pair_id)}>
                                         
                                             <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1 ">
-                                                <Image src={iconSelectore(item?.connector?.source)} alt={item?.connector?.source} />{item?.name}
+                                                <Image src={iconSelector(item?.connector?.source)} alt={item?.connector?.source} />{item?.name}
                                             </TableCell>
                                             <TableCell className=''>
                                                 <div className={`flex justify-center items-center gap-1 ${statusBackGround(item?.latest_index_attempt?.status)}`}>

@@ -13,6 +13,7 @@ export const fileNameAtom = atom('');
 export const openMenuAtom = atom(false);
 export const advanceItemAtom = atom('advance');
 export const showAdvanceAtom = atom(false);
+export const supabaseUserDataAtom = atom(null)
 export const selectOptionAtom = atom([
     {
         name:'option_1',
