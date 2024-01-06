@@ -33,8 +33,10 @@ const Indexing = () => {
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
             const json = await data.json();
+            // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
+            // console.log(isId)
             setTableData(json);
-            console.log(tableData);
+            console.log(json);
         } catch (error) {
             console.log(error)
         }

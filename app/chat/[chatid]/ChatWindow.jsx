@@ -1,23 +1,24 @@
 'use client'
 import React, { useEffect, useState, useRef } from 'react'
-import { Input } from '../../components/ui/input'
-import sendIcon from '../../public/assets/send.svg'
-import editIcon from '../../public/assets/edit-2.svg'
-import Logo from "../../public/assets/Logo.svg"
-import shareIcon from '../../public/assets/Navbar_Share.svg'
-import openDocIcon from '../../public/assets/Navbar_OpenDoc.svg'
-import xls from '../../public/assets/xls.svg'
-import pdf from '../../public/assets/pdf.svg'
-import doc from '../../public/assets/doc.svg'
+import { Input } from '../../../components/ui/input'
+import sendIcon from '../../../public/assets/send.svg'
+import editIcon from '../../../public/assets/edit-2.svg'
+import Logo from "../../../public/assets/Logo.svg"
+import shareIcon from '../../../public/assets/Navbar_Share.svg'
+import openDocIcon from '../../../public/assets/Navbar_OpenDoc.svg'
+import xls from '../../../public/assets/xls.svg'
+import pdf from '../../../public/assets/pdf.svg'
+import doc from '../../../public/assets/doc.svg'
 import Image from 'next/image'
-import { iconSelector } from '../../config/constants'
-
+import { iconSelector } from '../../../config/constants'
+import { Folder } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { fileNameAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom } from '../store'
+import { fileNameAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom } from '../../store'
 import ReactMarkdown from "react-markdown";
-
+import supabase from '../../../config/supabse'
 import { MoreHorizontal } from 'lucide-react';
-import { useToast } from '../../components/ui/use-toast'
+import { useToast } from '../../../components/ui/use-toast'
+import { NewFolder } from './(dashboard)'
 
 
 const ChatWindow = () => {
@@ -29,6 +30,8 @@ const ChatWindow = () => {
     const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [folder, setFolder] = useAtom(folderAtom);
+    const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
+    const [open, setOpen] = useState(false)
     const [rcvdMsg, setRcvdMsg] = useState('');
     const textareaRef = useRef(null);
     const [responseObj, setResponseObj] = useState(null)
@@ -38,6 +41,10 @@ const ChatWindow = () => {
     const [chatSessionId, setChatSessionId] = useState(37);
     const [chatMsg, setChatMsg] = useState([]);
     const [parentMessageId, setParentMessageId] = useState(null);
+
+    const current_url = window.location.href;
+    const chat_id = current_url.split("/chat/")[1];
+
     const { toast } = useToast()
 
     function iconName(file) {
@@ -73,7 +80,7 @@ const ChatWindow = () => {
     }
     async function sendMsg(data) {
 
-        if (data === '') return null;
+        if (data && data.trim() === '') return null;
 
         if (rcvdMsg !== '') {
 
@@ -107,9 +114,13 @@ const ChatWindow = () => {
     };
 
     const resizeTextarea = () => {
-        const { current } = textareaRef;
-        current.style.height = "auto";
-        current.style.height = `${current.scrollHeight}px`;
+        if(folder.length){
+            const { current } = textareaRef;
+            current.style.height = "auto";
+            current.style.height = `${current.scrollHeight}px`;
+        }else{
+            return 
+        }
     };
 
     function resize() {
@@ -186,7 +197,6 @@ const ChatWindow = () => {
             const response = await Promise.resolve(completedChunks);
               
             if (response.length > 0) {
-                
                 for (const obj of response) {
                     if (obj.answer_piece) {
                         setRcvdMsg(prev => prev + obj.answer_piece);
@@ -250,6 +260,23 @@ const ChatWindow = () => {
         }
     };
 
+    async function getChatHistory(id){
+        try {
+            const { data, error } = await supabase
+                .from('chats')
+                .select('chats')
+                .eq('session_id', id);
+            if(data){
+                const msgs = JSON.parse(data[0].chats)
+                setChatMsg(msgs.reverse())
+                console.log(JSON.parse(data[0].chats))
+            }else{
+                throw error
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    }
     useEffect(() => {
         resizeTextarea();
        
@@ -257,9 +284,17 @@ const ChatWindow = () => {
 
     useEffect(() => {
         setShowAdvance(false);
-        setChatMsgs(currentFol);
-
-    }, [folder])
+        setChatMsgs(currentFol)
+        if(chat_id === 'new'){
+            setChatSessionId(null);
+        }else{
+            getChatHistory(chat_id)
+            setChatSessionId(chat_id);
+        }
+        console.log(chat_id);
+        
+        
+    }, [chat_id])
 
 
     return (
@@ -308,8 +343,16 @@ const ChatWindow = () => {
                     </div>
                 </div>
             </div>
+            {folder.length === 0 ? 
+                <div className='border w-full h-full flex flex-col justify-center items-center gap-4'>
+                    <Folder color='#14B8A6' size={'3rem'} className='block'/>
+                    <p className='text-[16px] leading-5 font-[400]'><span className='font-[500] hover:underline hover:cursor-pointer' onClick={()=> setOpen(true)}>Create</span> an Folder First Before Start Chating...</p>
+                    {open && <NewFolder setFolderAdded={setFolderAdded} openMenu={open} setOpenMenu={setOpen}/>}
+                </div>
+                :
             <div className='w-[70%] h-[90%] rounded-[6px] flex flex-col justify-between box-border'  >
-                {chatMsg.length == 0 ?
+                {
+                chatMsg.length == 0 ?
                     <div>
                         <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>The chat is empty</p>
                         <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Ask your document a question using message panel ...</p>
@@ -362,8 +405,8 @@ const ChatWindow = () => {
                             </>
                             }
 
-                        {chatMsg.map((msg, idx) => msg.id === 'user' ?
-                            <p key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.message}</p>
+                        {chatMsg.map((msg, idx) => msg.user ?
+                            <p key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.user}</p>
                             :
                             <p key={idx} className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px]'>{
                                 <ReactMarkdown
@@ -396,7 +439,7 @@ const ChatWindow = () => {
                                         ),
                                     }}
                                 >
-                                    {msg.message.replaceAll("\\n", "\n")}
+                                    {msg.bot.replaceAll("\\n", "\n")}
                                 </ReactMarkdown>
                             }</p>
                         )}
@@ -439,7 +482,7 @@ const ChatWindow = () => {
 
                     </div>
                 </div>
-            </div>
+            </div>}
         </div>
     )
 }

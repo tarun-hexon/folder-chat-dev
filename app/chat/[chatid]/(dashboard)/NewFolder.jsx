@@ -7,29 +7,29 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "../../../components/ui/dialog";
+} from "../../../../components/ui/dialog";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "../../../components/ui/select"
-import { Input } from "../../../components/ui/input";
-import { Label } from "../../../components/ui/label";
-import { Button } from "../../../components/ui/button";
-import plus from '../../../public/assets/plus - light.svg'
+} from "../../../../components/ui/select"
+import { Input } from "../../../../components/ui/input";
+import { Label } from "../../../../components/ui/label";
+import { Button } from "../../../../components/ui/button";
+import plus from '../../../../public/assets/plus - light.svg'
 import Image from 'next/image';
 import { useAtom } from 'jotai';
-import { folderAtom, sessionAtom } from '../../store';
+import { folderAtom, sessionAtom } from '../../../store';
 import { Folder } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { isUserExist } from '../../../config/lib';
-import supabase from '../../../config/supabse';
+import { isUserExist } from '../../../../config/lib';
+import supabase from '../../../../config/supabse';
 
-const NewFolder = ( {setFolderAdded}) => {
+const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     const [folder, setFolder] = useAtom(folderAtom);
-    const [open, setOpen] = useState(false);
+    const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
     const [session, setSession] = useAtom(sessionAtom)
     const id = uuidv4()
@@ -57,13 +57,13 @@ const NewFolder = ( {setFolderAdded}) => {
 
     async function createFolder(folderData){
         try {
-            const userID = await isUserExist('users', 'id', 'email',session.user.email);
-            const wkID = await isUserExist('workspaces', 'id', 'created_by',userID[0].id);
+            
+            const wkID = await isUserExist('workspaces', 'id', 'created_by',session.user.id);
             
             const { data, error } = await supabase
                 .from('folders')
                 .insert([
-                    { workspace_id: wkID[0].id, user_id: userID[0].id, name:folderData.title, description:folderData.description, function:folderData.function, is_active:true, chat_enabled:true},
+                    { workspace_id: wkID[0].id, user_id: session.user.id, name:folderData.title, description:folderData.description, function:folderData.function, is_active:true, chat_enabled:true},
                 ])
                 .select();
                 if(data){
@@ -81,19 +81,21 @@ const NewFolder = ( {setFolderAdded}) => {
 
     return (
         <Dialog open={open} onOpenChange={() => {
-            setOpen(!open); setInputError(false); setFol({
+            setOpen(!open); 
+            setInputError(false); setFol({
                 id:id,
                 title: '',
                 description: '',
                 function: 'General',
                 files: []
-            })
+            });
+            setOpenMenu && setOpenMenu(false)
         }}>
             <DialogTrigger className='w-full'>
-                <div variant={'outline'} className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-between p-2 px-4 rounded-md hover:bg-[#DEEAEA] hover:text-black'>
+                {!openMenu && <div variant={'outline'} className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-between p-2 px-4 rounded-md hover:bg-[#DEEAEA] hover:text-black'>
                     New Folder
                     <Image src={plus} alt={'add'} className='w-4 h-4' />
-                </div>
+                </div>}
             </DialogTrigger>
 
             <DialogContent>

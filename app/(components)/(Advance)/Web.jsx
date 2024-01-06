@@ -13,6 +13,8 @@ import trash from '../../../public/assets/trash-2.svg';
 import { Label } from '../../../components/ui/label';
 import { useToast } from '../../../components/ui/use-toast';
 import { deleteConnectorFromTable, fetchAllConnector } from '../../../lib/helpers';
+import { useAtom } from 'jotai';
+import { sessionAtom } from '../../store';
 
 const Web = () => {
 
@@ -20,7 +22,8 @@ const Web = () => {
     const [webList, setWebList] = useState([]);
     const [connectorId, setConnectorId] = useState(null);
     const [credentialID, setCredentialID] = useState(null);
-    const [baseURL, setBaseURL] = useState('')
+    const [baseURL, setBaseURL] = useState('');
+    const [session, setSession] = useAtom(sessionAtom)
     const { toast } = useToast();
 
     async function addList(url) {
@@ -77,7 +80,9 @@ const Web = () => {
                 },
                 body: JSON.stringify(
                     {
-                        "credential_json": {},
+                        "credential_json": {
+                            "id":"12"
+                        },
                         "admin_public": false
                     }
                 )
@@ -100,7 +105,7 @@ const Web = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({'name':url})
+                body: JSON.stringify({'name':url, "id":"12"})
             });
             const json = await data.json();
             await getAllExistingConnector()

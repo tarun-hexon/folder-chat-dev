@@ -8,6 +8,7 @@ export const isPostNameCompleteAtom = atom(false);
 export const isPostUserCompleteAtom = atom(false);
 export const allowSessionAtom = atom(false);
 export const folderAtom = atom([]);
+export const folderAddedAtom = atom(false);
 export const folderIdAtom = atom('');
 export const fileNameAtom = atom('');
 export const openMenuAtom = atom(false);

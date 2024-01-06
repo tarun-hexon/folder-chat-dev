@@ -1,17 +1,17 @@
 'use client'
 import React, { useState } from 'react'
-import { DialogContent } from '../../../components/ui/dialog';
+import { DialogContent } from '../../../../components/ui/dialog';
 import { Mail, MessageSquare, Plus, PlusCircle, UserPlus, Users} from "lucide-react"
 import { useAtom } from 'jotai';
-import { sessionAtom } from '../../store';
+import { sessionAtom } from '../../../store';
 import Image from 'next/image';
-import { DropdownMenuSeparator } from "../../../components/ui/dropdown-menu";
-import { Popover, PopoverContent, PopoverTrigger } from "../../../components/ui/popover"
+import { DropdownMenuSeparator } from "../../../../components/ui/dropdown-menu";
+import { Popover, PopoverContent, PopoverTrigger } from "../../../../components/ui/popover"
 import { MyProfile, Notification, InnerSetting, Plans } from './index';
-import { setting } from '../../../config/constants';
-import rightArrow from '../../../public/assets/secondary icon.svg';
-import { Button } from '../../../components/ui/button';
-import { useToast } from '../../../components/ui/use-toast';
+import { setting } from '../../../../config/constants';
+import rightArrow from '../../../../public/assets/secondary icon.svg';
+import { Button } from '../../../../components/ui/button';
+import { useToast } from '../../../../components/ui/use-toast';
 const Setting = () => {
     const [session, setSession] = useAtom(sessionAtom);
     const { toast } = useToast()

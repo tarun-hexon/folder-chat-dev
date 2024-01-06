@@ -28,13 +28,9 @@ const Intial = () => {
     }
   };
 
-async function getUserData(){
-  
-}
 
   useEffect(() => {
     getSess();
-    console.log('hi')
   }, [])
 
 

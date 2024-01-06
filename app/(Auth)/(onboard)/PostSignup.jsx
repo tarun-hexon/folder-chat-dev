@@ -34,7 +34,7 @@ const PostSignup = () => {
                 });
         
         try {
-            await updateUsersTable(name);
+            //await updateUsersTable(name);
             const { user, error } = await supabase.auth.updateUser({
                 data: { full_name: name }
             });
@@ -55,50 +55,50 @@ const PostSignup = () => {
 
     };
 
-    async function checkIfUserExist(){
-        try {
-            const id = await isUserExist('users', 'email', 'email', session.user.email);
-            if(id.length > 0){
-                setUserExist(id[0].email)
-            }else{
-                setUserExist(false)
-            }
-            console.log(id)
-        } catch (error) {
-            console.log(error)
-        }
-    };
+    // async function checkIfUserExist(){
+    //     try {
+    //         const id = await isUserExist('users', 'email', 'email', session.user.email);
+    //         if(id.length > 0){
+    //             setUserExist(id[0].email)
+    //         }else{
+    //             setUserExist(false)
+    //         }
+    //         console.log(id)
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // };
 
-    async function updateUsersTable(name){
-        if(userExist == false){
-            try {
-                const { data, error } = await supabase
-                .from('users')
-                .insert([
-                { name: name, email: session.user.email, email_verified: true },
-                ])
-                .select()
-                console.log(data)
-            } catch (error) {
-                console.log(error)
-            }
-        }else{
-            try {
+    // async function updateUsersTable(name){
+    //     if(userExist == false){
+    //         try {
+    //             const { data, error } = await supabase
+    //             .from('users')
+    //             .insert([
+    //             { name: name, email: session.user.email, email_verified: true },
+    //             ])
+    //             .select()
+    //             console.log(data)
+    //         } catch (error) {
+    //             console.log(error)
+    //         }
+    //     }else{
+    //         try {
 
-            const { data, error } = await supabase
-            .from('users')
-            .update({ name: name })
-            .eq('email', userExist)
-            .select()
+    //         const { data, error } = await supabase
+    //         .from('users')
+    //         .update({ name: name })
+    //         .eq('email', userExist)
+    //         .select()
 
-            console.log(data)
-            } catch (error) {
-                console.log(error)
-            }
-        }
-    }
+    //         console.log(data)
+    //         } catch (error) {
+    //             console.log(error)
+    //         }
+    //     }
+    // }
     useEffect(() => {
-        checkIfUserExist()
+        // checkIfUserExist()
         if (session?.user?.user_metadata?.onBoarding) {
             router.push('/chat')
         }

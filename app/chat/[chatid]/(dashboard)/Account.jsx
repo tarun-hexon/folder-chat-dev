@@ -1,17 +1,17 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../components/ui/accordion";
-import threeDot from '../../../public/assets/more-horizontal.svg'
-import supabase from '../../../config/supabse';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../../components/ui/accordion";
+import threeDot from '../../../../public/assets/more-horizontal.svg'
+import supabase from '../../../../config/supabse';
 import Image from 'next/image';
 import { useAtom } from 'jotai'
-import { sessionAtom, isPostSignUpCompleteAtom, isPostUserCompleteAtom, supabaseUserDataAtom } from '../../store';
+import { sessionAtom, isPostSignUpCompleteAtom, isPostUserCompleteAtom, supabaseUserDataAtom } from '../../../store';
 import { useRouter } from 'next/navigation';
-import { sidebarOptions } from '../../../config/constants';
-import { Dialog, DialogTrigger } from '../../../components/ui/dialog';
-import { Setting } from '../(settings)/index'
+import { sidebarOptions } from '../../../../config/constants';
+import { Dialog, DialogTrigger } from '../../../../components/ui/dialog';
+import { Setting } from '../(settings)'
 import { LogOut } from 'lucide-react';
-import { isUserExist } from '../../../config/lib';
+import { isUserExist } from '../../../../config/lib';
 
 const Account = () => {
     const [userSession, setUserSession] = useAtom(sessionAtom);
@@ -38,7 +38,7 @@ const Account = () => {
             let { data: workspaces, error } = await supabase
             .from('workspaces')
             .select('name')
-            .eq('created_by', data[0].id);
+            .eq('created_by', userSession.user.id);
             if(error){
                 throw error
             }

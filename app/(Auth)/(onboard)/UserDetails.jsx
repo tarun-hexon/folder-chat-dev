@@ -83,11 +83,11 @@ const WorkPlace = () => {
 
   async function createWorkPlace(name){
     try {
-      const foreign_details = await isUserExist('users', '*', 'email', session.user.email);
+      
       const { data, error } = await supabase
       .from('workspaces')
       .insert([
-        { name: name, is_active: true, created_by:foreign_details[0].id, subscription_active:false },
+        { name: name, is_active: true, created_by:session.user.id, subscription_active:false },
       ])
       .select();
       if(data){
@@ -123,9 +123,9 @@ const UserDetails = () => {
   const [isPostUserComplete, setIsPostUserComplete] = useAtom(isPostUserCompleteAtom);
   const [isPostNameComplete, setIsPostNameComplete] = useAtom(isPostNameCompleteAtom);
   const [selectValue, setSelectValue] = useAtom(selectOptionAtom);
-  const [existingUser, setExistingUser] = useState(null);
+
   const [session, setSession] = useAtom(sessionAtom);
-  const [userExist, setUserExist] = useState(false);
+
   const {toast} = useToast();
 
 
@@ -133,16 +133,15 @@ const UserDetails = () => {
     
     
     try {
-        const foreign_details = await isUserExist('users', '*', 'email', session.user.email);
-        const checkIfUser = await isUserExistByFK('profile', 'id', ('user_id', foreign_details[0].id));
-        setExistingUser(foreign_details[0]);
-        console.log(checkIfUser, foreign_details)
+
+        const checkIfUser = await isUserExist('profile', 'id', 'user_id', session.user.id);
+        console.log(checkIfUser)
         if(checkIfUser.length === 0){
           const { data, error } = await supabase
         .from('profile')
         .insert([
         { is_for_personal: session?.user?.user_metadata?.is_for_personal, 
-          user_id: foreign_details[0].id,
+          user_id: session?.user?.id,
           department:selectValue[0].value,
           designation:selectValue[1].value,
           purpose:selectValue[3].value
@@ -158,7 +157,7 @@ const UserDetails = () => {
         .from('profile')
         .update([
         { is_for_personal: session?.user?.user_metadata?.is_for_personal, 
-          user_id: foreign_details[0].id,
+          user_id: session.user.id,
           department:selectValue[0].value,
           designation:selectValue[1].value,
           purpose:selectValue[3].value
@@ -176,23 +175,6 @@ const UserDetails = () => {
     }
 };
 
-async function isUserExistByFK(fromTable, selectParam, data){
-    
-  try {
-    let { data: users, error } = await supabase
-    .from(fromTable)
-    .select(selectParam)
-    .eq('user_id', data);
-    
-    if(error){
-      throw error
-    }
-    return users
-  } catch (error) {
-    console.log(error)
-  }
-
-}
   async function submitOption(){
     const search = selectValue.filter(item => item.value === '');
     if(search.length === 0){
@@ -209,9 +191,7 @@ async function isUserExistByFK(fromTable, selectParam, data){
     }
   };
 
-useEffect(()=> {
-  console.log(selectValue)
-}, [selectValue])
+
   return (
     <>
     <div className={`flex flex-col w-full gap-10 items-center box-border ${darkMode ? '' : 'text-white'}`}>
