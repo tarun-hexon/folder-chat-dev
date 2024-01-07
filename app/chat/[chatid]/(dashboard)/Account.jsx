@@ -34,7 +34,7 @@ const Account = () => {
     };
     async function getInfo(){
         try {
-            const data = await isUserExist('users', '*', 'email', userSession.user.email)
+            
             let { data: workspaces, error } = await supabase
             .from('workspaces')
             .select('name')

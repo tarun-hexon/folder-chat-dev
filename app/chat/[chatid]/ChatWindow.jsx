@@ -13,20 +13,21 @@ import Image from 'next/image'
 import { iconSelector } from '../../../config/constants'
 import { Folder } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { fileNameAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom } from '../../store'
+import { chatHistoryAtom, fileNameAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom } from '../../store'
 import ReactMarkdown from "react-markdown";
 import supabase from '../../../config/supabse'
 import { MoreHorizontal } from 'lucide-react';
 import { useToast } from '../../../components/ui/use-toast'
 import { NewFolder } from './(dashboard)'
-
+import { useRouter } from 'next/navigation'
+import { getSess } from '../../../lib/helpers'
 
 const ChatWindow = () => {
 
 
     const [session, setSession] = useAtom(sessionAtom);
     const [userMsg, setUserMsg] = useState('');
-    const [docName, setDocName] = useState('');
+    const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom);
     const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [folder, setFolder] = useAtom(folderAtom);
@@ -35,16 +36,15 @@ const ChatWindow = () => {
     const [rcvdMsg, setRcvdMsg] = useState('');
     const textareaRef = useRef(null);
     const [responseObj, setResponseObj] = useState(null)
-    const [chatMsgs, setChatMsgs] = useState(folder.filter(fol => fol.id === folderId));
-    const currentFol = folder.filter(fol => fol.id === folderId);
     const [msgLoader, setMsgLoader] = useState(false);
-    const [chatSessionId, setChatSessionId] = useState(37);
+    const [chatSessionId, setChatSessionId] = useState(null);
     const [chatMsg, setChatMsg] = useState([]);
     const [parentMessageId, setParentMessageId] = useState(null);
-
+    const [chatTitle, setChatTitle] = useState('');
     const current_url = window.location.href;
-    const chat_id = current_url.split("/chat/")[1];
 
+    const chat_id = current_url.split("/chat/")[1];
+    const router = useRouter()
     const { toast } = useToast()
 
     function iconName(file) {
@@ -57,7 +57,7 @@ const ChatWindow = () => {
         }
     };
 
-    async function getSessionId(userMsgdata){
+    async function createChatSessionId(userMsgdata){
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/create-chat-session`, {
                 method:'POST',
@@ -70,8 +70,10 @@ const ChatWindow = () => {
             });
             const json = await data.json();
             
-            sendChatMsgs(userMsgdata, json.chat_session_id, parentMessageId)
-            setChatSessionId(json?.chat_session_id)
+            await sendChatMsgs(userMsgdata, json.chat_session_id, parentMessageId)
+            setChatSessionId(json?.chat_session_id);
+            await insertChatInDB([userMsgdata], chatTitle, json?.chat_session_id, localStorage.getItem('folderId'))
+            window.history.replaceState('', '', `/chat/${json.chat_session_id}`)
 
         } catch (error) {
             setMsgLoader(false)
@@ -83,19 +85,29 @@ const ChatWindow = () => {
         if (data && data.trim() === '') return null;
 
         if (rcvdMsg !== '') {
-
+            const msgObj =[
+                {
+                    'bot': rcvdMsg
+                },
+                {
+                    'user':data
+                }
+            ]
+            await updateChats(chatHistory.chats, msgObj, 'both')
             setChatMsg((prev) => [{
-                id: 'bot',
-                message: rcvdMsg
+                bot: rcvdMsg
             }, ...prev]);
+            
             setMsgLoader(false);
             setRcvdMsg('');
             setResponseObj(null)
 
+        }else{
+            await updateChats(chatHistory.chats, data, 'user')
         }
         setChatMsg((prev) => [{
-            id: 'user',
-            message: data
+            
+            user: data
         }, ...prev]);
 
 
@@ -106,12 +118,110 @@ const ChatWindow = () => {
         }, 1000);
 
         if(chatSessionId === null){
-            await getSessionId(data);
+            await createChatSessionId(data);
+
         }else{
+            // await updateChats(chatHistory.chats, data, 'user')
             await sendChatMsgs(data, chatSessionId, parentMessageId)
         }
 
     };
+
+    async function createChatTitle(session_id, name, userMessage){
+        try {
+            const data = await fetch('https://danswer.folder.chat/api/chat/rename-chat-session', {
+                method:'PUT',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body:JSON.stringify({
+                    "chat_session_id": session_id,
+                    "name": name,
+                    "first_message": userMessage
+                })
+            });
+            const json = await data.json();
+            // console.log(json.new_name);
+            await updateTitle(json.new_name)
+            setChatTitle(json.new_name)
+        } catch (error) {
+            console.log(error)
+        }
+    }
+    async function insertChatInDB(msgData, chatTitle, chatID, folderID){
+
+        try {
+            const id = await getSess();
+            const { data, error } = await supabase
+                .from('chats')
+                .insert({ 
+                    folder_id: folderID, 
+                    user_id: id,
+                    chats:JSON.stringify([{'user':msgData}]),
+                    chat_title:chatTitle,
+                    is_active:true,
+                    session_id:chatID,
+                    sharable:false
+                });
+                if(error){
+                    throw error
+                }
+                
+        } catch (error) {
+            console.log(error)
+        }            
+    };
+    async function updateTitle(value){
+        try {
+            const id = await getSess();
+            const { data, error } = await supabase
+                .from('chats')
+                .update({ chat_title: value })
+                .eq('session_id', chatSessionId)
+                .select()
+            if(data.length){
+                setChatHistory(data[0])
+            }else if(error){
+                throw error
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    };
+
+
+    async function updateChats(oldChat, value, type){
+        
+        var newMsg = []
+        if(type === 'both'){
+            newMsg = [...JSON.parse(oldChat), ...value]
+        }else if(type === 'user'){
+            if(oldChat){
+                newMsg = [...JSON.parse(oldChat), {"user":value}]
+            }else{
+                newMsg = [{"user":value}]
+            }
+        }
+        
+        try {
+
+            const { data, error } = await supabase
+                .from('chats')
+                .update({ chats: JSON.stringify(newMsg) })
+                .eq('session_id', chatSessionId)
+                .select()
+            if(data.length){
+                console.log('updated res',data)
+                setChatHistory(data[0])
+            }else if(error){
+                throw error
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    };
+
+
 
     const resizeTextarea = () => {
         if(folder.length){
@@ -162,7 +272,10 @@ const ChatWindow = () => {
     
             await handleStream(
                 sendMessageResponse
-            )
+            ); 
+            if(chatTitle.length === 0){
+                await createChatTitle(chatID, null, userMsg)
+            }
         } catch (error) {
             console.log(error)
             setMsgLoader(false)
@@ -197,11 +310,14 @@ const ChatWindow = () => {
             const response = await Promise.resolve(completedChunks);
               
             if (response.length > 0) {
+                
                 for (const obj of response) {
                     if (obj.answer_piece) {
+                        
                         setRcvdMsg(prev => prev + obj.answer_piece);
                     }else if(obj.parent_message){
-                        setResponseObj(obj)
+                        setResponseObj(obj);
+                        
                     }
                     else if(obj.parent_message && parentMessageId === null){
                         setParentMessageId(obj.parent_message)
@@ -264,19 +380,26 @@ const ChatWindow = () => {
         try {
             const { data, error } = await supabase
                 .from('chats')
-                .select('chats')
+                .select('*')
                 .eq('session_id', id);
-            if(data){
+            if(data.length){
+                console.log('rcvd msg',data)
                 const msgs = JSON.parse(data[0].chats)
-                setChatMsg(msgs.reverse())
-                console.log(JSON.parse(data[0].chats))
-            }else{
-                throw error
+                
+                setChatMsg(msgs.reverse());
+                setChatHistory(data[0])
+                setChatTitle(data[0].chat_title)
+                // console.log(data)
+            }else if(data.length === 0){
+                router.push('/chat')
+                throw new Error('Chat ID is Invalid')
             }
         } catch (error) {
             console.log(error)
         }
-    }
+    };
+
+
     useEffect(() => {
         resizeTextarea();
        
@@ -284,17 +407,19 @@ const ChatWindow = () => {
 
     useEffect(() => {
         setShowAdvance(false);
-        setChatMsgs(currentFol)
+        // setChatMsgs(currentFol)
         if(chat_id === 'new'){
             setChatSessionId(null);
         }else{
             getChatHistory(chat_id)
             setChatSessionId(chat_id);
+
         }
-        console.log(chat_id);
+        // console.log(chat_id);
         
         
-    }, [chat_id])
+    }, [chat_id]);
+
 
 
     return (
@@ -344,15 +469,15 @@ const ChatWindow = () => {
                 </div>
             </div>
             {folder.length === 0 ? 
-                <div className='border w-full h-full flex flex-col justify-center items-center gap-4'>
+                <div className='w-full h-full flex flex-col justify-center items-center gap-4'>
                     <Folder color='#14B8A6' size={'3rem'} className='block'/>
-                    <p className='text-[16px] leading-5 font-[400]'><span className='font-[500] hover:underline hover:cursor-pointer' onClick={()=> setOpen(true)}>Create</span> an Folder First Before Start Chating...</p>
+                    <p className='text-[16px] leading-5 font-[400]'><span className='font-[500] hover:underline hover:cursor-pointer' onClick={()=> setOpen(true)}>Create</span> a Folder First Before Start Chating...</p>
                     {open && <NewFolder setFolderAdded={setFolderAdded} openMenu={open} setOpenMenu={setOpen}/>}
                 </div>
                 :
             <div className='w-[70%] h-[90%] rounded-[6px] flex flex-col justify-between box-border'  >
                 {
-                chatMsg.length == 0 ?
+                chatMsg?.length == 0 ?
                     <div>
                         <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>The chat is empty</p>
                         <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Ask your document a question using message panel ...</p>
@@ -363,8 +488,14 @@ const ChatWindow = () => {
                         {msgLoader &&
                             <>
                              {responseObj?.context_docs?.top_documents.length > 0 && <div className='max-w-[70%] self-start float-left text-justify '>
+                                    {responseObj?.context_docs?.top_documents[0]?.source_type !== 'file' ?
+                                    <>
                                     <h1 className='font-[600] text-sm leading-6'>Sources:</h1>
-                                    <a href={responseObj?.context_docs?.top_documents[0]?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(responseObj?.context_docs?.top_documents[0]?.source_type)} alt={responseObj?.context_docs?.top_documents[0]?.source_type}/>{responseObj?.context_docs?.top_documents[0]?.semantic_identifier}</a>
+                                    <a href={responseObj?.context_docs?.top_documents[0]?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(responseObj?.context_docs?.top_documents[0]?.source_type)} alt={responseObj?.context_docs?.top_documents[0]?.source_type}/>{responseObj?.context_docs?.top_documents[0]?.semantic_identifier}</a> </>:
+                                    <>
+                                    <h1 className='font-[600] text-sm leading-6'>Sources:</h1>
+                                    <div className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-default flex gap-1'><Image src={iconSelector(responseObj?.context_docs?.top_documents[0]?.source_type)} alt={responseObj?.context_docs?.top_documents[0]?.source_type}/>{responseObj?.context_docs?.top_documents[0]?.semantic_identifier}</div> </>
+                                    }
                                 </div>}
                                 <p className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px]'>
                                     {rcvdMsg === '' ? <MoreHorizontal className='m-auto animate-pulse' /> :
@@ -398,14 +529,14 @@ const ChatWindow = () => {
                                                 ),
                                             }}
                                         >
-                                            {rcvdMsg.replaceAll("\\n", "\n")}
+                                            {rcvdMsg?.replaceAll("\\n", "\n")}
                                         </ReactMarkdown>}
                                 </p>
                                
                             </>
                             }
 
-                        {chatMsg.map((msg, idx) => msg.user ?
+                        {chatMsg?.map((msg, idx) => msg.user ?
                             <p key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.user}</p>
                             :
                             <p key={idx} className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px]'>{
@@ -439,7 +570,7 @@ const ChatWindow = () => {
                                         ),
                                     }}
                                 >
-                                    {msg.bot.replaceAll("\\n", "\n")}
+                                    {msg?.bot?.replaceAll("\\n", "\n")}
                                 </ReactMarkdown>
                             }</p>
                         )}

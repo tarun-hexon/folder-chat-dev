@@ -36,7 +36,7 @@ const Indexing = () => {
             // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
             // console.log(isId)
             setTableData(json);
-            console.log(json);
+          
         } catch (error) {
             console.log(error)
         }
