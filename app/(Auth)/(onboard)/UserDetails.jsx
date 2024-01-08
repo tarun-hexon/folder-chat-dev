@@ -17,6 +17,7 @@ import { selectOptions } from '../../../config/constants';
 import supabase from '../../../config/supabse'
 import { useToast } from '../../../components/ui/use-toast'
 import { isUserExist } from '../../../config/lib'
+import { getSess } from '../../../lib/helpers'
 
 
 const SelectCard = (props) => {
@@ -83,11 +84,11 @@ const WorkPlace = () => {
 
   async function createWorkPlace(name){
     try {
-      
+      const sess_id = await getSess()
       const { data, error } = await supabase
       .from('workspaces')
       .insert([
-        { name: name, is_active: true, created_by:session.user.id, subscription_active:false },
+        { name: name, is_active: true, created_by:sess_id, subscription_active:false },
       ])
       .select();
       if(data){

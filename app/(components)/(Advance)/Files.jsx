@@ -7,18 +7,21 @@ import check from '../../../public/assets/check-circle.svg';
 import trash from '../../../public/assets/trash-2.svg';
 import { useDropzone } from 'react-dropzone';
 import { Label } from '../../../components/ui/label';
-import { deleteConnectorFromTable, fetchAllConnector } from '../../../lib/helpers';
+import { deleteConnectorFromTable, fetchAllConnector, getSess } from '../../../lib/helpers';
 import { useAtom } from 'jotai';
 import { sessionAtom } from '../../store';
+import { Item } from '@radix-ui/react-accordion';
+import supabase from '../../../config/supabse';
 
 const Files = () => {
 
     const [files, setFiles] = useState([]);
-   
+    const [loading, setLoading] = useState(true)
     // const [connectorId, setConnectorId] = useState(null);
     // const [credentialID ,setCredentialID] = useState(null);
     // const [fileName, setFileName] = useState('');
-    const [session, setSession] = useAtom(sessionAtom)
+    const [session, setSession] = useAtom(sessionAtom);
+    const [existConnector ,setExistConnector] = useState([]);
 
     async function uploadFile(file, name) {
         try {
@@ -61,11 +64,69 @@ const Files = () => {
 
             );
             const json = await data.json();
+            if(existConnector.length === 0){
+                await insertDataInConn([json.id])
+            }else{
+                await updatetDataInConn(existConnector, json.id)
+            }
             // setConnectorId(json.id)
             // console.log(json.id)
             getCredentials(json.id, name, file)
         } catch (error) {
             console.log('error while connectorRequest :', error)
+        }
+    };
+
+    async function insertDataInConn(newData){
+               
+        const { data, error } = await supabase
+        .from('connectors')
+        .insert(
+          { 'connect_id': newData, 'user_id' : session.user.id },
+        )
+        .select()
+        // console.log(data)
+        // console.log(error)
+        setExistConnector(data[0].connect_id)
+    };
+
+    async function updatetDataInConn(exConn, newData){
+        
+        const allConn = [...exConn, newData]
+        const { data, error } = await supabase
+        .from('connectors')
+        .update(
+          { 'connect_id': allConn },
+        )
+        .eq('user_id', session.user.id)
+        .select()
+        // console.log(data)
+        // console.log(error)
+        setExistConnector(data[0].connect_id)
+    };
+
+    async function readData(){
+        try {
+            // const id = await getSess();
+            const { data, error } = await supabase
+            .from('connectors')
+            .select('connect_id')
+            .eq('user_id', session.user.id);
+            if(error){
+                throw error
+            }else{
+                if(data !== null){
+                    setExistConnector(data[0].connect_id)
+                    return data[0].connect_id
+                }else{
+                    setExistConnector([])
+                    return []
+                }
+            }
+            
+        } catch (error) {
+            setExistConnector([])
+            console.log(error)
         }
     };
 
@@ -79,7 +140,7 @@ const Files = () => {
                 },
                 body: JSON.stringify({
                     "credential_json": {},
-                    "admin_public": true
+                    "admin_public": false
                 })
             });
             const json = await data.json();
@@ -150,13 +211,22 @@ const Files = () => {
     async function getAllExistingConnector() {
         try {
             const data = await fetchAllConnector();
-            const currentConnector = data.filter(conn => conn.source === 'file');
-            if(currentConnector.length > 0){
-                setFiles(currentConnector)
+
+            //calling api bcoz soetimes local state is not updating
+            const allConID = await readData();
+
+            const currentConnector = data.filter((item)=> { if(allConID?.includes(item?.id)) return item });
+
+            const filData = currentConnector.filter((item)=> item.source === 'file');
+
+            if(filData.length > 0){
+                setFiles(filData)
             };
+            setLoading(false)
             
         } catch (error) {
             console.log(error)
+            setLoading(false)
         }
     };
 
@@ -178,8 +248,10 @@ const Files = () => {
 
 
     useEffect(()=> {
+        readData();
         getAllExistingConnector();
-        console.log(session);
+        // readData()
+        // console.log(session);
     }, [])
     return (
         <>
@@ -213,20 +285,21 @@ const Files = () => {
                         </div>
                     </div>
                 </div>
-                {files.length > 0 && <table className='w-full text-sm'>
+                <table className='w-full text-sm'>
                     <thead className='p-2'>
                         <tr className='border-b p-2'>
                             <th className="w-96 text-left p-2">File Name</th>
                             <th className='text-center'>Status</th>
                             <th className="text-center">Remove</th>
                         </tr>
-                    </thead>
+                    </thead>    
                     <tbody>
+                    {loading && <div className='w-full text-start p-2'>Loading...</div>}
                         {files.map((item, idx) => {
                             // console.log(item)
                             return (
                                 <tr className='border-b' key={idx}>
-                                    <td className="font-medium w-96 text-left p-2 py-3 ">{item?.connector_specific_config?.file_locations[0].split('/')[4]}</td>
+                                    <td className="font-medium w-96 text-left p-2 py-3 text-ellipsis break-all line-clamp-1 text-emphasis">{item?.connector_specific_config?.file_locations[0].split('/')[4]}</td>
                                     <td>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Enabled
@@ -237,7 +310,7 @@ const Files = () => {
                             )
                         })}
                     </tbody>
-                </table>}
+                </table>
             </div>
 
         </>

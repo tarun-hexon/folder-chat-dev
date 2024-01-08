@@ -1,17 +1,17 @@
 import React, { useState } from 'react'
-import { Label } from '../../../../components/ui/label'
-import { Input } from '../../../../components/ui/input'
+import { Label } from '../../../components/ui/label'
+import { Input } from '../../../components/ui/input'
 import { useAtom } from 'jotai'
-import { sessionAtom } from '../../../store'
-import { Button } from '../../../../components/ui/button'
-import { Switch } from '../../../../components/ui/switch'
-import { Dialog, DialogTrigger, DialogContent, DialogFooter } from '../../../../components/ui/dialog'
-import rightArrow from '../../../../public/assets/secondary icon.svg';
+import { sessionAtom } from '../../store'
+import { Button } from '../../../components/ui/button'
+import { Switch } from '../../../components/ui/switch'
+import { Dialog, DialogTrigger, DialogContent, DialogFooter } from '../../../components/ui/dialog'
+import rightArrow from '../../../public/assets/secondary icon.svg';
 import Image from 'next/image'
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../../../components/ui/alert-dialog'
-import eye_icon from '../../../../public/assets/eye_icon.svg'
-import supabase from '../../../../config/supabse';
-import { useToast } from '../../../../components/ui/use-toast';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../../components/ui/alert-dialog'
+import eye_icon from '../../../public/assets/eye_icon.svg'
+import supabase from '../../../config/supabse';
+import { useToast } from '../../../components/ui/use-toast';
 
 
 
@@ -55,7 +55,7 @@ const MyProfile = () => {
             if (error) {
                 throw error
             };
-            getSess();
+            // getSess();
             setPreName('');
             setNameDialogOpen(false);
             toast({
@@ -91,7 +91,7 @@ const MyProfile = () => {
                 setInputError(error.message)
                 throw error
             };
-            getSess();
+            // getSess();
             setInputError(false);
             setNewPassword('');
             toast({
@@ -152,14 +152,14 @@ const MyProfile = () => {
         }
     };
 
-    async function getSess() {
-        await supabase.auth.getSession().then(({ data: { session } }) => {
-          if (session) {
-            setSession(session);
-          }
+    // async function getSess() {
+    //     await supabase.auth.getSession().then(({ data: { session } }) => {
+    //       if (session) {
+    //         setSession(session);
+    //       }
     
-        });
-    };
+    //     });
+    // };
 
     async function signOut() {
         const { error } = await supabase.auth.signOut({ scope: 'others' });

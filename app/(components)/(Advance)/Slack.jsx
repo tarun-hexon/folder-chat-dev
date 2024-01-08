@@ -13,6 +13,8 @@ const Slack = () => {
     const [token, setToken] = useState('');
     const [value, setValue] = useState('');
     const [slackList, setSlackList] = useState([1])
+    const [loading, setLoading] = useState(true)
+
     return (
         <>
 

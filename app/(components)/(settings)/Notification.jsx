@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Switch } from '../../../../components/ui/switch'
+import { Switch } from '../../../components/ui/switch'
 const Notification = () => {
     const [switchValues, setSwitchValues] = useState({
         pushNoti: true,

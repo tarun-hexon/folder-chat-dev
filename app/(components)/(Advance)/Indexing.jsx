@@ -11,6 +11,7 @@ import check from '../../../public/assets/check-circle.svg';
 import { Dialog, DialogTrigger, DialogContent } from '../../../components/ui/dialog';
 import { iconSelector } from '../../../config/constants'
 import { timeAgo } from '../../../config/time';
+import supabase from '../../../config/supabse';
 import {
     Table,
     TableBody,
@@ -22,26 +23,43 @@ import {
   } from "../../../components/ui/table";
 import { cn } from '../../../lib/utils';
 import EditIndex from './EditIndex';
+import { useAtom } from 'jotai';
+import { sessionAtom } from '../../store';
+
   
 
 const Indexing = () => {
     const [tableData, setTableData] = useState([]);
+    const [loading, setLoading] = useState(true)
     const [ccPairId, setCcPairId] = useState(null);
     const [open, setOpen] = useState(ccPairId !== null);
-
+    const [session, setSession] = useAtom(sessionAtom)
     async function indexingStatus(){
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
             const json = await data.json();
             // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
             // console.log(isId)
-            setTableData(json);
-          
+            const allConID = await readData();
+            // console.log(allConID)
+            const filData = json.filter((item)=> { if(allConID?.includes(item?.connector?.id)) return item });
+            // console.log(filData)
+            setTableData(filData);
+            setLoading(false)
         } catch (error) {
             console.log(error)
+            setLoading(false)
         }
 
     };
+    async function readData(){
+        // const id = await getSess();
+        const { data, error } = await supabase
+        .from('connectors')
+        .select('connect_id')
+        .eq('user_id', session.user.id);
+        return (data[0].connect_id)
+      };
 
     function iconSelectore(icon){
         if(icon === "web"){
@@ -102,13 +120,14 @@ const Indexing = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody className='w-full'>
+                    {loading && <div className='w-full text-start p-2'>Loading...</div>}
                         {tableData?.map((item) => {
                             return (
                                 
                                     <TableRow key={item?.cc_pair_id} className='border-b hover:cursor-pointer hover:bg-[#eaeaea]' onClick={()=> dialogTrgr(item?.cc_pair_id)}>
                                         
                                             <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1 ">
-                                                <Image src={iconSelector(item?.connector?.source)} alt={item?.connector?.source} />{item?.name}
+                                                <Image src={iconSelector(item?.connector?.source)} alt={item?.connector?.source} /><span className='text-ellipsis break-all line-clamp-1 text-emphasis'>{item?.name}</span>
                                             </TableCell>
                                             <TableCell className=''>
                                                 <div className={`flex justify-center items-center gap-1 ${statusBackGround(item?.latest_index_attempt?.status)}`}>

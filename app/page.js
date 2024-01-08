@@ -5,6 +5,7 @@ import { sessionAtom } from './store';
 
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import { Loader2 } from 'lucide-react';
 
 export default function Home() {
 
@@ -22,6 +23,8 @@ useEffect(()=> {
 
 
   return (
-    null
+    <div className='flex w-full justify-center items-center h-screen'>
+        <Loader2 className='animate-spin' />
+      </div>
   )
 }

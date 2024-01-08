@@ -9,9 +9,12 @@ import { useToast } from '../../../components/ui/use-toast';
 import { deleteAdminCredentails, fetchAllCredentials, fetchCredentialID, generateConnectorId, addNewInstance, fetchAllConnector } from '../../../lib/helpers';
 import { Dialog, DialogTrigger, DialogContent } from '../../../components/ui/dialog';
 import EditIndex from './EditIndex';
+import supabase from '../../../config/supabse';
+import { useAtom } from 'jotai';
+import { sessionAtom } from '../../store';
 
 const GitPrs = () => {
-
+    const [session, setSession] = useAtom(sessionAtom)
     const [git_token, setGitToken] = useState('');
     const [tokenValue, setTokenValue] = useState('');
     const [repos, setRepos] = useState([]);
@@ -21,14 +24,23 @@ const GitPrs = () => {
     const [connectorId, setConnectorId] = useState(null);
     const [credentialID, setCredentialID] = useState(null);
     const [adminCredential, setAdminCredential] = useState(null);
-    const [ccPairId ,setCCPairId] = useState(null)
+    const [existingCredentials, setExistingCredentials] = useState([])
+    const [ccPairId ,setCCPairId] = useState(null);
+    const [loading, setLoading] = useState(true)
+
     const { toast } = useToast();
 
 
     async function getAdminCredentials(){
         try {
             const json = await fetchAllCredentials();
-            const currentToken = json.filter(res => res.credential_json.github_access_token !== undefined)
+
+            const allCred = await readData();
+            
+            const currentUserToken = json.filter((res) => { if(allCred.includes(res?.id)) return res});
+            
+            const currentToken = currentUserToken.filter(res => res.credential_json.github_access_token !== undefined);
+            
             if(currentToken.length > 0){
                 setAdminCredential(currentToken[0]);
                 setTokenStatus(true)
@@ -42,19 +54,24 @@ const GitPrs = () => {
     }
 
 
-    
-
     async function getCredentials(token) {
         try {
             const body = {
                 "credential_json": {
                     "github_access_token": token
                 },
-                "admin_public": true
+                "admin_public": false
             };
-            const data = await fetchCredentialID(body)
+            const data = await fetchCredentialID(body);
+            
+            if(existingCredentials.length === 0){
+                
+                await insertDataInCred([data])
+            }else{
+                await updatetDataInConn(existingCredentials, data)
+            }
             await getAdminCredentials()
-            setCredentialID(data.id);
+            setCredentialID(data);
             setTokenStatus(true)
         } catch (error) {
             console.log('error while getting credentails:', error)
@@ -95,7 +112,7 @@ const GitPrs = () => {
                     description:json.detail
                 })
             }
-            console.log(json.id)
+            // console.log(json.id)
             setConnectorId(json.id);
             addNewRepo(json.id, adminCredential.id, full_name);
 
@@ -110,7 +127,7 @@ const GitPrs = () => {
             const json = await addNewInstance(conId, credId, name);
             await getAllExistingConnector();
             setTokenStatus(true)
-            console.log(json)
+            // console.log(json)
         } catch (error) {
             console.log(error)
         }
@@ -123,9 +140,11 @@ const GitPrs = () => {
             if(currentConnector.length > 0){
                 setRepos(currentConnector)
             };
-            console.log(currentConnector);
+            // console.log(currentConnector);
+            setLoading(false)
         } catch (error) {
             console.log(error)
+            setLoading(false)
         }
     }
 
@@ -194,15 +213,70 @@ const GitPrs = () => {
                 description:'Credentials Deleted !'
             })
         } catch (error) {
+            console.log(error)
             return toast({
                 variant:"destructive",
                 description:'Must Delete All Github Connector Before Delete Credentials'
             })
-            console.log(error)
         }
     };
 
+    async function insertDataInCred(newData){
+        // const id = await getSess();
+        // console.log(newData, session.user.id)
+        const { data, error } = await supabase
+        .from('credentials')
+        .insert(
+          { 'cred_ids': newData, 'user_id' : session.user.id },
+        )
+        .select()
+        // console.log(data)
+        console.log(error)
+        setExistingCredentials(data[0].cred_ids)
+    };
+
+    async function updatetDataInConn(exConn, newData){
+        // const id = await getSess();
+        const allConn = [...exConn, newData]
+        const { data, error } = await supabase
+        .from('credentials')
+        .update(
+          { 'cred_ids': allConn },
+        )
+        .eq('user_id', session.user.id)
+        .select()
+        // console.log(data)
+        console.log(error)
+        setExistingCredentials(data[0].cred_ids)
+    };
+
+    async function readData(){
+        // const id = await getSess();
+        try {
+            const { data, error } = await supabase
+            .from('credentials')
+            .select('cred_ids')
+            .eq('user_id', session.user.id);
+            // console.log(data);
+            if(error){
+                setExistingCredentials([]);
+                throw error
+            }
+            if(data[0].cred_ids === null){
+                setExistingCredentials([]);
+                return []
+            }
+            else{
+                setExistingCredentials(data[0].cred_ids);
+                return data[0].cred_ids
+            }
+        } catch (error) {
+            console.log(error);
+            return []
+        }
+    }; 
     useEffect(()=> {
+        readData();
         getAdminCredentials();
         getAllExistingConnector();
     }, [])
@@ -230,6 +304,8 @@ const GitPrs = () => {
                     }
 
                 </div>
+                {
+                tokenStatus && <>
                 <div className='self-start text-sm leading-5 flex flex-col gap-2'>
                     <h2 className='font-[600]  text-start'>Step 2: Which repositories do you want to make searchable?</h2>
                     <span className='font-[400]'>We pull the latest Pull Requests from each Repository listed below every <span className='font-[600]'>10</span> minutes</span>
@@ -245,8 +321,10 @@ const GitPrs = () => {
                         }}>Connect</Button>
                     </div>
                 </div>
+                </>
+                }
 
-                {repos.length > 0 && <table className='w-full text-sm'>
+                <table className='w-full text-sm'>
                     <thead className='p-2 w-full'>
                         <tr className='border-b p-2'>
                             <th className="text-left p-2">Repository</th>
@@ -255,12 +333,13 @@ const GitPrs = () => {
                             <th className="text-center">Remove</th>
                         </tr>
                     </thead>
+                    {loading && <div className='w-full text-start p-2'>Loading...</div>}
                     <tbody className='w-full'>
                         {repos.map((item, idx) => {
                             
                             return (
                                 <tr className='border-b hover:cursor-pointer w-full' key={item.id} onClick={()=> setCCPairId(item.id)}>
-                                    <td className="font-medium text-left justify-start p-2 py-3">{item?.connector_specific_config?.repo_owner}/{item?.connector_specific_config?.repo_name}</td>
+                                    <td className="font-medium text-left justify-start p-2 py-3 text-ellipsis break-all line-clamp-1 text-emphasis">{item?.connector_specific_config?.repo_owner}/{item?.connector_specific_config?.repo_name}</td>
                                     <td className=''>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Enabled
@@ -281,7 +360,7 @@ const GitPrs = () => {
                             )
                         })}
                     </tbody>
-                </table>}
+                </table>
                 
 
             </div>

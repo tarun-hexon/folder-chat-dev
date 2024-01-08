@@ -7,25 +7,25 @@ import {
     DialogHeader,
     DialogTitle,
     DialogTrigger,
-} from "../../../../components/ui/dialog";
+} from "../../../components/ui/dialog";
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "../../../../components/ui/select"
-import { Input } from "../../../../components/ui/input";
-import { Label } from "../../../../components/ui/label";
-import { Button } from "../../../../components/ui/button";
-import plus from '../../../../public/assets/plus - light.svg'
+} from "../../../components/ui/select"
+import { Input } from "../../../components/ui/input";
+import { Label } from "../../../components/ui/label";
+import { Button } from "../../../components/ui/button";
+import plus from '../../../public/assets/plus - light.svg'
 import Image from 'next/image';
 import { useAtom } from 'jotai';
-import { folderAtom, sessionAtom } from '../../../store';
+import { folderAtom, sessionAtom } from '../../store';
 import { Folder } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
-import { isUserExist } from '../../../../config/lib';
-import supabase from '../../../../config/supabse';
+import { isUserExist } from '../../../config/lib';
+import supabase from '../../../config/supabse';
 
 const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     const [folder, setFolder] = useAtom(folderAtom);

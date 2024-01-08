@@ -1,8 +1,6 @@
 'use client'
 import React, { useEffect, useState, useRef } from 'react'
-import { Input } from '../../../components/ui/input'
 import sendIcon from '../../../public/assets/send.svg'
-import editIcon from '../../../public/assets/edit-2.svg'
 import Logo from "../../../public/assets/Logo.svg"
 import shareIcon from '../../../public/assets/Navbar_Share.svg'
 import openDocIcon from '../../../public/assets/Navbar_OpenDoc.svg'
@@ -11,14 +9,14 @@ import pdf from '../../../public/assets/pdf.svg'
 import doc from '../../../public/assets/doc.svg'
 import Image from 'next/image'
 import { iconSelector } from '../../../config/constants'
-import { Folder } from 'lucide-react';
+import { Folder, Loader2 } from 'lucide-react';
 import { useAtom } from 'jotai'
 import { chatHistoryAtom, fileNameAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom } from '../../store'
 import ReactMarkdown from "react-markdown";
 import supabase from '../../../config/supabse'
 import { MoreHorizontal } from 'lucide-react';
 import { useToast } from '../../../components/ui/use-toast'
-import { NewFolder } from './(dashboard)'
+import { NewFolder } from '../../(components)/(dashboard)'
 import { useRouter } from 'next/navigation'
 import { getSess } from '../../../lib/helpers'
 
@@ -26,6 +24,7 @@ const ChatWindow = () => {
 
 
     const [session, setSession] = useAtom(sessionAtom);
+    const [loading, setLoading] = useState(true)
     const [userMsg, setUserMsg] = useState('');
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom);
     const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
@@ -41,21 +40,12 @@ const ChatWindow = () => {
     const [chatMsg, setChatMsg] = useState([]);
     const [parentMessageId, setParentMessageId] = useState(null);
     const [chatTitle, setChatTitle] = useState('');
+    const [textFieldDisabled, setTextFieldDisabled] = useState(false)
     const current_url = window.location.href;
 
     const chat_id = current_url.split("/chat/")[1];
-    const router = useRouter()
-    const { toast } = useToast()
-
-    function iconName(file) {
-        if (file === 'pdf') {
-            return pdf
-        } else if (file === 'xls') {
-            return xls
-        } else {
-            return doc
-        }
-    };
+    const router = useRouter();
+    const { toast } = useToast();
 
     async function createChatSessionId(userMsgdata){
         try {
@@ -83,7 +73,7 @@ const ChatWindow = () => {
     async function sendMsg(data) {
 
         if (data && data.trim() === '') return null;
-
+        setTextFieldDisabled(true)
         if (rcvdMsg !== '') {
             const msgObj =[
                 {
@@ -273,6 +263,7 @@ const ChatWindow = () => {
             await handleStream(
                 sendMessageResponse
             ); 
+            setTextFieldDisabled(false)
             if(chatTitle.length === 0){
                 await createChatTitle(chatID, null, userMsg)
             }
@@ -384,6 +375,7 @@ const ChatWindow = () => {
                 .eq('session_id', id);
             if(data.length){
                 console.log('rcvd msg',data)
+                setLoading(false)
                 const msgs = JSON.parse(data[0].chats)
                 
                 setChatMsg(msgs.reverse());
@@ -395,6 +387,7 @@ const ChatWindow = () => {
                 throw new Error('Chat ID is Invalid')
             }
         } catch (error) {
+            setLoading(false)
             console.log(error)
         }
     };
@@ -409,6 +402,7 @@ const ChatWindow = () => {
         setShowAdvance(false);
         // setChatMsgs(currentFol)
         if(chat_id === 'new'){
+            setLoading(false)
             setChatSessionId(null);
         }else{
             getChatHistory(chat_id)
@@ -424,7 +418,7 @@ const ChatWindow = () => {
 
     return (
         <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2'>
-            <div className='w-full flex justify-between px-4 py-2'>
+            <div className='w-full flex justify-between px-4 py-2 h-fit '>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
                     <Image src={Logo} alt='folder.chat'/>
                     
@@ -469,15 +463,16 @@ const ChatWindow = () => {
                 </div>
             </div>
             {folder.length === 0 ? 
-                <div className='w-full h-full flex flex-col justify-center items-center gap-4'>
+                <div className='border w-full h-full flex flex-col justify-center items-center gap-4'>
                     <Folder color='#14B8A6' size={'3rem'} className='block'/>
-                    <p className='text-[16px] leading-5 font-[400]'><span className='font-[500] hover:underline hover:cursor-pointer' onClick={()=> setOpen(true)}>Create</span> a Folder First Before Start Chating...</p>
+                    <p className='text-[16px] leading-5 font-[400]'><span className='font-[500] hover:underline hover:cursor-pointer' onClick={()=> setOpen(true)}>Create</span> an Folder First Before Start Chating...</p>
                     {open && <NewFolder setFolderAdded={setFolderAdded} openMenu={open} setOpenMenu={setOpen}/>}
                 </div>
                 :
-            <div className='w-[70%] h-[90%] rounded-[6px] flex flex-col justify-between box-border'  >
+            <div className='w-[70%] h-[88%] rounded-[6px] flex flex-col justify-between box-border '>
+                {loading && <div className='w-full p-2 h-full items-center justify-center '><Loader2 className='m-auto animate-spin'/></div>}
                 {
-                chatMsg?.length == 0 ?
+                chatMsg?.length == 0 && loading === false ?
                     <div>
                         <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>The chat is empty</p>
                         <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Ask your document a question using message panel ...</p>
@@ -494,7 +489,7 @@ const ChatWindow = () => {
                                     <a href={responseObj?.context_docs?.top_documents[0]?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(responseObj?.context_docs?.top_documents[0]?.source_type)} alt={responseObj?.context_docs?.top_documents[0]?.source_type}/>{responseObj?.context_docs?.top_documents[0]?.semantic_identifier}</a> </>:
                                     <>
                                     <h1 className='font-[600] text-sm leading-6'>Sources:</h1>
-                                    <div className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-default flex gap-1'><Image src={iconSelector(responseObj?.context_docs?.top_documents[0]?.source_type)} alt={responseObj?.context_docs?.top_documents[0]?.source_type}/>{responseObj?.context_docs?.top_documents[0]?.semantic_identifier}</div> </>
+                                    <a href={responseObj?.context_docs?.top_documents[0]?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(responseObj?.context_docs?.top_documents[0]?.source_type)} alt={responseObj?.context_docs?.top_documents[0]?.source_type}/>{responseObj?.context_docs?.top_documents[0]?.semantic_identifier}</a> </>
                                     }
                                 </div>}
                                 <p className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px]'>
@@ -582,9 +577,10 @@ const ChatWindow = () => {
                     <div className="flex bg-[#F7F7F7] w-full justify-around rounded-xl border-2 border-transparent "
                         style={{ boxShadow: '0 0 2px 0 rgb(18, 18, 18, 0.5)' }}>
 
-                        <textarea className="w-full bg-transparent outline-none self-center py-[10px] resize-none px-2 no-scrollbar max-h-[150px] min-h-[35px] "
+                        <textarea className={`w-full bg-transparent outline-none self-center py-[10px] resize-none px-2 no-scrollbar max-h-[150px] min-h-[35px] ${textFieldDisabled ? 'hover:cursor-not-allowed' : ''}`}
                             id="textarea"
                             ref={textareaRef}
+                            disabled={textFieldDisabled}
                             tabIndex={0}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {

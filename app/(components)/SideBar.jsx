@@ -3,12 +3,12 @@ import { folderOptions } from '../../config/constants';
 import Image from 'next/image';
 import threeDot from '../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
-import { Account, NewFolder } from '../chat/[chatid]/(dashboard)'
+import { Account, NewFolder } from './(dashboard)'
 import { useAtom } from 'jotai';
 import { folderAtom, fileNameAtom, openMenuAtom, showAdvanceAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../store';
 import rightArrow from '../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
-import { Pencil, Trash2, Check, X, MessageSquare } from 'lucide-react';
+import { Pencil, Trash2, Check, X, MessageSquare, Loader2 } from 'lucide-react';
 import { Advance } from './index'
 import supabase from '../../config/supabse';
 import { isUserExist } from '../../config/lib';
@@ -57,6 +57,8 @@ const FolderCard = (props) => {
             setFolderId(fol_id);
             setFileName('chat')
             router.push('/chat/new')
+        }else if(id === 'upload'){
+            setFileName('upload')
         }
         
         setPopOpen(false)
@@ -85,12 +87,12 @@ const FolderCard = (props) => {
         
     }, [chatHistory]);
 
-    // useEffect(() => {
-    //     setIsSelected(chat_id);
-    //     if(chat_id !== 'new'){
-    //         getFolderId(chat_id);
-    //     }
-    // }, [chat_id]);
+    useEffect(() => {
+        setIsSelected(chat_id);
+        if(chat_id !== 'new'){
+            getFolderId(chat_id);
+        }
+    }, [chat_id]);
 
     // useEffect(() => {
         
@@ -201,10 +203,10 @@ const SideBar = () => {
     const [session, setSession] = useAtom(sessionAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
 
-    async function getFolders() {
+    async function getFolders(ses) {
         try {
 
-            const wkID = await isUserExist('workspaces', 'id', 'created_by', session.user.id);
+            const wkID = await isUserExist('workspaces', 'id', 'created_by', ses.user.id);
             let { data: folders, error } = await supabase
                 .from('folders')
                 .select('*')
@@ -223,9 +225,8 @@ const SideBar = () => {
 
 
     useEffect(() => {
-        getFolders();
+        getFolders(session)
     }, [folderAdded]);
-
 
     return (
         <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-4 font-Inter relative h-full'>

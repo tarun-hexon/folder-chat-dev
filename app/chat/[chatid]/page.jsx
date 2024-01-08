@@ -200,7 +200,11 @@ const Chat = () => {
 
   useEffect(() => {
     getSess();
+    // console.log(userSession)
     // console.log(folder)
+    if(userSession){
+      setLoading(false)
+    }
   }, [folder]);
 
 
@@ -219,11 +223,9 @@ const Chat = () => {
 
     !loading &&
 
-    <div className='w-full flex text-center font-Inter box-border'>
+    <>
 
-      <div className={`w-[28%] min-h-screen`}>
-        <SideBar />
-      </div>
+      
       {fileName === 'upload' ?
         <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5 sticky top-0 self-start p-10 min-h-screen'>
           <div>
@@ -238,7 +240,7 @@ const Chat = () => {
               <Image src={uploadIcon} alt='upload' />
               <div>
                 <p className='font-[400] leading-6 text-[16px] opacity-[80%]'>Click to upload or drag and drop</p>
-                <p className='opacity-[50%] text-sm leading-6'>PDF, DOC, XLS</p>
+                <p className='opacity-[50%] text-sm leading-6'>PDF & TXT</p>
               </div>
             </Label>
             <div
@@ -258,7 +260,7 @@ const Chat = () => {
         </div>
       }
 
-    </div>
+    </>
   )
 }
 

@@ -1,11 +1,11 @@
 import React from 'react'
 import Image from 'next/image';
-import Plan1 from '../../../../public/assets/Plan1.svg';
-import Plan2 from '../../../../public/assets/Plan2.svg';
-import Plan3 from '../../../../public/assets/Plan3.svg';
-import checkIcon from '../../../../public/assets/Use_Checkmark.svg';
-import { plans } from '../../../../config/constants';
-import { Button } from '../../../../components/ui/button';
+import Plan1 from '../../../public/assets/Plan1.svg';
+import Plan2 from '../../../public/assets/Plan2.svg';
+import Plan3 from '../../../public/assets/Plan3.svg';
+import checkIcon from '../../../public/assets/Use_Checkmark.svg';
+import { plans } from '../../../config/constants';
+import { Button } from '../../../components/ui/button';
 const Plans = () => {
     return (
         <div className='w-full flex flex-col gap-20 py-5'>

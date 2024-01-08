@@ -93,11 +93,11 @@ export const folderOptions = [
     title:'Edit',
     icon: Edit
   },
-  // {
-  //   id:'upload',
-  //   title:'Upload New File',
-  //   icon: Upload
-  // },
+  {
+    id:'upload',
+    title:'Upload New File',
+    icon: Upload
+  },
   {
     id:"delete",
     title:'Delete',

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-
+import supabase from '../../../config/supabse';
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
 
@@ -10,18 +10,21 @@ import check from '../../../public/assets/check-circle.svg';
 import trash from '../../../public/assets/trash-2.svg';
 import { useToast } from '../../../components/ui/use-toast';
 import { fetchAllConnector, fetchAllCredentials, deleteConnector, generateConnectorId, addNewInstance, deleteAdminCredentails, fetchCredentialID } from '../../../lib/helpers';
+import { useAtom } from 'jotai';
+import { sessionAtom } from '../../store';
 
 const Confluence = () => {
-
+    const [session, setSession] = useAtom(sessionAtom)
     const [con_token, setConToken] = useState('');
     const [tokenValue, setTokenValue] = useState('');
     const [userName, setUserName] = useState('');
     const [conUrlList, setConUrlList] = useState([]);
     const [conUrl, setConUrl] = useState('');
-
+    const [loading, setLoading] = useState(true)
     const [tokenStatus, setTokenStatus] = useState(false)
     const [credentialID, setCredentialID] = useState(null);
-    const [connectorID, setConnectorID] = useState(null)
+    const [connectorID, setConnectorID] = useState(null);
+    const [existingCredentials, setExistingCredentials] = useState([])
     const [conJson, setConJson] = useState(null)
 
     const { toast } = useToast();
@@ -29,8 +32,16 @@ const Confluence = () => {
     async function getAllCred() {
         try {
             const data = await fetchAllCredentials();
-            const conCred = data.filter(cred => cred.credential_json.confluence_username);
-            console.log(conCred)
+            // console.log(data)
+            const allCred = await readData();
+            
+            const currentUserToken = data.filter((res) => { if(allCred.includes(res?.id)) return res});
+            // console.log(currentUserToken)
+            const currentToken = currentUserToken.filter(res => res.credential_json.confluence_username !== undefined);
+            // console.log(currentToken)
+
+            const conCred = currentToken.filter(cred => cred.credential_json.confluence_username);
+            // console.log(conCred)
             if(conCred.length > 0){
                 setConJson(conCred[0])
             }else{
@@ -49,9 +60,10 @@ const Confluence = () => {
             if(currentConnector.length > 0){
                 setConUrlList(currentConnector)
             };
-            
+            setLoading(false)
         } catch (error) {
             console.log(error)
+            setLoading(false)
         }
     }
 
@@ -76,18 +88,22 @@ const Confluence = () => {
                     "confluence_username": username,
                     "confluence_access_token": token
                 },
-                "admin_public": true
+                "admin_public": false
             }
-            const data = await fetchCredentialID(body)
+            const data = await fetchCredentialID(body);
+            if(existingCredentials.length === 0){
+                
+                await insertDataInCred([data])
+            }else{
+                await updatetDataInCred(existingCredentials, data)
+            }
             await getAllCred()
-            setCredentialID(data.id);
+            setCredentialID(data);
             setTokenStatus(true)
         } catch (error) {
             console.log('error while getting credentails:', error)
         }
     }
-
-    
 
     async function getConnectorId(space_url) {
         try {
@@ -124,7 +140,7 @@ const Confluence = () => {
             const data = await addNewInstance(conId, credId, name);
             setTokenStatus(true)
             addLisrUrl(url);
-            console.log(data);
+            // console.log(data);
         } catch (error) {
             console.log(error)
         }
@@ -172,7 +188,71 @@ const Confluence = () => {
         setTokenStatus(false)
     };
 
+
+    async function insertDataInCred(newData){
+        // const id = await getSess();
+        try {
+            // console.log(newData, session.user.id)
+            const { data, error } = await supabase
+            .from('credentials')
+            .insert(
+            { 'cred_ids': newData, 'user_id' : session.user.id },
+            )
+            .select();
+
+            if(error){
+                throw error
+            }
+            setExistingCredentials(data[0].cred_ids)
+        } catch (error) {
+            setExistingCredentials([])
+            console.log(error)
+        }
+    };
+
+    async function updatetDataInCred(exConn, newData){
+        // const id = await getSess();
+        const allConn = [...exConn, newData]
+        const { data, error } = await supabase
+        .from('credentials')
+        .update(
+          { 'cred_ids': allConn },
+        )
+        .eq('user_id', session.user.id)
+        .select()
+        // console.log(data)
+        console.log(error)
+        setExistingCredentials(data[0].cred_ids)
+    };
+
+    async function readData(){
+        // const id = await getSess();
+        try {
+            const { data, error } = await supabase
+            .from('credentials')
+            .select('cred_ids')
+            .eq('user_id', session.user.id);
+            // console.log(data);
+            if(error){
+                setExistingCredentials([]);
+                throw error
+            }
+            if(data[0].cred_ids === null){
+                setExistingCredentials([]);
+                return []
+            }
+            else{
+                setExistingCredentials(data[0].cred_ids);
+                return data[0].cred_ids
+            }
+        } catch (error) {
+            console.log(error);
+            return []
+        }
+    }; 
+
     useEffect(() => {
+        readData();
         getAllCred();
         getAllExistingConnector();
     }, [])
@@ -223,7 +303,7 @@ const Confluence = () => {
                     </div>
                 </>
 
-                {conUrlList.length > 0 && <table className='w-full text-sm'>
+                <table className='w-full text-sm'>
                     <thead className='p-2 w-full'>
                         <tr className='border-b p-2'>
                             <th className="text-left p-2">Connected URLs</th>
@@ -232,11 +312,12 @@ const Confluence = () => {
                             <th className="text-center">Remove</th>
                         </tr>
                     </thead>
+                    {loading && <div className='w-full text-start p-2'>Loading...</div>}
                     <tbody className='w-full'>
                         {conUrlList.map((item, idx) => {
                             return (
                                 <tr className='border-b hover:cursor-pointer w-full' key={idx}>
-                                    <td className="font-medium text-left justify-start p-2 py-3">{item?.connector_specific_config?.wiki_page_url}</td>
+                                    <td className="font-medium text-left justify-start p-2 py-3 text-ellipsis break-all line-clamp-1 text-emphasis">{item?.connector_specific_config?.wiki_page_url}</td>
                                     <td className=''>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Enabled
@@ -248,7 +329,7 @@ const Confluence = () => {
                             )
                         })}
                     </tbody>
-                </table>}
+                </table>
             </div>
 
         </>

@@ -1,7 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-
 import { Input } from '../../../components/ui/input';
 import { Button } from '../../../components/ui/button';
 
@@ -12,9 +11,11 @@ import trash from '../../../public/assets/trash-2.svg';
 
 import { Label } from '../../../components/ui/label';
 import { useToast } from '../../../components/ui/use-toast';
-import { deleteConnectorFromTable, fetchAllConnector } from '../../../lib/helpers';
+import { deleteConnectorFromTable, fetchAllConnector, getSess } from '../../../lib/helpers';
 import { useAtom } from 'jotai';
 import { sessionAtom } from '../../store';
+import supabase from '../../../config/supabse';
+import { Loader2 } from 'lucide-react';
 
 const Web = () => {
 
@@ -23,11 +24,13 @@ const Web = () => {
     const [connectorId, setConnectorId] = useState(null);
     const [credentialID, setCredentialID] = useState(null);
     const [baseURL, setBaseURL] = useState('');
-    const [session, setSession] = useAtom(sessionAtom)
+    const [session, setSession] = useAtom(sessionAtom);
+    const [loading, setLoading] = useState(true)
+    const [existConnector ,setExistConnector] = useState([])
     const { toast } = useToast();
 
     async function addList(url) {
-        
+        existConnector
         if (url === '') {
             return toast({
                 variant: 'destructive',
@@ -63,13 +66,70 @@ const Web = () => {
             );
             const json = await data.json();
             setConnectorId(json.id)
-            
+            if(existConnector.length === 0){
+                
+                await insertDataInConn([json.id])
+            }else{
+                await updatetDataInConn(existConnector, json.id)
+            }
             await getCredentials(json.id, baseName)
         } catch (error) {
             console.log('error while connectorRequest :', error)
         }        
     };
 
+    async function insertDataInConn(newData){
+        const id = await getSess();
+        
+        const { data, error } = await supabase
+        .from('connectors')
+        .insert(
+          { 'connect_id': newData, 'user_id' : id },
+        )
+        .select()
+        console.log(data)
+        console.log(error)
+        setExistConnector(data[0].connect_id)
+    };
+
+    async function updatetDataInConn(exConn, newData){
+        const id = await getSess();
+        const allConn = [...exConn, newData]
+        const { data, error } = await supabase
+        .from('connectors')
+        .update(
+          { 'connect_id': allConn, 'user_id' : id },
+        )
+        .eq('user_id', id)
+        .select()
+        console.log(data)
+        console.log(error)
+        setExistConnector(data[0].connect_id)
+    };
+
+    async function readData(){
+        try {
+            const id = await getSess();
+            const { data, error } = await supabase
+            .from('connectors')
+            .select('connect_id')
+            .eq('user_id', id);
+            if(error){
+                throw error
+            }else{
+                if(data !== null){
+                    setExistConnector(data[0].connect_id)
+                    return data[0].connect_id
+                }else{
+                    setExistConnector([])
+                    return []
+                }
+            }
+        } catch (error) {
+            setExistConnector([]);
+            console.log(error)
+        }
+    };  
     async function getCredentials(id, baseName){
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/credential`, {
@@ -105,10 +165,10 @@ const Web = () => {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({'name':url, "id":"12"})
+                body: JSON.stringify({ 'name':url })
             });
             const json = await data.json();
-            await getAllExistingConnector()
+            await getAllExistingServerConnector()
                 setWebUrl('');
                 setCredentialID(null);
                 setConnectorId(null)
@@ -116,16 +176,23 @@ const Web = () => {
             console.log('error while sendURL:', error)
         }
     };
-    async function getAllExistingConnector() {
+    async function getAllExistingServerConnector() {
         try {
             const data = await fetchAllConnector();
-            const currentConnector = data.filter(conn => conn.source === 'web');
-            if(currentConnector.length > 0){
-                setWebList(currentConnector)
+
+            const allConID = await readData();
+
+            const currentConnector = data.filter((item)=> { if(allConID?.includes(item?.id)) return item });
+
+            const filData = currentConnector.filter((item)=> item.source === 'web');
+
+            if(filData.length > 0){
+                setWebList(filData)
             };
-            
+            setLoading(false)
         } catch (error) {
-            console.log(error)
+            console.log(error);
+            setLoading(false)
         }
     };
 
@@ -141,7 +208,8 @@ const Web = () => {
         }
     }
     useEffect(()=> {
-        getAllExistingConnector()
+        getAllExistingServerConnector();
+        readData();
     }, [])
     return (
         <>
@@ -170,7 +238,7 @@ const Web = () => {
                         </div>
                     </div>
                 </div>
-                {webList.length > 0 && <table className='w-full text-sm'>
+                <table className='w-full text-sm'>
                     <thead className='p-2'>
                         <tr className='border-b p-2'>
                             <th className="w-96 text-left p-2">Base URL</th>
@@ -178,11 +246,14 @@ const Web = () => {
                             <th className="text-center">Remove</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        {webList.map((item, idx) => {
+                    {loading && <div className='w-full text-start p-2'>Loading...</div>}
+                    <tbody className='w-full'>
+                        { 
+                        webList.map((item, idx) => {
+                            
                             return (
                                 <tr className='border-b' key={idx}>
-                                    <td className="font-medium w-96 text-left p-2 py-3 break-words">{item?.connector_specific_config?.base_url}</td>
+                                    <td className="font-medium w-96 text-left px-2 py-3 text-ellipsis break-all text-emphasis overflow-hidden">{item?.connector_specific_config?.base_url}</td>
                                     <td>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Running!
@@ -193,7 +264,7 @@ const Web = () => {
                             )
                         })}
                     </tbody>
-                </table>}
+                </table>
             </div>
 
         </>
