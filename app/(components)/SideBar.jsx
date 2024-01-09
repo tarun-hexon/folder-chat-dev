@@ -5,7 +5,7 @@ import threeDot from '../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
 import { Account, NewFolder } from './(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom, fileNameAtom, openMenuAtom, showAdvanceAtom, chatTitleAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../store';
+import { folderAtom, fileNameAtom, openMenuAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../store';
 import rightArrow from '../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
 import { Pencil, Trash2, Check, X, MessageSquare, Loader2 } from 'lucide-react';
@@ -14,11 +14,12 @@ import supabase from '../../config/supabse';
 import { isUserExist } from '../../config/lib';
 import { useRouter } from 'next/navigation';
 import { Input } from '../../components/ui/input';
+import { getSess } from '../../lib/helpers';
 
 
 
 const FolderCard = (props) => {
-
+    // console.log(props.fol)
     const { name, id } = props.fol
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
     const [files, setFiles] = useState([])
@@ -28,17 +29,18 @@ const FolderCard = (props) => {
     const [popOpen, setPopOpen] = useState(false)
     const [isRenamingChat, setIsRenamingChat] = useState(false);
     const [isSelected, setIsSelected] = useState(true);
-    const [chatName, setChatName] = useState('')
+    const [chatSessionID, setChatSessionID] = useAtom(chatSessionIDAtom)
 
     const current_url = window.location.href;
     const chat_id = current_url.split("/chat/")[1];
 
     async function getChatFiles() {
+        let ID = id === undefined ? props.fol[0].id : id
         try {
             const { data, error } = await supabase
                 .from('chats')
                 .select('*')
-                .eq('folder_id', id);
+                .eq('folder_id', ID);
             if (data) {
                 setFiles(data);
                 
@@ -57,13 +59,22 @@ const FolderCard = (props) => {
             setFolderId(fol_id);
             setFileName('chat');
             localStorage.removeItem('chatSessionID')
+            setChatSessionID('new')
             window.history.replaceState('', '', `/chat/new`);
             // router.push('/chat/new')
+
         }else if(id === 'upload'){
             setFileName('upload')
         }
         
         setPopOpen(false)
+    };
+
+    function handleFilessOnclick(data) {
+        window.history.replaceState('', '', `/chat/${data.session_id}`); 
+        setChatSessionID(data.session_id)
+        localStorage.setItem('folderId', data.folder_id); 
+        setFileName('chat')
     };
 
     async function getFolderId(chatid){
@@ -73,7 +84,7 @@ const FolderCard = (props) => {
                 .select('folder_id')
                 .eq('session_id', chatid);
             if(data){
-                localStorage.setItem('folderId', data[0].folder_id)
+                localStorage.setItem('folderId', data[0]?.folder_id)
                 setFolderId(data[0].folder_id)
                 
             }else{
@@ -91,17 +102,14 @@ const FolderCard = (props) => {
 
     useEffect(() => {
         setIsSelected(chat_id);
-        if(chat_id !== 'new'){
-            getFolderId(chat_id);
+        if(chatSessionID !== 'new' && chatSessionID){
+            getFolderId(chatSessionID);
         }
-    }, [chat_id]);
+    }, [chat_id, chatSessionID]);
 
     // useEffect(() => {
-        
-    //     if(chat_id !== 'new'){
-    //         getFolderId(chat_id);
-    //     }
-    // }, [folderId]);
+    //     console.log(chatSessionID)
+    // }, [chatSessionID]);
     return (
 
         <Accordion type="single" collapsible defaultValue={localStorage.getItem('folderId')}>
@@ -138,7 +146,7 @@ const FolderCard = (props) => {
                             :
                             files.map((data, idx) => {
                                 return (
-                                    <div key={data.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer ${chat_id === data.session_id ? 'bg-slate-200':''}`} onClick={() => {router.push('/chat/' + data.session_id); localStorage.setItem('folderId', data.folder_id); setFileName('chat')}}>
+                                    <div key={data.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer ${chat_id === data.session_id ? 'bg-slate-200':''}`} onClick={() => handleFilessOnclick(data)}>
                                         <div className='inline-flex gap-1 items-center'>
                                             {/* <MessageSquare size={'1rem'} className='hover:cursor-pointer' /> */}
                                             <span className='font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis' onClick={()=> setFileName('chat')}>{data?.chat_title || 'New Chat'}</span> 
@@ -205,21 +213,25 @@ const SideBar = () => {
     const [session, setSession] = useAtom(sessionAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
 
-    async function getFolders(ses) {
+    async function getFolders() {
         try {
-
-            const wkID = await isUserExist('workspaces', 'id', 'created_by', ses.user.id);
+            const userID = await getSess()
+            const wkID = await isUserExist('workspaces', 'id', 'created_by', userID);
             let { data: folders, error } = await supabase
                 .from('folders')
                 .select('*')
                 .eq('workspace_id', wkID[0].id);
-            if (folders) {
+            if (folders?.length === 1) {
                 const lastFolder = folders[folders.length - 1];
-                localStorage.setItem('lastFolderId', lastFolder.id)
+                localStorage.setItem('folderId', lastFolder.id)
                 setFolder([...folders]);
                 return
+            }else if(folders?.length){
+                setFolder([...folders]);
             };
-            throw error
+            if(error){
+                throw error
+            }
         } catch (error) {
             console.log(error)
         }

@@ -12,7 +12,7 @@ import { Label } from '../../../components/ui/label';
 const Slack = () => {
     const [token, setToken] = useState('');
     const [value, setValue] = useState('');
-    const [slackList, setSlackList] = useState([1])
+    const [slackList, setSlackList] = useState([])
     const [loading, setLoading] = useState(true)
 
     return (

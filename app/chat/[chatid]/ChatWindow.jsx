@@ -4,14 +4,11 @@ import sendIcon from '../../../public/assets/send.svg'
 import Logo from "../../../public/assets/Logo.svg"
 import shareIcon from '../../../public/assets/Navbar_Share.svg'
 import openDocIcon from '../../../public/assets/Navbar_OpenDoc.svg'
-import xls from '../../../public/assets/xls.svg'
-import pdf from '../../../public/assets/pdf.svg'
-import doc from '../../../public/assets/doc.svg'
 import Image from 'next/image'
 import { iconSelector } from '../../../config/constants'
 import { Folder, Loader2 } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { chatHistoryAtom, chatTitleAtom, fileNameAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom } from '../../store'
+import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom } from '../../store'
 import ReactMarkdown from "react-markdown";
 import supabase from '../../../config/supabse'
 import { MoreHorizontal } from 'lucide-react';
@@ -42,6 +39,7 @@ const ChatWindow = () => {
     const [chatTitle, setChatTitle] = useState('')
     const [chatRenamed, setChatRename] = useAtom(chatTitleAtom);
     const [textFieldDisabled, setTextFieldDisabled] = useState(false);
+    const [chatSessionID, setChatSessionID] = useAtom(chatSessionIDAtom);
     const botResponse = useRef('');
     
     const current_url = window.location.href;
@@ -52,6 +50,8 @@ const ChatWindow = () => {
     const { toast } = useToast();
 
     async function createChatSessionId(userMsgdata){
+        setRcvdMsg('')
+        botResponse.current = ''
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/create-chat-session`, {
                 method:'POST',
@@ -64,16 +64,15 @@ const ChatWindow = () => {
             });
             const json = await data.json();
             localStorage.setItem('chatSessionID', json?.chat_session_id)
-            setChatSessionId(json?.chat_session_id)
-            await insertChatInDB([userMsgdata], chatTitle, json?.chat_session_id, localStorage.getItem('folderId'));
+            setChatSessionID(json?.chat_session_id)
+            
 
             window.history.replaceState('', '', `/chat/${json.chat_session_id}`);
             
+            await insertChatInDB(null, json?.chat_session_id, localStorage.getItem('folderId'));
 
             await sendChatMsgs(userMsgdata, json.chat_session_id, parentMessageId);
-            
-           
-
+            await createChatTitle(json.chat_session_id, null, userMsgdata)
         } catch (error) {
             setMsgLoader(false)
             console.log('error while creating chat id:', error)
@@ -85,28 +84,23 @@ const ChatWindow = () => {
         
         setTextFieldDisabled(true);
         setResponseObj(null)
-        if (botResponse.current !== '') {
+        if (rcvdMsg !== '') {
             
             const msgObj =[
                 {
-                    'bot': botResponse.current
+                    'bot': rcvdMsg
                 }
             ];
-            botResponse.current = ''
+            
             setRcvdMsg('')
 
             setChatMsg((prev) => [...msgObj, ...prev]);
-            //await updateChats(chatHistory.chats, msgObj, 'both')
-            // setChatMsg((prev) => [{
-            //     bot: rcvdMsg
-            // }, ...prev]);
+            
             
             setMsgLoader(false);
             
             setResponseObj(null)
 
-        }else{
-            // await updateChats(chatHistory.chats, data, 'user')
         }
         setChatMsg((prev) => [{
             
@@ -120,12 +114,12 @@ const ChatWindow = () => {
             setMsgLoader(true)
         }, 1000);
 
-        if(chatSessionId === null){
+        if(chatSessionID === 'new' || !chatSessionID || chat_id === 'new'){
             await createChatSessionId(data);
 
         }else{
-            // await updateChats(chatHistory.chats, data, 'user')
-            await sendChatMsgs(data, chatSessionId, parentMessageId)
+            
+            await sendChatMsgs(data, chatSessionID, parentMessageId)
         }
 
     };
@@ -152,16 +146,21 @@ const ChatWindow = () => {
             console.log(error)
         }
     }
-    async function insertChatInDB(msgData, chatTitle, chatID, folderID){
-
+    async function insertChatInDB(chatTitle, chatID, folderID){
+        var folID = folderID
+        if(folderID === 'undefined' || folderID === null || folderID === undefined){
+            folID = localStorage.getItem('lastFolderId')
+        }
+        console.log(localStorage.getItem('lastFolderId'))
+        console.log(chatTitle, chatID, folderID, folID)
         try {
             const id = await getSess();
             const { data, error } = await supabase
                 .from('chats')
                 .insert({ 
-                    folder_id: folderID, 
+                    folder_id: folID, 
                     user_id: id,
-                    chats:JSON.stringify([{'user':msgData}]),
+                    chats:null,
                     chat_title:chatTitle,
                     is_active:true,
                     session_id:chatID,
@@ -197,19 +196,11 @@ const ChatWindow = () => {
 
 
     async function updateChats(bot, user, oldChat){
-        // console.log(localStorage.getItem('chatSessionID'))
+        console.log(localStorage.getItem('chatSessionID'));
+        console.log(bot, user, oldChat)
         
         var newMsg = [bot, user, ...oldChat]
-        // if(type === 'both'){
-        //     newMsg = [...value, ...oldChat]
-        // }else if(type === 'user'){
-        //     if(oldChat){
-        //         newMsg = [...JSON.parse(oldChat), {"user":value}]
-        //     }else{
-        //         newMsg = [{"user":value}]
-        //     }
-        // }
-        
+        console.log(chatSessionID)
         try {
 
             const { data, error } = await supabase
@@ -218,7 +209,12 @@ const ChatWindow = () => {
                 .eq('session_id', localStorage.getItem('chatSessionID'))
                 .select()
             if(data.length){
-                // console.log('updated res',data)
+                console.log('updated res',data);
+                if(data[0].chats){
+                    const msgs = JSON.parse(data[0]?.chats)
+                
+                    setChatMsg(msgs);
+                }
                 setChatHistory(data[0])
             }else if(error){
                 throw error
@@ -281,12 +277,11 @@ const ChatWindow = () => {
                 sendMessageResponse, userMsg
             ); 
             setTextFieldDisabled(false)
-            if(chatTitle === ''){
-                await createChatTitle(chatID, null, userMsg)
-            }
+            
         } catch (error) {
             console.log(error)
             setMsgLoader(false)
+            setTextFieldDisabled(false)
         }
     };
 
@@ -329,13 +324,15 @@ const ChatWindow = () => {
                     }else if(obj.parent_message){
                         
                         setResponseObj(obj);
-                        // console.log({'bot': botResponse.current}, {'user': userMsg}, chatMsg)
+                        console.log({'bot': botResponse.current}, {'user': userMsg}, chatMsg)
 
                         await updateChats({'bot': botResponse.current}, {'user': userMsg}, chatMsg)
-                        
+                        botResponse.current = ''
+                        setMsgLoader(false)
                     }
                     else if(obj.parent_message && parentMessageId === null){
                         setParentMessageId(obj.parent_message)
+                        
                     }else if(obj.error){
                         setMsgLoader(false);
                         return toast({
@@ -344,8 +341,9 @@ const ChatWindow = () => {
                         })
                     }
                 }
+                
             };
-
+            
         }
     };
 
@@ -397,19 +395,20 @@ const ChatWindow = () => {
                 .from('chats')
                 .select('*')
                 .eq('session_id', id);
-            if(data.length){
+            if(data[0]?.chats){
                 // console.log('rcvd msg',data)
                 setLoading(false)
-                const msgs = JSON.parse(data[0].chats)
+                const msgs = JSON.parse(data[0]?.chats)
                 
                 setChatMsg(msgs);
                 setChatHistory(data[0])
                 setChatTitle(data[0].chat_title)
                 // console.log(data)
-            }else if(data.length === 0){
-                router.push('/chat')
-                throw new Error('Chat ID is Invalid')
             }
+            // else if(data.length === 0){
+            //     window.history.replaceState('', '', `/chat/new`);
+            //     throw new Error('Chat session ID is Invalid')
+            // }
         } catch (error) {
             setLoading(false)
             console.log(error)
@@ -422,23 +421,28 @@ const ChatWindow = () => {
        
     }, [userMsg]);
 
-    useEffect(() => {
-        alert(chat_id)
+    useEffect(()=> {
+        if(chat_id !== 'new'){
+            setRcvdMsg('')
+            localStorage.setItem('chatSessionID', chat_id)
+        }
+    }, [chat_id])
+
+    useEffect(()=> {
         setShowAdvance(false);
-        // setChatMsgs(currentFol);
-        console.log('inside useEff')
-        if(chat_id === 'new'){
-            console.log('inside new')
+        setMsgLoader(false)
+        if(chatSessionID !== 'new' && chatSessionID){
+            getChatHistory(chatSessionID)
+            setChatSessionId(chatSessionID);
+            
+        }else{
+            setRcvdMsg('')
             setChatMsg([])
             setLoading(false)
-            setChatSessionId(null);
+            setChatSessionId('new');
             localStorage.removeItem('chatSessionID')
-        }else{
-            getChatHistory(chat_id)
-            setChatSessionId(chat_id);
         }
-
-    }, [chat_id]);
+    }, [chatSessionID]);
 
     return (
         <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2'>

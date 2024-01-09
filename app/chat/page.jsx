@@ -15,7 +15,7 @@ const Page = () => {
         if (session) {
           setUserSession(session);
           if (session?.user?.user_metadata?.onBoarding) {
-            // setLoading(false)
+            router.push('/chat/new')
           } else {
             router.push('/signup')
           }
@@ -30,9 +30,9 @@ const Page = () => {
     
     useEffect(()=> {
         getSess();
-        if(userSession !== null){
-          router.push('/chat/new')
-        }
+        // if(userSession !== null){
+        //   router.push('/chat/new')
+        // }
     }, []);
 
 

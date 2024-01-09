@@ -33,6 +33,7 @@ const Chat = () => {
         setUserSession(session);
         if (session?.user?.user_metadata?.onBoarding) {
           setLoading(false)
+          // router.push('/chat/new')
         } else {
           router.push('/signup')
         }
