@@ -11,7 +11,7 @@ import Image from 'next/image'
 import { iconSelector } from '../../../config/constants'
 import { Folder, Loader2 } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { chatHistoryAtom, fileNameAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom } from '../../store'
+import { chatHistoryAtom, chatTitleAtom, fileNameAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom } from '../../store'
 import ReactMarkdown from "react-markdown";
 import supabase from '../../../config/supabse'
 import { MoreHorizontal } from 'lucide-react';
@@ -39,8 +39,11 @@ const ChatWindow = () => {
     const [chatSessionId, setChatSessionId] = useState(null);
     const [chatMsg, setChatMsg] = useState([]);
     const [parentMessageId, setParentMessageId] = useState(null);
-    const [chatTitle, setChatTitle] = useState('');
-    const [textFieldDisabled, setTextFieldDisabled] = useState(false)
+    const [chatTitle, setChatTitle] = useState('')
+    const [chatRenamed, setChatRename] = useAtom(chatTitleAtom);
+    const [textFieldDisabled, setTextFieldDisabled] = useState(false);
+    const botResponse = useRef('');
+    
     const current_url = window.location.href;
 
     const chat_id = current_url.split("/chat/")[1];
@@ -59,11 +62,15 @@ const ChatWindow = () => {
                 })
             });
             const json = await data.json();
+            localStorage.setItem('chatSessionID', json?.chat_session_id)
+            setChatSessionId(json?.chat_session_id)
+            await insertChatInDB([userMsgdata], chatTitle, json?.chat_session_id, localStorage.getItem('folderId'));
+
+            window.history.replaceState('', '', `/chat/${json.chat_session_id}`);
+
+            await sendChatMsgs(userMsgdata, json.chat_session_id, parentMessageId);
             
-            await sendChatMsgs(userMsgdata, json.chat_session_id, parentMessageId)
-            setChatSessionId(json?.chat_session_id);
-            await insertChatInDB([userMsgdata], chatTitle, json?.chat_session_id, localStorage.getItem('folderId'))
-            window.history.replaceState('', '', `/chat/${json.chat_session_id}`)
+           
 
         } catch (error) {
             setMsgLoader(false)
@@ -73,27 +80,31 @@ const ChatWindow = () => {
     async function sendMsg(data) {
 
         if (data && data.trim() === '') return null;
-        setTextFieldDisabled(true)
-        if (rcvdMsg !== '') {
+        
+        setTextFieldDisabled(true);
+        setResponseObj(null)
+        if (botResponse.current !== '') {
+            
             const msgObj =[
                 {
-                    'bot': rcvdMsg
-                },
-                {
-                    'user':data
+                    'bot': botResponse.current
                 }
-            ]
-            await updateChats(chatHistory.chats, msgObj, 'both')
-            setChatMsg((prev) => [{
-                bot: rcvdMsg
-            }, ...prev]);
+            ];
+            botResponse.current = ''
+            setRcvdMsg('')
+
+            setChatMsg((prev) => [...msgObj, ...prev]);
+            //await updateChats(chatHistory.chats, msgObj, 'both')
+            // setChatMsg((prev) => [{
+            //     bot: rcvdMsg
+            // }, ...prev]);
             
             setMsgLoader(false);
-            setRcvdMsg('');
+            
             setResponseObj(null)
 
         }else{
-            await updateChats(chatHistory.chats, data, 'user')
+            // await updateChats(chatHistory.chats, data, 'user')
         }
         setChatMsg((prev) => [{
             
@@ -118,6 +129,7 @@ const ChatWindow = () => {
     };
 
     async function createChatTitle(session_id, name, userMessage){
+        console.log(session_id, name, userMessage)
         try {
             const data = await fetch('https://danswer.folder.chat/api/chat/rename-chat-session', {
                 method:'PUT',
@@ -126,13 +138,13 @@ const ChatWindow = () => {
                 },
                 body:JSON.stringify({
                     "chat_session_id": session_id,
-                    "name": name,
+                    "name": name || null,
                     "first_message": userMessage
                 })
             });
             const json = await data.json();
             // console.log(json.new_name);
-            await updateTitle(json.new_name)
+            await updateTitle(json.new_name, session_id)
             setChatTitle(json.new_name)
         } catch (error) {
             console.log(error)
@@ -161,16 +173,18 @@ const ChatWindow = () => {
             console.log(error)
         }            
     };
-    async function updateTitle(value){
+    async function updateTitle(value, id){
+        console.log(value, id)
         try {
-            const id = await getSess();
+            // const id = await getSess();
             const { data, error } = await supabase
                 .from('chats')
                 .update({ chat_title: value })
-                .eq('session_id', chatSessionId)
+                .eq('session_id', id)
                 .select()
             if(data.length){
-                setChatHistory(data[0])
+                setChatHistory(data[0]);
+                setChatRename(!chatTitleAtom)
             }else if(error){
                 throw error
             }
@@ -180,25 +194,26 @@ const ChatWindow = () => {
     };
 
 
-    async function updateChats(oldChat, value, type){
+    async function updateChats(bot, user, oldChat){
+        console.log(localStorage.getItem('chatSessionID'))
         
-        var newMsg = []
-        if(type === 'both'){
-            newMsg = [...JSON.parse(oldChat), ...value]
-        }else if(type === 'user'){
-            if(oldChat){
-                newMsg = [...JSON.parse(oldChat), {"user":value}]
-            }else{
-                newMsg = [{"user":value}]
-            }
-        }
+        var newMsg = [bot, user, ...oldChat]
+        // if(type === 'both'){
+        //     newMsg = [...value, ...oldChat]
+        // }else if(type === 'user'){
+        //     if(oldChat){
+        //         newMsg = [...JSON.parse(oldChat), {"user":value}]
+        //     }else{
+        //         newMsg = [{"user":value}]
+        //     }
+        // }
         
         try {
 
             const { data, error } = await supabase
                 .from('chats')
                 .update({ chats: JSON.stringify(newMsg) })
-                .eq('session_id', chatSessionId)
+                .eq('session_id', localStorage.getItem('chatSessionID'))
                 .select()
             if(data.length){
                 console.log('updated res',data)
@@ -261,10 +276,10 @@ const ChatWindow = () => {
             }
     
             await handleStream(
-                sendMessageResponse
+                sendMessageResponse, userMsg
             ); 
             setTextFieldDisabled(false)
-            if(chatTitle.length === 0){
+            if(chatTitle === ''){
                 await createChatTitle(chatID, null, userMsg)
             }
         } catch (error) {
@@ -273,7 +288,7 @@ const ChatWindow = () => {
         }
     };
 
-    async function handleStream(streamingResponse) {
+    async function handleStream(streamingResponse, userMsg) {
         const reader = streamingResponse.body?.getReader();
         const decoder = new TextDecoder("utf-8");
 
@@ -304,10 +319,17 @@ const ChatWindow = () => {
                 
                 for (const obj of response) {
                     if (obj.answer_piece) {
-                        
+
+                        botResponse.current += obj.answer_piece;
+
                         setRcvdMsg(prev => prev + obj.answer_piece);
+
                     }else if(obj.parent_message){
+                        
                         setResponseObj(obj);
+                        // console.log({'bot': botResponse.current}, {'user': userMsg}, chatMsg)
+
+                        await updateChats({'bot': botResponse.current}, {'user': userMsg}, chatMsg)
                         
                     }
                     else if(obj.parent_message && parentMessageId === null){
@@ -378,7 +400,7 @@ const ChatWindow = () => {
                 setLoading(false)
                 const msgs = JSON.parse(data[0].chats)
                 
-                setChatMsg(msgs.reverse());
+                setChatMsg(msgs);
                 setChatHistory(data[0])
                 setChatTitle(data[0].chat_title)
                 // console.log(data)
@@ -404,9 +426,11 @@ const ChatWindow = () => {
         if(chat_id === 'new'){
             setLoading(false)
             setChatSessionId(null);
+            localStorage.removeItem('chatSessionID')
         }else{
             getChatHistory(chat_id)
             setChatSessionId(chat_id);
+            localStorage.setItem('chatSessionID', chat_id)
 
         }
         // console.log(chat_id);

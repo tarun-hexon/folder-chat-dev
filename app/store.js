@@ -16,6 +16,8 @@ export const advanceItemAtom = atom('advance');
 export const showAdvanceAtom = atom(false);
 export const supabaseUserDataAtom = atom(null);
 export const chatHistoryAtom = atom({})
+export const chatTitleAtom = atom('')
+
 export const selectOptionAtom = atom([
     {
         name:'option_1',

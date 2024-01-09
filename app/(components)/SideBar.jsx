@@ -5,7 +5,7 @@ import threeDot from '../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
 import { Account, NewFolder } from './(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom, fileNameAtom, openMenuAtom, showAdvanceAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../store';
+import { folderAtom, fileNameAtom, openMenuAtom, showAdvanceAtom, chatTitleAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../store';
 import rightArrow from '../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
 import { Pencil, Trash2, Check, X, MessageSquare, Loader2 } from 'lucide-react';
@@ -85,7 +85,7 @@ const FolderCard = (props) => {
     useEffect(() => {
         getChatFiles();
         
-    }, [chatHistory]);
+    }, [chatHistory, chatTitleAtom]);
 
     useEffect(() => {
         setIsSelected(chat_id);
@@ -139,7 +139,7 @@ const FolderCard = (props) => {
                                     <div key={data.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer ${chat_id === data.session_id ? 'bg-slate-200':''}`} onClick={() => {router.push('/chat/' + data.session_id); localStorage.setItem('folderId', data.folder_id); setFileName('chat')}}>
                                         <div className='inline-flex gap-1 items-center'>
                                             {/* <MessageSquare size={'1rem'} className='hover:cursor-pointer' /> */}
-                                            <span className='font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis' onClick={()=> setFileName('chat')}>{data.chat_title || 'New Chat'}</span> 
+                                            <span className='font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis' onClick={()=> setFileName('chat')}>{data?.chat_title || 'New Chat'}</span> 
                                             {/* {isRenamingChat ? 
                                                 <input type='text' value={chatName} onChange={(e)=> setChatName(e.target.value)} className='rounded-md px-1 w-[90%]'/>
                                                 :
