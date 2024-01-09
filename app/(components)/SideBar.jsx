@@ -15,7 +15,9 @@ import { isUserExist } from '../../config/lib';
 import { useRouter } from 'next/navigation';
 import { Input } from '../../components/ui/input';
 import { getSess } from '../../lib/helpers';
-
+import { Dialog, DialogTrigger, DialogContent, DialogFooter } from '../../components/ui/dialog';
+import { Button } from '../../components/ui/button';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../components/ui/alert-dialog'
 
 
 const FolderCard = (props) => {
@@ -24,13 +26,13 @@ const FolderCard = (props) => {
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
     const [files, setFiles] = useState([])
     const [fileName, setFileName] = useAtom(fileNameAtom);
-    const [folderId, setFolderId] = useState('')
-    const router = useRouter()
+    const router = useRouter();
+    const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [popOpen, setPopOpen] = useState(false)
     const [isRenamingChat, setIsRenamingChat] = useState(false);
     const [isSelected, setIsSelected] = useState(true);
     const [chatSessionID, setChatSessionID] = useAtom(chatSessionIDAtom)
-
+    const [folderId, setFolderId] = useAtom(folderIdAtom);
     const current_url = window.location.href;
     const chat_id = current_url.split("/chat/")[1];
 
@@ -43,7 +45,7 @@ const FolderCard = (props) => {
                 .eq('folder_id', ID);
             if (data) {
                 setFiles(data);
-                
+
             } else {
                 throw error
             }
@@ -53,59 +55,82 @@ const FolderCard = (props) => {
     };
 
     function handleOptionsOnclick(id, fol_id) {
-        
-        if(id === 'new-chat'){
+
+        if (id === 'new-chat') {
             localStorage.setItem('folderId', fol_id);
-            setFolderId(fol_id);
+            setFolderId(fol_id)
             setFileName('chat');
             localStorage.removeItem('chatSessionID')
             setChatSessionID('new')
             window.history.replaceState('', '', `/chat/new`);
             // router.push('/chat/new')
 
-        }else if(id === 'upload'){
-            setFileName('upload')
+        } else if (id === 'upload') {
+            setFileName('upload');
+            setFolderId(fol_id)
         }
-        
         setPopOpen(false)
+    };
+    async function deleteChats(fol_id) {
+        const { error } = await supabase
+            .from('chats')
+            .delete()
+            .eq('folder_id', fol_id)
+    }
+
+    async function deleteConne(fol_id) {
+        const { error } = await supabase
+            .from('connectors')
+            .delete()
+            .eq('folder_id', fol_id)
+    }
+
+    async function deleteFolder(fol_id) {
+        await deleteChats(fol_id);
+        await deleteConne(fol_id);
+        const { error } = await supabase
+            .from('folders')
+            .delete()
+            .eq('id', fol_id);
+        if (!error) {
+            setFolderAdded(!folderAdded)
+        }
     };
 
     function handleFilessOnclick(data) {
-        window.history.replaceState('', '', `/chat/${data.session_id}`); 
+        window.history.replaceState('', '', `/chat/${data.session_id}`);
         setChatSessionID(data.session_id)
-        localStorage.setItem('folderId', data.folder_id); 
+        localStorage.setItem('folderId', data.folder_id);
         setFileName('chat')
     };
 
-    async function getFolderId(chatid){
+    async function getFolderId(chatid) {
         try {
             const { data, error } = await supabase
                 .from('chats')
                 .select('folder_id')
                 .eq('session_id', chatid);
-            if(data){
+            if (data) {
                 localStorage.setItem('folderId', data[0]?.folder_id)
-                setFolderId(data[0].folder_id)
-                
-            }else{
+            } else {
                 throw error
             }
         } catch (error) {
             console.log(error)
         }
     }
-    
+
     useEffect(() => {
         getChatFiles();
-        
+
     }, [chatHistory, chatTitleAtom]);
 
     useEffect(() => {
         setIsSelected(chat_id);
-        if(chatSessionID !== 'new' && chatSessionID){
-            getFolderId(chatSessionID);
+        if (chat_id !== 'new' && chat_id) {
+            getFolderId(chat_id);
         }
-    }, [chat_id, chatSessionID]);
+    }, [chat_id]);
 
     // useEffect(() => {
     //     console.log(chatSessionID)
@@ -125,10 +150,38 @@ const FolderCard = (props) => {
                         <PopoverContent className="w-full flex flex-col p-1 gap-[2px]">
                             {folderOptions.map((option, idx) => {
                                 return (
-                                    <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer" onClick={() => { handleOptionsOnclick(option.id, id) }}>
-                                        <option.icon className="mr-2 h-4 w-4" />
-                                        <span>{option.title}</span>
-                                    </div>
+                                    option.id !== 'delete' ?
+                                        <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer" onClick={() => { handleOptionsOnclick(option.id, id) }}>
+                                            <option.icon className="mr-2 h-4 w-4" />
+                                            <span>{option.title}</span>
+                                        </div>
+                                        :
+
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer">
+                                                    <option.icon className="mr-2 h-4 w-4" />
+                                                    <span>{option.title}</span>
+                                                </div>
+                                            </AlertDialogTrigger>
+
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>
+                                                        Are you absolutely sure?
+                                                    </AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action cannot be undone. This will delete all chat files inside this folder.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction className='bg-[#14B8A6] hover:bg-[#14B8A6] hover:opacity-75' onClick={() => deleteFolder(id)}>Continue</AlertDialogAction>
+                                                </AlertDialogFooter>
+
+                                            </AlertDialogContent>
+                                        </AlertDialog>
+
                                 )
                             })}
 
@@ -139,17 +192,17 @@ const FolderCard = (props) => {
                 <AccordionContent className='flex flex-col gap-2 p-1'>
                     {
                         files.length === 0 ?
-                            <div className='flex justify-between bg-[#EFF5F5] hover:cursor-pointer hover:bg-slate-200 p-2 rounded-lg' onClick={() => { setFileName('chat')}}>
+                            <div className='flex justify-between bg-[#EFF5F5] hover:cursor-pointer hover:bg-slate-200 p-2 rounded-lg' onClick={() => { setFileName('chat') }}>
                                 <span className='text-sm font-[500] leading-5 '>No Chats to display</span>
 
                             </div>
                             :
                             files.map((data, idx) => {
                                 return (
-                                    <div key={data.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer ${chat_id === data.session_id ? 'bg-slate-200':''}`} onClick={() => handleFilessOnclick(data)}>
+                                    <div key={data.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer ${chat_id === data.session_id ? 'bg-slate-200' : ''}`} onClick={() => handleFilessOnclick(data)}>
                                         <div className='inline-flex gap-1 items-center'>
                                             {/* <MessageSquare size={'1rem'} className='hover:cursor-pointer' /> */}
-                                            <span className='font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis' onClick={()=> setFileName('chat')}>{data?.chat_title || 'New Chat'}</span> 
+                                            <span className='font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis' onClick={() => setFileName('chat')}>{data?.chat_title || 'New Chat'}</span>
                                             {/* {isRenamingChat ? 
                                                 <input type='text' value={chatName} onChange={(e)=> setChatName(e.target.value)} className='rounded-md px-1 w-[90%]'/>
                                                 :
@@ -224,12 +277,12 @@ const SideBar = () => {
             if (folders?.length === 1) {
                 const lastFolder = folders[folders.length - 1];
                 localStorage.setItem('folderId', lastFolder.id)
-                setFolder([...folders]);
+                setFolder(folders);
                 return
-            }else if(folders?.length){
-                setFolder([...folders]);
+            } else if (folders?.length) {
+                setFolder(folders);
             };
-            if(error){
+            if (error) {
                 throw error
             }
         } catch (error) {

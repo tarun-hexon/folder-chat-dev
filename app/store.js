@@ -17,7 +17,7 @@ export const showAdvanceAtom = atom(false);
 export const supabaseUserDataAtom = atom(null);
 export const chatHistoryAtom = atom({});
 export const chatSessionIDAtom = atom('new')
-
+export const currentDOCNameAtom = atom({name:'', id:null});
 export const chatTitleAtom = atom('')
 
 export const selectOptionAtom = atom([

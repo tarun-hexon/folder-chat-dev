@@ -14,10 +14,11 @@ import Files from './(Advance)/Files'
 import Drive from './(Advance)/Drive'
 import Confluence from './(Advance)/Confluence';
 import Web from './(Advance)/Web'
-
+import AllContext from './(common)/AllContext'
 
 
 export {
+    AllContext,
     Header,
     Signup,
     PostSignup,

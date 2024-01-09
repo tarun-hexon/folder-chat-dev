@@ -21,7 +21,7 @@ import { Button } from "../../../components/ui/button";
 import plus from '../../../public/assets/plus - light.svg'
 import Image from 'next/image';
 import { useAtom } from 'jotai';
-import { folderAtom, sessionAtom } from '../../store';
+import { folderAtom, sessionAtom, fileNameAtom, folderIdAtom } from '../../store';
 import { Folder } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { isUserExist } from '../../../config/lib';
@@ -29,9 +29,12 @@ import supabase from '../../../config/supabse';
 
 const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     const [folder, setFolder] = useAtom(folderAtom);
+    const [folderId, setFolderId] = useAtom(folderIdAtom);
+
     const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
-    const [session, setSession] = useAtom(sessionAtom)
+    const [session, setSession] = useAtom(sessionAtom);
+    const [fileName, setFileName] = useAtom(fileNameAtom);
     const id = uuidv4()
     const [fol, setFol] = useState({
         id: id,
@@ -41,21 +44,17 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
         files:[]
     });
 
-    async function addFolder(data) {
-        
-        if (data.title === '') {
-            setInputError('Write some valid folder name');
-            return null
-        } else if (data.description === '') {
-            setInputError('Write some valid folder description');
-            return null
-        } else {
-            await createFolder(data); 
-            
-        }
-    };
 
     async function createFolder(folderData){
+        if (folderData.title === '') {
+            setInputError('Write some valid folder name');
+            return null
+        } else if (folderData.description === '') {
+            setInputError('Write some valid folder description');
+            return null
+        };
+
+
         try {
             
             const wkID = await isUserExist('workspaces', 'id', 'created_by',session.user.id);
@@ -67,10 +66,13 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                 ])
                 .select();
                 if(data){
-                    console.log(data);
+                    // console.log(data);
                     setFolder([...folder, data]);
                     setFolderAdded(prev => !prev)
-                    setOpen(false)
+                    setOpen(false);
+                    setFolderId(data[0].id)
+                    setFileName('upload')
+                    window.history.replaceState('', '', `/chat/new`);
                     return 
                 }
                 throw error
@@ -162,7 +164,7 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                     <p className='tracking-tight text-xs text-red-400 -mt-1'>{inputError}</p>
                 </div>
                 <DialogFooter>
-                    <Button variant={'outline'} type="submit" className='text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px]' onClick={() => addFolder(fol)}>Create Folder</Button>
+                    <Button variant={'outline'} type="submit" className='text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px]' onClick={() => createFolder(fol)}>Create Folder</Button>
                 </DialogFooter>
             </DialogContent>
 

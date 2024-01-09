@@ -8,7 +8,7 @@ import Image from 'next/image'
 import { iconSelector } from '../../../config/constants'
 import { Folder, Loader2 } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom } from '../../store'
+import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom, currentDOCNameAtom } from '../../store'
 import ReactMarkdown from "react-markdown";
 import supabase from '../../../config/supabse'
 import { MoreHorizontal } from 'lucide-react';
@@ -16,7 +16,7 @@ import { useToast } from '../../../components/ui/use-toast'
 import { NewFolder } from '../../(components)/(dashboard)'
 import { useRouter } from 'next/navigation'
 import { getSess } from '../../../lib/helpers'
-
+import { AllContext } from '../../(components)'
 const ChatWindow = () => {
 
 
@@ -40,6 +40,8 @@ const ChatWindow = () => {
     const [chatRenamed, setChatRename] = useAtom(chatTitleAtom);
     const [textFieldDisabled, setTextFieldDisabled] = useState(false);
     const [chatSessionID, setChatSessionID] = useAtom(chatSessionIDAtom);
+    const [currentDOCName, setCurrentDocName] = useAtom(currentDOCNameAtom);
+
     const botResponse = useRef('');
     
     const current_url = window.location.href;
@@ -65,7 +67,6 @@ const ChatWindow = () => {
             const json = await data.json();
             localStorage.setItem('chatSessionID', json?.chat_session_id)
             setChatSessionID(json?.chat_session_id)
-            
 
             window.history.replaceState('', '', `/chat/${json.chat_session_id}`);
             
@@ -85,18 +86,10 @@ const ChatWindow = () => {
         setTextFieldDisabled(true);
         setResponseObj(null)
         if (rcvdMsg !== '') {
-            
-            const msgObj =[
-                {
-                    'bot': rcvdMsg
-                }
-            ];
+    
             
             setRcvdMsg('')
 
-            setChatMsg((prev) => [...msgObj, ...prev]);
-            
-            
             setMsgLoader(false);
             
             setResponseObj(null)
@@ -242,7 +235,8 @@ const ChatWindow = () => {
     };
 
     async function sendChatMsgs(userMsg, chatID, parent_ID) {
-
+        
+        
         try {
             const sendMessageResponse = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/send-message`, {
                 method: 'POST',
@@ -260,7 +254,7 @@ const ChatWindow = () => {
                         "real_time": true,
                         "filters": {
                             "source_type": null,
-                            "document_set": null,
+                            "document_set": setCurrentDocName.name === null ? null : [currentDOCName.name],
                             "time_cutoff": null
                         }
                     }
@@ -396,13 +390,15 @@ const ChatWindow = () => {
                 .select('*')
                 .eq('session_id', id);
             if(data[0]?.chats){
-                // console.log('rcvd msg',data)
+                // console.log('rcvd msg',data);
+                
                 setLoading(false)
                 const msgs = JSON.parse(data[0]?.chats)
                 
                 setChatMsg(msgs);
                 setChatHistory(data[0])
-                setChatTitle(data[0].chat_title)
+                setChatTitle(data[0].chat_title);
+                setFolderId(data[0].folder_id)
                 // console.log(data)
             }
             // else if(data.length === 0){
@@ -422,19 +418,12 @@ const ChatWindow = () => {
     }, [userMsg]);
 
     useEffect(()=> {
-        if(chat_id !== 'new'){
-            setRcvdMsg('')
-            localStorage.setItem('chatSessionID', chat_id)
-        }
-    }, [chat_id])
-
-    useEffect(()=> {
         setShowAdvance(false);
-        setMsgLoader(false)
-        if(chatSessionID !== 'new' && chatSessionID){
-            getChatHistory(chatSessionID)
-            setChatSessionId(chatSessionID);
-            
+        // setMsgLoader(false)
+        if(chat_id !== 'new' && chat_id){
+            getChatHistory(chat_id)
+            setChatSessionId(chat_id);
+            localStorage.setItem('chatSessionID', chat_id)
         }else{
             setRcvdMsg('')
             setChatMsg([])
@@ -442,14 +431,18 @@ const ChatWindow = () => {
             setChatSessionId('new');
             localStorage.removeItem('chatSessionID')
         }
-    }, [chatSessionID]);
+        
+    }, [chat_id]);
+
+    // useEffect(()=> {console.log(folderId)}, [folderId])
 
     return (
         <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2'>
             <div className='w-full flex justify-between px-4 py-2 h-fit '>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
-                    <Image src={Logo} alt='folder.chat'/>
-                    
+                    {/* <Image src={Logo} alt='folder.chat'/> */}
+                    <span className='text-sm leading-5 font-400'>Name : {currentDOCName.name || 'No Doc Uploaded'}</span>
+                    {/* <AllContext /> */}
                     {/* <p className='text-sm font-[500] leading-5'>{chatMsgs[0]?.files[0]?.name || 'New Doc 001'}</p>
                     <Dialog onOpenChange={() => setDocName('')}>
                         <DialogTrigger asChild>

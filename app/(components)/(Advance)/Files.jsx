@@ -232,6 +232,7 @@ const Files = () => {
 
 
     async function deleteConnector(id1, id2){
+        return null
         try {
             const body = {
                 "connector_id": id1,
