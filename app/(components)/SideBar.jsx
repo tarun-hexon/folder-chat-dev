@@ -55,8 +55,10 @@ const FolderCard = (props) => {
         if(id === 'new-chat'){
             localStorage.setItem('folderId', fol_id);
             setFolderId(fol_id);
-            setFileName('chat')
-            router.push('/chat/new')
+            setFileName('chat');
+            localStorage.removeItem('chatSessionID')
+            window.history.replaceState('', '', `/chat/new`);
+            // router.push('/chat/new')
         }else if(id === 'upload'){
             setFileName('upload')
         }

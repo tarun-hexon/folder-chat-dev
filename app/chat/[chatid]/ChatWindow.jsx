@@ -47,6 +47,7 @@ const ChatWindow = () => {
     const current_url = window.location.href;
 
     const chat_id = current_url.split("/chat/")[1];
+
     const router = useRouter();
     const { toast } = useToast();
 
@@ -67,6 +68,7 @@ const ChatWindow = () => {
             await insertChatInDB([userMsgdata], chatTitle, json?.chat_session_id, localStorage.getItem('folderId'));
 
             window.history.replaceState('', '', `/chat/${json.chat_session_id}`);
+            
 
             await sendChatMsgs(userMsgdata, json.chat_session_id, parentMessageId);
             
@@ -129,7 +131,7 @@ const ChatWindow = () => {
     };
 
     async function createChatTitle(session_id, name, userMessage){
-        console.log(session_id, name, userMessage)
+        // console.log(session_id, name, userMessage)
         try {
             const data = await fetch('https://danswer.folder.chat/api/chat/rename-chat-session', {
                 method:'PUT',
@@ -174,7 +176,7 @@ const ChatWindow = () => {
         }            
     };
     async function updateTitle(value, id){
-        console.log(value, id)
+        // console.log(value, id)
         try {
             // const id = await getSess();
             const { data, error } = await supabase
@@ -195,7 +197,7 @@ const ChatWindow = () => {
 
 
     async function updateChats(bot, user, oldChat){
-        console.log(localStorage.getItem('chatSessionID'))
+        // console.log(localStorage.getItem('chatSessionID'))
         
         var newMsg = [bot, user, ...oldChat]
         // if(type === 'both'){
@@ -216,7 +218,7 @@ const ChatWindow = () => {
                 .eq('session_id', localStorage.getItem('chatSessionID'))
                 .select()
             if(data.length){
-                console.log('updated res',data)
+                // console.log('updated res',data)
                 setChatHistory(data[0])
             }else if(error){
                 throw error
@@ -396,7 +398,7 @@ const ChatWindow = () => {
                 .select('*')
                 .eq('session_id', id);
             if(data.length){
-                console.log('rcvd msg',data)
+                // console.log('rcvd msg',data)
                 setLoading(false)
                 const msgs = JSON.parse(data[0].chats)
                 
@@ -421,24 +423,22 @@ const ChatWindow = () => {
     }, [userMsg]);
 
     useEffect(() => {
+        alert(chat_id)
         setShowAdvance(false);
-        // setChatMsgs(currentFol)
+        // setChatMsgs(currentFol);
+        console.log('inside useEff')
         if(chat_id === 'new'){
+            console.log('inside new')
+            setChatMsg([])
             setLoading(false)
             setChatSessionId(null);
             localStorage.removeItem('chatSessionID')
         }else{
             getChatHistory(chat_id)
             setChatSessionId(chat_id);
-            localStorage.setItem('chatSessionID', chat_id)
-
         }
-        // console.log(chat_id);
-        
-        
+
     }, [chat_id]);
-
-
 
     return (
         <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2'>
