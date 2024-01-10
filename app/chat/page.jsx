@@ -30,9 +30,6 @@ const Page = () => {
     
     useEffect(()=> {
         getSess();
-        // if(userSession !== null){
-        //   router.push('/chat/new')
-        // }
     }, []);
 
 

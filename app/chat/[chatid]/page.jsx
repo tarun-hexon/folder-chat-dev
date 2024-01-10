@@ -1,7 +1,7 @@
 'use client'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
-import { fileNameAtom, folderAtom, folderIdAtom, openMenuAtom, sessionAtom, currentDOCNameAtom } from '../../store'
+import { fileNameAtom, folderAtom, folderIdAtom, openMenuAtom, sessionAtom, currentDOCNameAtom, existConnectorAtom } from '../../store'
 import { useRouter } from 'next/navigation'
 import supabase from '../../../config/supabse'
 import uploadIcon from '../../../public/assets/upload-cloud.svg'
@@ -13,6 +13,7 @@ import ChatWindow from './ChatWindow';
 import { SideBar, AdvancePage } from '../../(components)'
 import { useToast } from '../../../components/ui/use-toast'
 import { fetchCCPairId } from '../../../lib/helpers'
+import { Input } from '../../../components/ui/input'
 
 
 const Chat = () => {
@@ -24,13 +25,18 @@ const Chat = () => {
   const [fileName, setFileName] = useAtom(fileNameAtom);
   const [folder, setFolder] = useAtom(folderAtom);
   const [folderId, setFolderId] = useAtom(folderIdAtom);
-  const [existConnector ,setExistConnector] = useState([]);
-  const [ccIDS, setCcIDS] = useState([]);
+  const [existConnector, setExistConnector] = useAtom(existConnectorAtom);
+  const [ccIDs, setCCIds] = useState([]);
   const [currentDOC, setCurrentDoc] = useState([]);
   const [currentDOCName, setCurrentDocName] = useAtom(currentDOCNameAtom);
-
+  const [context, setContext] = useState({
+    name:'',
+    description:''
+  })
   const [uploading, setUploading] = useState(false);
-  
+  const current_url = window.location.href;
+
+  const chat_id = current_url.split("/chat/")[1];
   const { toast } = useToast();
 
   async function getSess() {
@@ -52,19 +58,25 @@ const Chat = () => {
     });
   };
 
-
-
   const onDrop = (acceptedFiles) => {
+    if(existConnector[0]?.doc_set_name === '' && context.name === ''){
+      return toast({
+        variant: 'destructive',
+        title: "Give your context a name first!"
+      });
+    }
     if (acceptedFiles && acceptedFiles.length > 0) {
       setUploading(true)
       const file = acceptedFiles[0];
 
       const fileType = file.name.split('.')[1]
       if (fileType !== 'pdf' && fileType !== 'txt') {
+        setLoading(false)
         toast({
           variant: 'destructive',
           title: "This File type is not supported!"
         });
+        
         return null
       }
 
@@ -122,13 +134,7 @@ const Chat = () => {
 
       );
       const json = await data.json();
-      
-      if(existConnector.length === 0){
-        await insertDataInConn([json.id])
-    }else{
-        await updatetDataInConn(existConnector, json.id)
-    }
-      console.log('conn done', json)
+     
       getCredentials(json.id, file)
     } catch (error) {
       console.log('error while connectorRequest :', error)
@@ -177,10 +183,21 @@ const Chat = () => {
         body: JSON.stringify({ 'name': file.name })
       });
       const json = await data.json();
-      console.log('send done', json)
+      
       await runOnce(connectID, credID);
       setCurrentDoc(json.data);
-      await setDocumentSet(json.data, file.name)
+      setTimeout(async()=> {
+        if(existConnector.length === 0){
+          console.log('inside if')
+          await setDocumentSet(connectID, context.name, context.description);
+        }else{
+            
+              await updateDocumentSet(existConnector[0].doc_set_id, connectID, context.description)
+              await updatetDataInDB(existConnector, connectID)
+          
+        } 
+      }, 2000)
+      
     } catch (error) {
       console.log('error while sendURL:', error)
       setUploading(false)
@@ -224,104 +241,189 @@ const Chat = () => {
       });
     }
   };
-async function setDocumentSet(cc, f_name){
-  const res = await fetch('https://danswer.folder.chat/api/manage/admin/document-set', {
-    method:'POST',
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body:JSON.stringify({
-      "name": f_name,
-      "description": "dummy desc",
-      "cc_pair_ids": [
-        cc
-      ]
-  })
-  })
-}
+
+  async function setDocumentSet(ccID, f_name, des){
+    console.log(ccID, f_name, des)
+    const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    const json = await data.json();
+    
+    const docSetid = []
+    for(const pair_id of json){
+      if(pair_id?.connector?.id === ccID){
+        docSetid.push(pair_id?.cc_pair_id);
+      }
+    };
+    
+    if(docSetid.length === 0){
+      return null
+    }
+    
+    try {
+      console.log(docSetid)
+      const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+        method:'POST',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body:JSON.stringify({
+          "name": f_name,
+          "description": des,
+          "cc_pair_ids": docSetid
+        })
+      });
+      
+      const id = await res.json();
+      
+      toast({
+        variant: 'default',
+        title: "Document Set Created!"
+      });
+      setContext({name:'', description:''})
+      await insertDataInConn([ccID], f_name, id)
+      
+    } catch (error) {
+      console.log(error)  ;
+      toast({
+        variant: 'destructive',
+        title: "Some Error Occured!"
+      });
+    }
+  }
+
+  async function updateDocumentSet(db_id, ccID, des){
+    const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    const json = await data.json();
+
+    const docSetid = [];
+    for(const pair_id of json){
+      if(pair_id?.connector?.id===ccID){
+        docSetid.push(pair_id?.cc_pair_id);
+      }
+    };
+    console.log(docSetid);
+    if(docSetid.length === 0){
+      return null
+    }
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+        method:'PATCH',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body:JSON.stringify({
+          "id": db_id,
+          "description": des,
+          "cc_pair_ids": docSetid
+        })
+      });
+      setContext({name:'', description:''})
+      return toast({
+        variant: 'default',
+        title: "Document Update!"
+      });
+    } catch (error) {
+      
+    }
+  }
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
-  async function insertDataInConn(newData){
+
+  async function insertDataInConn(newData, doc_name, doc_id){
                
     const { data, error } = await supabase
     .from('connectors')
     .insert(
-      { 'connect_id': newData, 'user_id' : userSession.user.id, 'folder_id':folderId },
+      { 'connect_id': newData, 'user_id' : userSession.user.id, 'folder_id':folderId, 'doc_set_name':doc_name,  'doc_set_id':doc_id},
     )
     .select()
-    // console.log(data)
-    // console.log(error)
-    setExistConnector(data[0].connect_id)
+    console.log(data)
+    console.log(error)
+    if(data.length > 0){
+      setExistConnector(data)
+    }
   };
 
-  async function updatetDataInConn(exConn, newData){
-    
-    const allConn = [...exConn, newData]
+  async function updatetDataInDB(exConn, newData){
+    // console.log(exConn, newData, folderId)
+    const allConn = [...exConn[0].connect_id, newData]
     const { data, error } = await supabase
     .from('connectors')
     .update(
-      { 'connect_id': allConn },
+      { 'connect_id': allConn},
     )
     .eq('folder_id', folderId)
     .select()
-    // console.log(data)
-    // console.log(error)
-    setExistConnector(data[0].connect_id)
+    console.log(data)
+    console.log(error)
+    if(data.length){
+      setExistConnector(data)
+    }
   };
 
-async function readData(){
+  async function indexingStatus(f_id){
     try {
-        const cc_ids = await fetchCCPairId();
-        if(cc_ids){
-          setCcIDS(cc_ids);
-        }
-        const { data, error } = await supabase
-        .from('connectors')
-        .select('connect_id')
-        .eq('folder_id', folderId);
-        if(error){
-            throw error
-        }else{
-            if(data.length > 0){
-                setExistConnector(data[0].connect_id);
-                for (const name of ccIDS){
-                    if(name.cc_pair_id === data[0].connect_id[data[0].connect_id.length-1]){
-                      setCurrentDocName({name:name.name, id:name.cc_pair_id})
-                    }
-                }
-                return data[0].connect_id
-            }else{
-                setExistConnector([])
-                setCurrentDocName({name:'', id:null})
-                return []
-            }
-        }
+        const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+        const json = await data.json();
+        // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
         
+        const allConID = await readData(f_id);
+        
+        var cc_p_id = []
+        for(const cc_id of json){
+          if(allConID?.includes(cc_id?.connector?.id)){
+            cc_p_id.push(cc_id)
+          }
+        };
+        return cc_p_id
     } catch (error) {
-        setExistConnector([])
         console.log(error)
+        
+    }
+
+};
+async function readData(f_id){
+   
+    const { data, error } = await supabase
+    .from('connectors')
+    .select('*')
+    .eq('folder_id', f_id);
+    
+    if(data?.length > 0){
+      
+      setExistConnector(data)
+        var arr = []
+        for(const val of data){
+            arr.push(...val.connect_id)
+        };
+        // setExistConnector(arr)
+        return data[0].connect_id
+    }else{
+      setExistConnector([])
     }
 };
-
   useEffect(() => {
     getSess();
-    
-    
+    indexingStatus(folderId)
+    console.log(folderId)
     if(userSession){
       setLoading(false)
     }
     
-  }, [folder]);
-
-
-  useEffect(()=> {
-    folderId && readData()
   }, [folderId]);
 
 
+  // useEffect(()=> {
+  //   if(folderId !== ''){
+  //     console.log(folderId)
+  //     readData(folderId)
+  //   }
+  //   console.log(folderId, 'folid')
+  // }, [folderId]);
+
+
   useEffect(()=> {
+    
       console.log(existConnector)
-    },
-  [existConnector])
+  },[existConnector])
 
 
   if (loading || !userSession) {
@@ -349,12 +451,18 @@ async function readData(){
           </div>
           :
           <>
-            <div>
+            {existConnector.length === 0 &&  <div>
               <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>This folder is empty</p>
               <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Upload a document to start</p>
+            </div>}
+            <div className='w-[70%] text-start space-y-2'>
+              <div><Label className='text-start' htmlFor='context'>Name Of Context</Label>
+              <Input type='text' placeholder='' id='context' disabled={existConnector.length !== 0} value={existConnector[0]?.doc_set_name || context.name} onChange={(e) => setContext({...context, name:e.target.value})}/></div>
+              <div><Label className='text-start' htmlFor='context'>Description</Label>
+              <Input type='text' placeholder='' id='context' value={context.description} onChange={(e) => setContext({...context, description:e.target.value})}/></div>
             </div>
             <div
-              className={`w-[70%] border flex justify-center items-center bg-[#EFF5F5] p-32 ${isDragActive ? 'opacity-50' : ''}`}
+              className={`w-[70%] border flex justify-center items-center bg-[#EFF5F5] p-20 ${isDragActive ? 'opacity-50' : ''}`}
               {...getRootProps()}
             >
               <Label htmlFor='upload-files' className='flex flex-col items-center justify-center' >

@@ -33,15 +33,16 @@ const Indexing = () => {
     const [loading, setLoading] = useState(true)
     const [ccPairId, setCcPairId] = useState(null);
     const [open, setOpen] = useState(ccPairId !== null);
-    const [session, setSession] = useAtom(sessionAtom)
+    const [session, setSession] = useAtom(sessionAtom);
+
     async function indexingStatus(){
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
             const json = await data.json();
             // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
-            // console.log(isId)
+            // console.log(json)
             const allConID = await readData();
-            // console.log(allConID)
+            
             const filData = json.filter((item)=> { if(allConID?.includes(item?.connector?.id)) return item });
             // console.log(filData)
             setTableData(filData);
@@ -58,8 +59,15 @@ const Indexing = () => {
         .from('connectors')
         .select('connect_id')
         .eq('user_id', session.user.id);
-        return (data[0].connect_id)
-      };
+        
+        if(data.length > 0){
+            var arr = []
+            for(const val of data){
+                arr.push(...val.connect_id)
+            };
+            return arr
+        }
+    };
 
     function iconSelectore(icon){
         if(icon === "web"){

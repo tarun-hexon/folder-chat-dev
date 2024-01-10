@@ -68,6 +68,8 @@ const FolderCard = (props) => {
         } else if (id === 'upload') {
             setFileName('upload');
             setFolderId(fol_id)
+            window.history.replaceState('', '', `/chat/new`);
+            
         }
         setPopOpen(false)
     };
@@ -156,10 +158,9 @@ const FolderCard = (props) => {
                                             <span>{option.title}</span>
                                         </div>
                                         :
-
-                                        <AlertDialog>
+                                        <AlertDialog key={option.id}>
                                             <AlertDialogTrigger asChild>
-                                                <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer">
+                                                <div  className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer">
                                                     <option.icon className="mr-2 h-4 w-4" />
                                                     <span>{option.title}</span>
                                                 </div>
@@ -181,13 +182,10 @@ const FolderCard = (props) => {
 
                                             </AlertDialogContent>
                                         </AlertDialog>
-
                                 )
                             })}
-
                         </PopoverContent>
                     </Popover>
-
                 </div>
                 <AccordionContent className='flex flex-col gap-2 p-1'>
                     {
@@ -205,8 +203,7 @@ const FolderCard = (props) => {
                                             <span className='font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis' onClick={() => setFileName('chat')}>{data?.chat_title || 'New Chat'}</span>
                                             {/* {isRenamingChat ? 
                                                 <input type='text' value={chatName} onChange={(e)=> setChatName(e.target.value)} className='rounded-md px-1 w-[90%]'/>
-                                                :
-                                                   
+                                                :    
                                         } */}
                                         </div>
                                         {/* {chat_id === data.session_id &&
@@ -248,13 +245,9 @@ const FolderCard = (props) => {
                                 )
                             })
                     }
-
                 </AccordionContent>
-
             </AccordionItem>
         </Accordion>
-
-
     )
 }
 

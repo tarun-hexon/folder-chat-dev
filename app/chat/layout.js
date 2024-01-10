@@ -2,7 +2,7 @@
 
 import { useAtom } from 'jotai';
 import { SideBar } from '../(components)';
-import { sessionAtom } from '../store';
+import { allConnecorsAtom, sessionAtom } from '../store';
 import { useEffect } from 'react';
 import supabase from '../../config/supabse';
 import Logo from "../../public/assets/Logo.svg"
@@ -10,10 +10,14 @@ import shareIcon from '../../public/assets/Navbar_Share.svg'
 import openDocIcon from '../../public/assets/Navbar_OpenDoc.svg'
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { fetchCCPairId } from '../../lib/helpers';
 
 
 export default function RootLayout({ children }) {
-    const [session, setSession] = useAtom(sessionAtom)
+    const [session, setSession] = useAtom(sessionAtom);
+    const [allConnectors, setAllConnectors] = useAtom(allConnecorsAtom);
+
+
     const router = useRouter();
     
     async function getSess() {
@@ -21,11 +25,10 @@ export default function RootLayout({ children }) {
           if (session) {
             setSession(session);
             if (session?.user?.user_metadata?.onBoarding) {
-              
             } else {
               router.push('/signup')
             }
-    
+
           }
           else {
             
@@ -34,9 +37,17 @@ export default function RootLayout({ children }) {
         });
       };
 
+      async function getConn(){
+        const connectors = await fetchCCPairId();
+        if(connectors.length > 0){
+          setAllConnectors(connectors)
+        }
+      }
       useEffect(()=> {
+        getConn()
         getSess()
-      }, [])
+      }, []);
+
     if(!session){
         return null
     }
@@ -45,7 +56,6 @@ export default function RootLayout({ children }) {
         <div className={`w-[28%] min-h-screen`}>
             <SideBar />
         </div>
-        
         { children }
     </div>
   )
