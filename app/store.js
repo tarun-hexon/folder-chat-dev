@@ -18,6 +18,7 @@ export const supabaseUserDataAtom = atom(null);
 export const chatHistoryAtom = atom({});
 export const chatSessionIDAtom = atom('new')
 export const currentDOCNameAtom = atom({name:'', id:null});
+export const existConnectorDetailsAtom = atom([])
 export const chatTitleAtom = atom('')
 export const allConnecorsAtom = atom([]);
 export const existConnectorAtom = atom([]);

@@ -9,7 +9,7 @@ import Image from 'next/image'
 import { iconSelector } from '../../../config/constants'
 import { Folder, Loader2, Plus, MoreHorizontal } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom, currentDOCNameAtom, existConnectorAtom } from '../../store'
+import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom, currentDOCNameAtom, existConnectorAtom, existConnectorDetailsAtom } from '../../store'
 import ReactMarkdown from "react-markdown";
 import supabase from '../../../config/supabse'
 import { useToast } from '../../../components/ui/use-toast'
@@ -51,7 +51,7 @@ const ChatWindow = () => {
     const [textFieldDisabled, setTextFieldDisabled] = useState(false);
     const [chatSessionID, setChatSessionID] = useAtom(chatSessionIDAtom);
     const [currentDOCName, setCurrentDocName] = useAtom(currentDOCNameAtom);
-    const [existConnectorDetails, setExistConnectorDetails] = useState(null);
+    const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
     const [existConnectorName, setExistConnectorName] = useAtom(existConnectorAtom);
     const [inputDocDes, setInputDocDes] = useState('');
     const [ccIDS, setCcIDS] = useState([]);
@@ -401,12 +401,11 @@ const ChatWindow = () => {
 
                 setLoading(false)
                 const msgs = JSON.parse(data[0]?.chats)
-
                 setChatMsg(msgs);
                 setChatHistory(data[0])
                 setChatTitle(data[0].chat_title);
                 // console.log(data[0]?.folder_id)
-                await readData(data[0]?.folder_id)
+                // await readData(data[0]?.folder_id)
                 setFolderId(data[0].folder_id)
                 // console.log(data)
             }
@@ -419,35 +418,35 @@ const ChatWindow = () => {
             console.log(error)
         }
     };
-    async function readData() {
-        try {
-            const cc_ids = await fetchCCPairId();
-            // console.log(cc_ids)
+    // async function readData() {
+    //     try {
+    //         const cc_ids = await fetchCCPairId();
+    //         // console.log(cc_ids)
             
-            if (existConnectorName.length > 0) {
-                setExistConnectorDetails([])
-                newDocSet.clear()
+    //         if (existConnectorName.length > 0) {
+    //             setExistConnectorDetails([])
+    //             newDocSet.clear()
 
-                for (const value of cc_ids) {
-                    for (const id of existConnectorName[0].connect_id) {
-                        if(value?.connector?.id === id){
-                            setExistConnectorDetails((prev) => [...prev, value])
-                        }
+    //             for (const value of cc_ids) {
+    //                 for (const id of existConnectorName[0].connect_id) {
+    //                     if(value?.connector?.id === id){
+    //                         setExistConnectorDetails((prev) => [...prev, value])
+    //                     }
                         
-                    }
-                }
+    //                 }
+    //             }
 
-            } else {
-                setExistConnectorDetails([])
+    //         } else {
+    //             setExistConnectorDetails([])
 
-                return []
-            }
+    //             return []
+    //         }
 
-        } catch (error) {
-            setExistConnectorDetails([])
-            console.log(error)
-        }
-    };
+    //     } catch (error) {
+    //         setExistConnectorDetails([])
+    //         console.log(error)
+    //     }
+    // };
     async function updateDocumentSet(ccID, des){
         if(!existConnectorName[0]?.doc_set_id){
           return null
@@ -505,7 +504,7 @@ const ChatWindow = () => {
 
     }, [chat_id]);
 
-    useEffect(() => {  readData() }, [folderId])
+    // useEffect(() => {  readData() }, [folderId])
 
     return (
         <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2'>

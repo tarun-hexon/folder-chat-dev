@@ -1,7 +1,7 @@
 'use client'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
-import { fileNameAtom, folderAtom, folderIdAtom, openMenuAtom, sessionAtom, currentDOCNameAtom, existConnectorAtom } from '../../store'
+import { fileNameAtom, existConnectorDetailsAtom, folderAtom, folderIdAtom, openMenuAtom, sessionAtom, currentDOCNameAtom, existConnectorAtom } from '../../store'
 import { useRouter } from 'next/navigation'
 import supabase from '../../../config/supabse'
 import uploadIcon from '../../../public/assets/upload-cloud.svg'
@@ -26,6 +26,7 @@ const Chat = () => {
   const [folder, setFolder] = useAtom(folderAtom);
   const [folderId, setFolderId] = useAtom(folderIdAtom);
   const [existConnector, setExistConnector] = useAtom(existConnectorAtom);
+  const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
   const [ccIDs, setCCIds] = useState([]);
   const [currentDOC, setCurrentDoc] = useState([]);
   const [currentDOCName, setCurrentDocName] = useAtom(currentDOCNameAtom);
@@ -373,6 +374,7 @@ const Chat = () => {
             cc_p_id.push(cc_id)
           }
         };
+        setExistConnectorDetails(cc_p_id)
         return cc_p_id
     } catch (error) {
         console.log(error)
@@ -394,7 +396,7 @@ async function readData(f_id){
         for(const val of data){
             arr.push(...val.connect_id)
         };
-        // setExistConnector(arr)
+        
         return data[0].connect_id
     }else{
       setExistConnector([])
