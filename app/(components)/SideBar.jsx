@@ -258,7 +258,7 @@ const SideBar = () => {
     const [fileName, setFileName] = useAtom(fileNameAtom);
     const [session, setSession] = useAtom(sessionAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
-
+    const [folderId, setFolderId] = useAtom(folderIdAtom);
     async function getFolders() {
         try {
             const userID = await getSess()
@@ -267,14 +267,14 @@ const SideBar = () => {
                 .from('folders')
                 .select('*')
                 .eq('workspace_id', wkID[0].id);
-            if (folders?.length === 1) {
+            if (folders?.length>0) {
+                
                 const lastFolder = folders[folders.length - 1];
-                localStorage.setItem('folderId', lastFolder.id)
+                setFolderId(lastFolder?.id)
+                localStorage.setItem('folderId', lastFolder?.id)
                 setFolder(folders);
                 return
-            } else if (folders?.length) {
-                setFolder(folders);
-            };
+            } 
             if (error) {
                 throw error
             }

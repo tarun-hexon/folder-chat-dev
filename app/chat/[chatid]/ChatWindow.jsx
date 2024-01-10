@@ -22,7 +22,7 @@ import { Button } from '../../../components/ui/button';
 import { Label } from '../../../components/ui/label'
 import { cn } from '../../../lib/utils'
 import plus from '../../../public/assets/plus.svg'
-import { connect } from 'formik'
+
 
 
 
@@ -50,11 +50,12 @@ const ChatWindow = () => {
     const [fileName, setFileName] = useAtom(fileNameAtom);
     const [textFieldDisabled, setTextFieldDisabled] = useState(false);
     const [chatSessionID, setChatSessionID] = useAtom(chatSessionIDAtom);
-    const [currentDOCName, setCurrentDocName] = useAtom(currentDOCNameAtom);
+    
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
     const [existConnectorName, setExistConnectorName] = useAtom(existConnectorAtom);
     const [inputDocDes, setInputDocDes] = useState('');
-    const [ccIDS, setCcIDS] = useState([]);
+    
+    const ccIDS = useRef([]);
     const newDocSet = new Set();
 
     const botResponse = useRef('');
@@ -418,39 +419,16 @@ const ChatWindow = () => {
             console.log(error)
         }
     };
-    // async function readData() {
-    //     try {
-    //         const cc_ids = await fetchCCPairId();
-    //         // console.log(cc_ids)
-            
-    //         if (existConnectorName.length > 0) {
-    //             setExistConnectorDetails([])
-    //             newDocSet.clear()
-
-    //             for (const value of cc_ids) {
-    //                 for (const id of existConnectorName[0].connect_id) {
-    //                     if(value?.connector?.id === id){
-    //                         setExistConnectorDetails((prev) => [...prev, value])
-    //                     }
-                        
-    //                 }
-    //             }
-
-    //         } else {
-    //             setExistConnectorDetails([])
-
-    //             return []
-    //         }
-
-    //     } catch (error) {
-    //         setExistConnectorDetails([])
-    //         console.log(error)
-    //     }
-    // };
+    
     async function updateDocumentSet(ccID, des){
+        const db_connectors = [...existConnectorName[0].cc_pair_id, ...ccID]
+        
+        console.log(db_connectors , ccID);
+
         if(!existConnectorName[0]?.doc_set_id){
           return null
         }
+        
         try {
           const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
             method:'PATCH',
@@ -460,25 +438,49 @@ const ChatWindow = () => {
             body:JSON.stringify({
               "id": existConnectorName[0]?.doc_set_id,
               "description": des,
-              "cc_pair_ids": ccID
+              "cc_pair_ids": db_connectors
             })
           });
-          setContext({name:'', description:''})
-          return toast({
-            variant: 'default',
-            title: "Document Update!"
-          });
-        } catch (error) {
           
+          updatetDataInDB(ccID)
+          setInputDocDes('')
+          if(res === null){
+            return toast({
+                variant: 'default',
+                title: "Document Update!"
+              });
+          }
+        } catch (error) {
+          console.log(error)
         }
-      }
+    }
+
+      async function updatetDataInDB(ccID){
+        const db_connectors = [...existConnectorName[0].cc_pair_id, ...ccID]
+        
+        const fol_id = folderId || localStorage.getItem('folderId')
+        console.log(fol_id)
+        const { data, error } = await supabase
+        .from('document_set')
+        .update(
+          { 'cc_pair_id': db_connectors},
+        )
+        .eq('folder_id', fol_id)
+        .select()
+        console.log(data)
+        console.log(error)
+        if(data?.length){
+            setExistConnectorName(data)
+        }
+      };
     function handleDocSet(id) {
+        
         if(newDocSet.has(id)){
             newDocSet.delete(id)
         }else{
             newDocSet.add(id)
         }
-        
+        ccIDS.current = ([...newDocSet])
         console.log([...newDocSet])
     }
     useEffect(() => {
@@ -547,7 +549,7 @@ const ChatWindow = () => {
                                 <div className='flex w-full flex-wrap gap-1'>
 
                                     {existConnectorDetails?.length > 0 &&
-                                        existConnectorDetails?.map((connector) => <div key={connector.id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 ${newDocSet.has(connector.cc_pair_id) ? 'bg-gray-100' : ''}`} onClick={() => handleDocSet(connector.cc_pair_id)}>{connector.name}</div>)}
+                                        existConnectorDetails?.map((connector) => <div key={connector.id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 ${ccIDS.current.includes(connector.cc_pair_id) ? 'bg-gray-100' : ''}`} onClick={() => handleDocSet(connector.cc_pair_id)}>{connector.name}</div>)}
                                 </div>
                                 <DialogFooter className={cn('w-full')}>
                                     <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')}onClick={()=> updateDocumentSet([...newDocSet], inputDocDes)}>Update</Button>

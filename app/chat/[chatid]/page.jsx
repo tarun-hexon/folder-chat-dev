@@ -1,7 +1,7 @@
 'use client'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
-import { fileNameAtom, existConnectorDetailsAtom, folderAtom, folderIdAtom, openMenuAtom, sessionAtom, currentDOCNameAtom, existConnectorAtom } from '../../store'
+import { fileNameAtom, existConnectorDetailsAtom, folderAtom, folderIdAtom, openMenuAtom, sessionAtom, existConnectorAtom } from '../../store'
 import { useRouter } from 'next/navigation'
 import supabase from '../../../config/supabse'
 import uploadIcon from '../../../public/assets/upload-cloud.svg'
@@ -29,7 +29,7 @@ const Chat = () => {
   const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
   const [ccIDs, setCCIds] = useState([]);
   const [currentDOC, setCurrentDoc] = useState([]);
-  const [currentDOCName, setCurrentDocName] = useAtom(currentDOCNameAtom);
+
   const [context, setContext] = useState({
     name:'',
     description:''
@@ -189,12 +189,12 @@ const Chat = () => {
       setCurrentDoc(json.data);
       setTimeout(async()=> {
         if(existConnector.length === 0){
-          console.log('inside if')
+          
           await setDocumentSet(connectID, context.name, context.description);
         }else{
             
               await updateDocumentSet(existConnector[0].doc_set_id, connectID, context.description)
-              await updatetDataInDB(existConnector, connectID)
+             
           
         } 
       }, 2000)
@@ -225,13 +225,7 @@ const Chat = () => {
       });
       const json = await data.json()
       console.log('run once done', json);
-      setUploading(false)
-      toast({
-        variant: 'default',
-        title: "File Uploaded!"
-      });
       
-      setFileName('chat')
       window.history.replaceState('', '', `/chat/new`);
     } catch (error) {
       console.log('error in runOnce :', error)
@@ -244,7 +238,7 @@ const Chat = () => {
   };
 
   async function setDocumentSet(ccID, f_name, des){
-    console.log(ccID, f_name, des)
+    
     const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
     const json = await data.json();
     
@@ -260,7 +254,7 @@ const Chat = () => {
     }
     
     try {
-      console.log(docSetid)
+      
       const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
         method:'POST',
         headers: {
@@ -274,13 +268,9 @@ const Chat = () => {
       });
       
       const id = await res.json();
-      
-      toast({
-        variant: 'default',
-        title: "Document Set Created!"
-      });
+
       setContext({name:'', description:''})
-      await insertDataInConn([ccID], f_name, id)
+      await insertDataInConn(docSetid, f_name, id)
       
     } catch (error) {
       console.log(error)  ;
@@ -301,7 +291,7 @@ const Chat = () => {
         docSetid.push(pair_id?.cc_pair_id);
       }
     };
-    console.log(docSetid);
+    
     if(docSetid.length === 0){
       return null
     }
@@ -318,10 +308,7 @@ const Chat = () => {
         })
       });
       setContext({name:'', description:''})
-      return toast({
-        variant: 'default',
-        title: "Document Update!"
-      });
+      await updatetDataInDB(existConnector, docSetid)
     } catch (error) {
       
     }
@@ -331,32 +318,47 @@ const Chat = () => {
   async function insertDataInConn(newData, doc_name, doc_id){
                
     const { data, error } = await supabase
-    .from('connectors')
+    .from('document_set')
     .insert(
-      { 'connect_id': newData, 'user_id' : userSession.user.id, 'folder_id':folderId, 'doc_set_name':doc_name,  'doc_set_id':doc_id},
+      { 'cc_pair_id': newData, 'user_id' : userSession.user.id, 'folder_id':folderId, 'doc_set_name':doc_name,  'doc_set_id':doc_id},
     )
     .select()
     console.log(data)
     console.log(error)
     if(data.length > 0){
       setExistConnector(data)
+      setFileName('chat')
+      toast({
+        variant: 'default',
+        title: "File Uploaded!"
+      });
+      setUploading(false)
+
     }
   };
 
   async function updatetDataInDB(exConn, newData){
     // console.log(exConn, newData, folderId)
-    const allConn = [...exConn[0].connect_id, newData]
+    const allConn = [...exConn[0].cc_pair_id, ...newData]
     const { data, error } = await supabase
-    .from('connectors')
+    .from('document_set')
     .update(
-      { 'connect_id': allConn},
+      { 'cc_pair_id': allConn},
     )
     .eq('folder_id', folderId)
     .select()
     console.log(data)
     console.log(error)
     if(data.length){
-      setExistConnector(data)
+      setExistConnector(data);
+      setUploading(false)
+      setFileName('chat')
+      toast({
+        variant: 'default',
+        title: "File Uploaded!"
+      });
+      await indexingStatus(folderId)
+      setUploading(false)
     }
   };
 
@@ -367,10 +369,10 @@ const Chat = () => {
         // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
         
         const allConID = await readData(f_id);
-        
+        console.log(allConID)
         var cc_p_id = []
         for(const cc_id of json){
-          if(allConID?.includes(cc_id?.connector?.id)){
+          if(allConID?.includes(cc_id?.cc_pair_id)){
             cc_p_id.push(cc_id)
           }
         };
@@ -383,21 +385,19 @@ const Chat = () => {
 
 };
 async function readData(f_id){
-   
+  let fol_id = f_id
+    if(!f_id){
+      fol_id = localStorage.getItem('folderId')
+    }
     const { data, error } = await supabase
-    .from('connectors')
+    .from('document_set')
     .select('*')
-    .eq('folder_id', f_id);
+    .eq('folder_id', fol_id);
     
     if(data?.length > 0){
       
       setExistConnector(data)
-        var arr = []
-        for(const val of data){
-            arr.push(...val.connect_id)
-        };
-        
-        return data[0].connect_id
+      return data[0].cc_pair_id
     }else{
       setExistConnector([])
     }
@@ -405,7 +405,7 @@ async function readData(f_id){
   useEffect(() => {
     getSess();
     indexingStatus(folderId)
-    console.log(folderId)
+    
     if(userSession){
       setLoading(false)
     }
