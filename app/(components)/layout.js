@@ -1,7 +1,7 @@
 'use client'
 
 import { useAtom } from 'jotai';
-import { SideBar } from '../(components)';
+import { SideBar } from './(common)';
 import { allConnecorsAtom, sessionAtom } from '../store';
 import { useEffect } from 'react';
 import supabase from '../../config/supabse';
@@ -52,11 +52,13 @@ export default function RootLayout({ children }) {
         return null
     }
   return (
-    <div className='w-full flex text-center font-Inter box-border'>
+    <div className='w-full flex font-Inter box-border'>
         <div className={`w-[28%] min-h-screen`}>
             <SideBar />
         </div>
+        <div className='w-full'>
         { children }
+        </div>
     </div>
   )
 }

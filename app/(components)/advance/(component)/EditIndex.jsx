@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { DialogContent } from '../../../components/ui/dialog';
-import { cn } from '../../../lib/utils';
+import { DialogContent } from '../../../../components/ui/dialog';
+import { cn } from '../../../../lib/utils';
 import { Loader2 } from 'lucide-react';
-import { Button } from '../../../components/ui/button';
+import { Button } from '../../../../components/ui/button';
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
-} from "../../../components/ui/tooltip"
-import { fetchConnectorStatus } from '../../../lib/helpers';
-import { useToast } from '../../../components/ui/use-toast';
+} from "../../../../components/ui/tooltip"
+import { fetchConnectorStatus } from '../../../../lib/helpers';
+import { useToast } from '../../../../components/ui/use-toast';
 
 
 const EditIndex = ({ cc_pair_id }) => {

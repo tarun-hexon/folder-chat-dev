@@ -1,6 +1,7 @@
+'use client'
 import React, { useState } from 'react'
 import Image from 'next/image';
-import { Indexing, Slack, GitPrs, Files, Drive, Confluence, Web } from '../index' 
+import { Indexing, Slack, GitPrs, Files, Drive, Confluence, Web } from '../(common)/index' 
 import { Input } from '../../../components/ui/input';
 import searchIcon from '../../../public/assets/search.svg';
 import gDriveIcon from '../../../public/assets/Danswer-google-B.svg'

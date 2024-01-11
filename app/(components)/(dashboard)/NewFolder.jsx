@@ -26,6 +26,7 @@ import { Folder } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { isUserExist } from '../../../config/lib';
 import supabase from '../../../config/supabse';
+import { useRouter } from 'next/navigation';
 
 const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     const [folder, setFolder] = useAtom(folderAtom);
@@ -35,6 +36,7 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     const [inputError, setInputError] = useState(false);
     const [session, setSession] = useAtom(sessionAtom);
     const [fileName, setFileName] = useAtom(fileNameAtom);
+    const router = useRouter()
     const id = uuidv4()
     const [fol, setFol] = useState({
         id: id,
@@ -62,7 +64,15 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
             const { data, error } = await supabase
                 .from('folders')
                 .insert([
-                    { workspace_id: wkID[0].id, user_id: session.user.id, name:folderData.title, description:folderData.description, function:folderData.function, is_active:true, chat_enabled:true},
+                    { 
+                        'workspace_id': wkID[0].id, 
+                        'user_id': session.user.id, 
+                        'name' :folderData.title, 
+                        'description':folderData.description, 
+                        'function':folderData.function, 
+                        'is_active':true, 
+                        'chat_enabled':true 
+                    }
                 ])
                 .select();
                 if(data){
@@ -71,8 +81,9 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                     setFolderAdded(prev => !prev)
                     setOpen(false);
                     setFolderId(data[0].id)
-                    setFileName('upload')
-                    window.history.replaceState('', '', `/chat/new`);
+                    setFileName('upload');
+                    router.push(`/chat/new`)
+                    // window.history.replaceState('', '', `/chat/new`);
                     return 
                 }
                 throw error

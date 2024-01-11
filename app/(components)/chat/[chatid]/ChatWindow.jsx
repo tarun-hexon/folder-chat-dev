@@ -1,27 +1,28 @@
 'use client'
 import React, { useEffect, useState, useRef } from 'react'
-import sendIcon from '../../../public/assets/send.svg'
-import Logo from "../../../public/assets/Logo.svg"
-import editIcon from "../../../public/assets/edit-2.svg"
-import shareIcon from '../../../public/assets/Navbar_Share.svg'
-import openDocIcon from '../../../public/assets/Navbar_OpenDoc.svg'
+import sendIcon from '../../../../public/assets/send.svg'
+import Logo from "../../../../public/assets/Logo.svg"
+import editIcon from "../../../../public/assets/edit-2.svg"
+import shareIcon from '../../../../public/assets/Navbar_Share.svg'
+import openDocIcon from '../../../../public/assets/Navbar_OpenDoc.svg'
 import Image from 'next/image'
-import { iconSelector } from '../../../config/constants'
+import { iconSelector } from '../../../../config/constants'
 import { Folder, Loader2, Plus, MoreHorizontal } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom, currentDOCNameAtom, existConnectorAtom, existConnectorDetailsAtom } from '../../store'
+import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom, existConnectorAtom, existConnectorDetailsAtom, allConnectorsAtom } from '../../../store'
 import ReactMarkdown from "react-markdown";
-import supabase from '../../../config/supabse'
-import { useToast } from '../../../components/ui/use-toast'
-import { NewFolder } from '../../(components)/(dashboard)'
+import supabase from '../../../../config/supabse'
+import { useToast } from '../../../../components/ui/use-toast'
+import { NewFolder } from '../../(dashboard)'
 import { useRouter } from 'next/navigation'
-import { fetchCCPairId, getSess } from '../../../lib/helpers'
-import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog'
-import { Input } from '../../../components/ui/input';
-import { Button } from '../../../components/ui/button';
-import { Label } from '../../../components/ui/label'
-import { cn } from '../../../lib/utils'
-import plus from '../../../public/assets/plus.svg'
+import { fetchCCPairId, getSess } from '../../../../lib/helpers'
+import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../components/ui/dialog'
+import { Input } from '../../../../components/ui/input';
+import { Button } from '../../../../components/ui/button';
+import { Label } from '../../../../components/ui/label'
+import { cn } from '../../../../lib/utils'
+import plus from '../../../../public/assets/plus.svg'
+import { usePathname } from 'next/navigation'
 
 
 
@@ -30,6 +31,7 @@ const ChatWindow = () => {
 
 
     const [session, setSession] = useAtom(sessionAtom);
+    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
     const [loading, setLoading] = useState(true)
     const [userMsg, setUserMsg] = useState('');
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom);
@@ -50,7 +52,6 @@ const ChatWindow = () => {
     const [fileName, setFileName] = useAtom(fileNameAtom);
     const [textFieldDisabled, setTextFieldDisabled] = useState(false);
     const [chatSessionID, setChatSessionID] = useAtom(chatSessionIDAtom);
-    
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
     const [existConnectorName, setExistConnectorName] = useAtom(existConnectorAtom);
     const [inputDocDes, setInputDocDes] = useState('');
@@ -61,8 +62,9 @@ const ChatWindow = () => {
     const botResponse = useRef('');
 
     const current_url = window.location.href;
+    const pathname = usePathname()
 
-    const chat_id = current_url.split("/chat/")[1];
+    const chat_id = pathname.split("/chat/")[1];
 
     const router = useRouter();
     const { toast } = useToast();
@@ -83,15 +85,15 @@ const ChatWindow = () => {
             const json = await data.json();
             localStorage.setItem('chatSessionID', json?.chat_session_id)
             setChatSessionID(json?.chat_session_id)
-
+            // router.push(`/chat/${json.chat_session_id}`, undefined, {shallow: true});
             window.history.replaceState('', '', `/chat/${json.chat_session_id}`);
 
-            await insertChatInDB(null, json?.chat_session_id, localStorage.getItem('folderId'));
+            await insertChatInDB(null, json?.chat_session_id, folderId);
 
             await sendChatMsgs(userMsgdata, json.chat_session_id, parentMessageId);
             await createChatTitle(json.chat_session_id, null, userMsgdata)
         } catch (error) {
-            setMsgLoader(false)
+            
             console.log('error while creating chat id:', error)
         }
     }
@@ -123,9 +125,8 @@ const ChatWindow = () => {
             setMsgLoader(true)
         }, 1000);
 
-        if (chatSessionID === 'new' || !chatSessionID || chat_id === 'new') {
-            await createChatSessionId(data);
-
+        if (chatSessionID === 'new') {
+            await createChatSessionId(data)
         } else {
 
             await sendChatMsgs(data, chatSessionID, parentMessageId)
@@ -156,17 +157,13 @@ const ChatWindow = () => {
         }
     }
     async function insertChatInDB(chatTitle, chatID, folderID) {
-        var folID = folderID
-        if (folderID === 'undefined' || folderID === null || folderID === undefined) {
-            folID = localStorage.getItem('lastFolderId')
-        }
-
+        
         try {
             const id = await getSess();
             const { data, error } = await supabase
                 .from('chats')
                 .insert({
-                    folder_id: folID,
+                    folder_id: folderID,
                     user_id: id,
                     chats: null,
                     chat_title: chatTitle,
@@ -183,12 +180,12 @@ const ChatWindow = () => {
         }
     };
     async function updateTitle(value, id) {
-        // console.log(value, id)
+        
         try {
-            // const id = await getSess();
+            
             const { data, error } = await supabase
                 .from('chats')
-                .update({ chat_title: value })
+                .update({ 'chat_title': value })
                 .eq('session_id', id)
                 .select()
             if (data.length) {
@@ -203,19 +200,20 @@ const ChatWindow = () => {
     };
 
 
-    async function updateChats(bot, user, oldChat) {
+    async function updateChats(bot, user, oldChat, msgID) {
         var newMsg = [bot, user, ...oldChat]
 
         try {
 
             const { data, error } = await supabase
                 .from('chats')
-                .update({ chats: JSON.stringify(newMsg) })
+                .update({ 'chats': JSON.stringify(newMsg), 'message_id':msgID })
                 .eq('session_id', localStorage.getItem('chatSessionID'))
                 .select()
             if (data.length) {
-                console.log('updated res', data);
+                
                 if (data[0].chats) {
+                    setParentMessageId(data[0]?.message_id)
                     const msgs = JSON.parse(data[0]?.chats)
 
                     setChatMsg(msgs);
@@ -245,6 +243,7 @@ const ChatWindow = () => {
     };
 
     async function sendChatMsgs(userMsg, chatID, parent_ID) {
+        
         try {
             const sendMessageResponse = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/send-message`, {
                 method: 'POST',
@@ -262,7 +261,7 @@ const ChatWindow = () => {
                         "real_time": true,
                         "filters": {
                             "source_type": null,
-                            "document_set": existConnectorName[0]?.doc_set_id === null ? null : [existConnectorName[0]?.doc_set_name],
+                            "document_set": existConnectorName.length === 0 ? null : [existConnectorName[0]?.doc_set_name],
                             "time_cutoff": null
                         }
                     }
@@ -326,16 +325,12 @@ const ChatWindow = () => {
                     } else if (obj.parent_message) {
 
                         setResponseObj(obj);
-                        console.log({ 'bot': botResponse.current }, { 'user': userMsg }, chatMsg)
+                        console.log(obj)
 
-                        await updateChats({ 'bot': botResponse.current }, { 'user': userMsg }, chatMsg)
+                        await updateChats({ 'bot': botResponse.current }, { 'user': userMsg }, chatMsg, obj.message_id)
                         botResponse.current = ''
                         setMsgLoader(false)
-                    }
-                    else if (obj.parent_message && parentMessageId === null) {
-                        setParentMessageId(obj.parent_message)
-
-                    } else if (obj.error) {
+                    }else if (obj.error) {
                         setMsgLoader(false);
                         return toast({
                             variant: 'destructive',
@@ -398,17 +393,17 @@ const ChatWindow = () => {
                 .select('*')
                 .eq('session_id', id);
             if (data[0]?.chats) {
-                // console.log('rcvd msg',data);
-
-                setLoading(false)
-                const msgs = JSON.parse(data[0]?.chats)
-                setChatMsg(msgs);
-                setChatHistory(data[0])
-                setChatTitle(data[0].chat_title);
-                // console.log(data[0]?.folder_id)
-                // await readData(data[0]?.folder_id)
                 setFolderId(data[0].folder_id)
-                // console.log(data)
+                
+                const isTrue = await isDocSetExist(data[0]?.folder_id)
+                
+                if(isTrue){
+                    setLoading(false)
+                    const msgs = JSON.parse(data[0]?.chats)
+                    setChatMsg(msgs);
+                    setChatHistory(data[0])
+                    setChatTitle(data[0].chat_title);
+                }                
             }
             // else if(data.length === 0){
             //     window.history.replaceState('', '', `/chat/new`);
@@ -422,9 +417,6 @@ const ChatWindow = () => {
     
     async function updateDocumentSet(ccID, des){
         const db_connectors = [...existConnectorName[0].cc_pair_id, ...ccID]
-        
-        console.log(db_connectors , ccID);
-
         if(!existConnectorName[0]?.doc_set_id){
           return null
         }
@@ -442,7 +434,7 @@ const ChatWindow = () => {
             })
           });
           
-          updatetDataInDB(ccID)
+          await updateDataInDB(ccID)
           setInputDocDes('')
           if(res === null){
             return toast({
@@ -455,11 +447,11 @@ const ChatWindow = () => {
         }
     }
 
-      async function updatetDataInDB(ccID){
+    async function updateDataInDB(ccID){
         const db_connectors = [...existConnectorName[0].cc_pair_id, ...ccID]
         
         const fol_id = folderId || localStorage.getItem('folderId')
-        console.log(fol_id)
+        
         const { data, error } = await supabase
         .from('document_set')
         .update(
@@ -467,12 +459,11 @@ const ChatWindow = () => {
         )
         .eq('folder_id', fol_id)
         .select()
-        console.log(data)
-        console.log(error)
+
         if(data?.length){
             setExistConnectorName(data)
         }
-      };
+    };
     function handleDocSet(id) {
         
         if(newDocSet.has(id)){
@@ -483,6 +474,32 @@ const ChatWindow = () => {
         ccIDS.current = ([...newDocSet])
         console.log([...newDocSet])
     }
+
+    async function isDocSetExist(folder_id){
+        
+        try {
+            let { data: document_set, error } = await supabase
+                .from('document_set')
+                .select('doc_set_id')
+                .eq('folder_id', folder_id);
+                if(error){
+                    console.log(error)
+                    return toast({
+                        variant: 'destructive',
+                        title: "Some Error Occured While Fetching Context List"
+                      });
+                }
+                
+                if(document_set.length === 0){
+                    router.push('/chat/upload')
+                }else {
+                    setLoading(false)
+                    return true
+                }
+        } catch (error) {
+            console.log(error)
+        }
+    }
     useEffect(() => {
         resizeTextarea();
 
@@ -490,26 +507,27 @@ const ChatWindow = () => {
 
     useEffect(() => {
         setShowAdvance(false);
-        // setMsgLoader(false)
+        
         if (chat_id !== 'new' && chat_id) {
             getChatHistory(chat_id)
             setChatSessionId(chat_id);
-
             localStorage.setItem('chatSessionID', chat_id)
         } else {
             setRcvdMsg('')
             setChatMsg([])
-            setLoading(false)
+            
+            isDocSetExist(folderId);
             setChatSessionId('new');
-            localStorage.removeItem('chatSessionID')
+            localStorage.removeItem('chatSessionID');
+            
         }
+        
+    }, [chat_id, pathname, folder]);
 
-    }, [chat_id]);
 
-    // useEffect(() => {  readData() }, [folderId])
 
     return (
-        <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2'>
+        <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2 text-center'>
             <div className='w-full flex justify-between px-4 py-2 h-fit '>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
                     {/* <Image src={Logo} alt='folder.chat'/> */}
@@ -549,7 +567,7 @@ const ChatWindow = () => {
                                 <div className='flex w-full flex-wrap gap-1'>
 
                                     {existConnectorDetails?.length > 0 &&
-                                        existConnectorDetails?.map((connector) => <div key={connector.id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 ${ccIDS.current.includes(connector.cc_pair_id) ? 'bg-gray-100' : ''}`} onClick={() => handleDocSet(connector.cc_pair_id)}>{connector.name}</div>)}
+                                        existConnectorDetails?.map((connector) => <div key={connector.name} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 ${ccIDS.current.includes(connector.cc_pair_id) ? 'bg-gray-100' : ''}`} onClick={() => handleDocSet(connector.cc_pair_id)}>{connector.name}</div>)}
                                 </div>
                                 <DialogFooter className={cn('w-full')}>
                                     <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')}onClick={()=> updateDocumentSet([...newDocSet], inputDocDes)}>Update</Button>
@@ -590,9 +608,10 @@ const ChatWindow = () => {
                             <div className='flex w-full flex-col-reverse gap-2 overflow-y-scroll no-scrollbar px-3' >
                                 <hr className='w-full bg-transparent border-transparent' />
 
-                                {msgLoader &&
+                                
                                     <>
-                                        {responseObj?.context_docs?.top_documents.length > 0 && <div className='max-w-[70%] self-start float-left text-justify '>
+                                        {responseObj?.context_docs?.top_documents.length > 0 && 
+                                        <div className='max-w-[70%] self-start float-left text-justify '>
                                             {responseObj?.context_docs?.top_documents[0]?.source_type !== 'file' ?
                                                 <>
                                                     <h1 className='font-[600] text-sm leading-6'>Sources:</h1>
@@ -602,7 +621,8 @@ const ChatWindow = () => {
                                                     <a href={responseObj?.context_docs?.top_documents[0]?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(responseObj?.context_docs?.top_documents[0]?.source_type)} alt={responseObj?.context_docs?.top_documents[0]?.source_type} />{responseObj?.context_docs?.top_documents[0]?.semantic_identifier}</a> </>
                                             }
                                         </div>}
-                                        <p className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px]'>
+
+                                        {msgLoader && <p className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px]'>
                                             {rcvdMsg === '' ? <MoreHorizontal className='m-auto animate-pulse' /> :
                                                 <ReactMarkdown
                                                     className='w-full'
@@ -636,10 +656,9 @@ const ChatWindow = () => {
                                                 >
                                                     {rcvdMsg?.replaceAll("\\n", "\n")}
                                                 </ReactMarkdown>}
-                                        </p>
+                                        </p>}
 
                                     </>
-                                }
 
                                 {chatMsg?.map((msg, idx) => msg.user ?
                                     <p key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.user}</p>

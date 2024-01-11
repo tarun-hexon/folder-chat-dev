@@ -1,6 +1,6 @@
 'use client'
 import { useEffect, useState } from 'react';
-import { PostSignup, Signup, UserDetails, PostName, Header } from '../../(components)/index'
+import { PostSignup, Signup, UserDetails, PostName, Header } from '../../(components)/(common)/index'
 import { useAtom } from 'jotai'
 import { darkModeAtom, isPostSignUpCompleteAtom, isPostNameCompleteAtom, sessionAtom } from '../../store';
 import { useRouter } from 'next/navigation';

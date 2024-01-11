@@ -1,17 +1,18 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import supabase from '../../../config/supabse';
-import { Input } from '../../../components/ui/input';
-import { Button } from '../../../components/ui/button';
+import supabase from '../../../../config/supabse';
+import { Input } from '../../../../components/ui/input';
+import { Button } from '../../../../components/ui/button';
 
-import conIcon from '../../../public/assets/Danswer-confluence-B.svg';
+import conIcon from '../../../../public/assets/Danswer-confluence-B.svg';
 
-import check from '../../../public/assets/check-circle.svg';
-import trash from '../../../public/assets/trash-2.svg';
-import { useToast } from '../../../components/ui/use-toast';
-import { fetchAllConnector, fetchAllCredentials, deleteConnector, generateConnectorId, addNewInstance, deleteAdminCredentails, fetchCredentialID } from '../../../lib/helpers';
+import check from '../../../../public/assets/check-circle.svg';
+import trash from '../../../../public/assets/trash-2.svg';
+import { useToast } from '../../../../components/ui/use-toast';
+import { fetchAllConnector, fetchAllCredentials, deleteConnector, generateConnectorId, addNewInstance, deleteAdminCredentails, fetchCredentialID } from '../../../../lib/helpers';
 import { useAtom } from 'jotai';
-import { sessionAtom } from '../../store';
+import { sessionAtom, allConnectorsAtom } from '../../../store';
 
 const Confluence = () => {
     const [session, setSession] = useAtom(sessionAtom)
@@ -26,6 +27,7 @@ const Confluence = () => {
     const [connectorID, setConnectorID] = useState(null);
     const [existingCredentials, setExistingCredentials] = useState([])
     const [conJson, setConJson] = useState(null)
+    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
 
     const { toast } = useToast();
 
@@ -257,8 +259,8 @@ const Confluence = () => {
         getAllExistingConnector();
     }, [])
     return (
-        <>
-            <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-4'>
+        <div className='w-full sticky top-0 self-start h-screen flex flex-col rounded-[6px] gap-5 items-center  box-border text-[#64748B] '>
+            <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2 overflow-scroll no-scrollbar h-full px-4 py-10'>
                 <div className='flex justify-start items-center gap-2'>
                     <Image src={conIcon} alt='github' className='w-5 h-5' />
                     <h1 className='font-[600] text-[20px] leading-7 tracking-[-0.5%] text-start'>Confluence</h1>
@@ -332,7 +334,7 @@ const Confluence = () => {
                 </table>
             </div>
 
-        </>
+        </div>
     )
 }
 

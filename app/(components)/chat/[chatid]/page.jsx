@@ -1,19 +1,19 @@
 'use client'
 import { useAtom } from 'jotai'
 import React, { useEffect, useState } from 'react'
-import { fileNameAtom, existConnectorDetailsAtom, folderAtom, folderIdAtom, openMenuAtom, sessionAtom, existConnectorAtom } from '../../store'
+import { fileNameAtom, existConnectorDetailsAtom, folderAtom, folderIdAtom, openMenuAtom, sessionAtom, existConnectorAtom } from '../../../store'
 import { useRouter } from 'next/navigation'
-import supabase from '../../../config/supabse'
-import uploadIcon from '../../../public/assets/upload-cloud.svg'
+import supabase from '../../../../config/supabse'
+import uploadIcon from '../../../../public/assets/upload-cloud.svg'
 import { ChevronRightCircle, Loader2 } from 'lucide-react'
 import Image from 'next/image'
-import { Label } from '../../../components/ui/label';
+import { Label } from '../../../../components/ui/label';
 import { useDropzone } from 'react-dropzone';
 import ChatWindow from './ChatWindow';
-import { SideBar, AdvancePage } from '../../(components)'
-import { useToast } from '../../../components/ui/use-toast'
-import { fetchCCPairId } from '../../../lib/helpers'
-import { Input } from '../../../components/ui/input'
+import { SideBar, AdvancePage } from '../../(common)'
+import { useToast } from '../../../../components/ui/use-toast'
+import { fetchCCPairId } from '../../../../lib/helpers'
+import { Input } from '../../../../components/ui/input'
 
 
 const Chat = () => {
@@ -34,11 +34,12 @@ const Chat = () => {
     name:'',
     description:''
   })
+  const { toast } = useToast();
   const [uploading, setUploading] = useState(false);
   const current_url = window.location.href;
 
   const chat_id = current_url.split("/chat/")[1];
-  const { toast } = useToast();
+  
 
   async function getSess() {
     await supabase.auth.getSession().then(({ data: { session } }) => {
@@ -310,7 +311,7 @@ const Chat = () => {
       setContext({name:'', description:''})
       await updatetDataInDB(existConnector, docSetid)
     } catch (error) {
-      
+      console.log(error)
     }
   }
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
@@ -347,8 +348,7 @@ const Chat = () => {
     )
     .eq('folder_id', folderId)
     .select()
-    console.log(data)
-    console.log(error)
+    
     if(data.length){
       setExistConnector(data);
       setUploading(false)
@@ -369,7 +369,7 @@ const Chat = () => {
         // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
         
         const allConID = await readData(f_id);
-        console.log(allConID)
+        
         var cc_p_id = []
         for(const cc_id of json){
           if(allConID?.includes(cc_id?.cc_pair_id)){
@@ -389,17 +389,21 @@ async function readData(f_id){
     if(!f_id){
       fol_id = localStorage.getItem('folderId')
     }
+    console.log(fol_id)
     const { data, error } = await supabase
     .from('document_set')
     .select('*')
     .eq('folder_id', fol_id);
-    
+    console.log(data)
+    console.log(error)
     if(data?.length > 0){
       
       setExistConnector(data)
       return data[0].cc_pair_id
     }else{
-      setExistConnector([])
+      // alert('line 404')
+      setExistConnector([]);
+      // router.push('/chat/upload')
     }
 };
   useEffect(() => {
@@ -422,10 +426,10 @@ async function readData(f_id){
   // }, [folderId]);
 
 
-  useEffect(()=> {
+  // useEffect(()=> {
     
-      console.log(existConnector)
-  },[existConnector])
+  //     console.log(existConnector)
+  // },[existConnector])
 
 
   if (loading || !userSession) {
@@ -446,46 +450,47 @@ async function readData(f_id){
 
       
       {fileName === 'upload' ?
-        <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5 sticky top-0 self-start p-10 min-h-screen'>
-          {uploading ? 
-          <div className={`w-[70%] border flex justify-center items-center bg-[#EFF5F5] p-32`}>
-            Your File is uploading please wait...!
-          </div>
-          :
-          <>
-            {existConnector.length === 0 &&  <div>
-              <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>This folder is empty</p>
-              <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Upload a document to start</p>
-            </div>}
-            <div className='w-[70%] text-start space-y-2'>
-              <div><Label className='text-start' htmlFor='context'>Name Of Context</Label>
-              <Input type='text' placeholder='' id='context' disabled={existConnector.length !== 0} value={existConnector[0]?.doc_set_name || context.name} onChange={(e) => setContext({...context, name:e.target.value})}/></div>
-              <div><Label className='text-start' htmlFor='context'>Description</Label>
-              <Input type='text' placeholder='' id='context' value={context.description} onChange={(e) => setContext({...context, description:e.target.value})}/></div>
-            </div>
-            <div
-              className={`w-[70%] border flex justify-center items-center bg-[#EFF5F5] p-20 ${isDragActive ? 'opacity-50' : ''}`}
-              {...getRootProps()}
-            >
-              <Label htmlFor='upload-files' className='flex flex-col items-center justify-center' >
-                <Image src={uploadIcon} alt='upload' />
-                <div>
-                  <p className='font-[400] leading-6 text-[16px] opacity-[80%]'>Click to upload or drag and drop</p>
-                  <p className='opacity-[50%] text-sm leading-6'>PDF & TXT</p>
-                </div>
-              </Label>
-              <div
+        // <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5 sticky top-0 self-start p-10 min-h-screen'>
+        //   {uploading ? 
+        //   <div className={`w-[70%] border flex justify-center items-center bg-[#EFF5F5] p-32`}>
+        //     Your File is uploading please wait...!
+        //   </div>
+        //   :
+        //   <>
+        //     {existConnector.length === 0 &&  <div>
+        //       <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>This folder is empty</p>
+        //       <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Upload a document to start</p>
+        //     </div>}
+        //     <div className='w-[70%] text-start space-y-2'>
+        //       <div><Label className='text-start' htmlFor='context'>Name Of Context</Label>
+        //       <Input type='text' placeholder='' id='context' disabled={existConnector.length !== 0} value={existConnector[0]?.doc_set_name || context.name} onChange={(e) => setContext({...context, name:e.target.value})}/></div>
+        //       <div><Label className='text-start' htmlFor='context'>Description</Label>
+        //       <Input type='text' placeholder='' id='context' value={context.description} onChange={(e) => setContext({...context, description:e.target.value})}/></div>
+        //     </div>
+        //     <div
+        //       className={`w-[70%] border flex justify-center items-center bg-[#EFF5F5] p-20 ${isDragActive ? 'opacity-50' : ''}`}
+        //       {...getRootProps()}
+        //     >
+        //       <Label htmlFor='upload-files' className='flex flex-col items-center justify-center' >
+        //         <Image src={uploadIcon} alt='upload' />
+        //         <div>
+        //           <p className='font-[400] leading-6 text-[16px] opacity-[80%]'>Click to upload or drag and drop</p>
+        //           <p className='opacity-[50%] text-sm leading-6'>PDF & TXT</p>
+        //         </div>
+        //       </Label>
+        //       <div
 
-                {...getInputProps()}
-                type='file'
-                id='upload-files'
-                accept='.pdf, .doc, .docx, .xls, .xlsx'
-                style={{ display: 'none' }}
-              />
-            </div>
-          </>
-          }
-        </div>
+        //         {...getInputProps()}
+        //         type='file'
+        //         id='upload-files'
+        //         accept='.pdf, .doc, .docx, .xls, .xlsx'
+        //         style={{ display: 'none' }}
+        //       />
+        //     </div>
+        //   </>
+        //   }
+        // </div>
+        <h1></h1>
         :
         <div className='w-full sticky top-0 self-start h-screen'>
           {fileName === 'advance' ? <AdvancePage /> : <ChatWindow />}

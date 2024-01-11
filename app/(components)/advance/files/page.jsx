@@ -1,25 +1,22 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import { Button } from '../../../components/ui/button';
-import fileIcon from '../../../public/assets/Danswer-doc-B.svg';
-import check from '../../../public/assets/check-circle.svg';
-import trash from '../../../public/assets/trash-2.svg';
+import { Button } from '../../../../components/ui/button';
+import fileIcon from '../../../../public/assets/Danswer-doc-B.svg';
+import check from '../../../../public/assets/check-circle.svg';
+import trash from '../../../../public/assets/trash-2.svg';
 import { useDropzone } from 'react-dropzone';
-import { Label } from '../../../components/ui/label';
-import { deleteConnectorFromTable, fetchAllConnector, getSess } from '../../../lib/helpers';
+import { Label } from '../../../../components/ui/label';
+import { deleteConnectorFromTable, fetchAllConnector, getSess } from '../../../../lib/helpers';
 import { useAtom } from 'jotai';
-import { sessionAtom } from '../../store';
-import { Item } from '@radix-ui/react-accordion';
-import supabase from '../../../config/supabse';
+import { sessionAtom, allConnectorsAtom } from '../../../store';
+import supabase from '../../../../config/supabse';
 
 const Files = () => {
 
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(true)
-    // const [connectorId, setConnectorId] = useState(null);
-    // const [credentialID ,setCredentialID] = useState(null);
-    // const [fileName, setFileName] = useState('');
+    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
     const [session, setSession] = useAtom(sessionAtom);
     const [existConnector ,setExistConnector] = useState([]);
 
@@ -105,31 +102,6 @@ const Files = () => {
         setExistConnector(data[0].connect_id)
     };
 
-    async function readData(){
-        try {
-            // const id = await getSess();
-            const { data, error } = await supabase
-            .from('connectors')
-            .select('connect_id')
-            .eq('user_id', session.user.id);
-            if(error){
-                throw error
-            }else{
-                if(data !== null){
-                    setExistConnector(data[0].connect_id)
-                    return data[0].connect_id
-                }else{
-                    setExistConnector([])
-                    return []
-                }
-            }
-            
-        } catch (error) {
-            setExistConnector([])
-            console.log(error)
-        }
-    };
-
     async function getCredentials(connectID, name, file) {
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/credential`, {
@@ -200,8 +172,8 @@ const Files = () => {
                 body: JSON.stringify({'name':name})
             });
             const json = await data.json();
-            runOnce(connectID, credID);
-            await getAllExistingConnector();
+            await runOnce(connectID, credID);
+            // await getAllExistingConnector();
            
         } catch (error) {
             console.log('error while sendURL:', error)
@@ -213,7 +185,7 @@ const Files = () => {
             const data = await fetchAllConnector();
 
             //calling api bcoz soetimes local state is not updating
-            const allConID = await readData();
+            //const allConID = await readData();
 
             const currentConnector = data.filter((item)=> { if(allConID?.includes(item?.id)) return item });
 
@@ -230,6 +202,30 @@ const Files = () => {
         }
     };
 
+    async function readData(){
+        try {
+            // const id = await getSess();
+            const { data, error } = await supabase
+            .from('connectors')
+            .select('connect_id')
+            .eq('user_id', session.user.id);
+            if(error){
+                throw error
+            }else{
+                if(data !== null){
+                    setExistConnector(data[0]?.connect_id)
+                    return data[0]?.connect_id
+                }else{
+                    setExistConnector([])
+                    return []
+                }
+            }
+            
+        } catch (error) {
+            setExistConnector([])
+            console.log(error)
+        }
+    };
 
     async function deleteConnector(id1, id2){
         return null
@@ -249,15 +245,21 @@ const Files = () => {
 
 
     useEffect(()=> {
-        readData();
-        getAllExistingConnector();
-        // readData()
-        // console.log(session);
-    }, [])
-    return (
-        <>
+        // readData();
+        // getAllExistingConnector();
 
-            <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2'>
+        if(allConnectors !== null ){
+            const filData = allConnectors.filter((item)=> item?.connector?.source === 'file');
+            if(filData.length > 0){
+                setFiles(filData);
+            };
+            setLoading(false)
+        }
+        
+    }, [allConnectors])
+    return (
+        <div className='w-full sticky top-0 self-start h-screen flex flex-col rounded-[6px] gap-5 items-center  box-border text-[#64748B] '>
+             <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2 overflow-scroll no-scrollbar h-full px-4 py-10'>
                 <div className='flex justify-start items-center gap-2'>
                     <Image src={fileIcon} alt='file' className='w-5 h-5' />
                     <h1 className='font-[600] text-[20px] leading-7 tracking-[-0.5%] text-start'>Files</h1>
@@ -300,7 +302,7 @@ const Files = () => {
                             // console.log(item)
                             return (
                                 <tr className='border-b' key={idx}>
-                                    <td className="font-medium w-96 text-left p-2 py-3 text-ellipsis break-all line-clamp-1 text-emphasis">{item?.connector_specific_config?.file_locations[0].split('/')[4]}</td>
+                                    <td className="font-medium w-96 text-left p-2 py-3 text-ellipsis break-all line-clamp-1 text-emphasis">{item?.name}</td>
                                     <td>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Enabled
@@ -314,7 +316,7 @@ const Files = () => {
                 </table>
             </div>
 
-        </>
+        </div>
     )
 }
 

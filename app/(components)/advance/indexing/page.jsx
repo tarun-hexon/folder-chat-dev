@@ -1,17 +1,18 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import threeLines from '../../../public/assets/Danswer-All-B.svg'
-import gDriveIcon from '../../../public/assets/Danswer-google-B.svg'
-import web from '../../../public/assets/Danswer-web-B.svg'
-import slackIcon from '../../../public/assets/Danswer-slack-B.svg'
-import confluenceIcon from '../../../public/assets/Danswer-confluence-B.svg'
-import gitIcon from '../../../public/assets/Danswer-github-B.svg';
-import fileIcon from '../../../public/assets/Danswer-doc-B.svg';
-import check from '../../../public/assets/check-circle.svg';
-import { Dialog, DialogTrigger, DialogContent } from '../../../components/ui/dialog';
-import { iconSelector } from '../../../config/constants'
-import { timeAgo } from '../../../config/time';
-import supabase from '../../../config/supabse';
+import threeLines from '../../../../public/assets/Danswer-All-B.svg'
+import gDriveIcon from '../../../../public/assets/Danswer-google-B.svg'
+import web from '../../../../public/assets/Danswer-web-B.svg'
+import slackIcon from '../../../../public/assets/Danswer-slack-B.svg'
+import confluenceIcon from '../../../../public/assets/Danswer-confluence-B.svg'
+import gitIcon from '../../../../public/assets/Danswer-github-B.svg';
+import fileIcon from '../../../../public/assets/Danswer-doc-B.svg';
+import check from '../../../../public/assets/check-circle.svg';
+import { Dialog, DialogTrigger, DialogContent } from '../../../../components/ui/dialog';
+import { iconSelector } from '../../../../config/constants'
+import { timeAgo } from '../../../../config/time';
+import supabase from '../../../../config/supabse';
 import {
     Table,
     TableBody,
@@ -20,11 +21,11 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-  } from "../../../components/ui/table";
-import { cn } from '../../../lib/utils';
-import EditIndex from './EditIndex';
+  } from "../../../../components/ui/table";
+import { cn } from '../../../../lib/utils';
+import EditIndex from '../(component)/EditIndex';
 import { useAtom } from 'jotai';
-import { sessionAtom } from '../../store';
+import { sessionAtom, allConnectorsAtom } from '../../../store';
 
   
 
@@ -34,56 +35,9 @@ const Indexing = () => {
     const [ccPairId, setCcPairId] = useState(null);
     const [open, setOpen] = useState(ccPairId !== null);
     const [session, setSession] = useAtom(sessionAtom);
+    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
 
-    async function indexingStatus(){
-        try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
-            const json = await data.json();
-            // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
-            // console.log(json)
-            const allConID = await readData();
-            
-            const filData = json.filter((item)=> { if(allConID?.includes(item?.connector?.id)) return item });
-            // console.log(filData)
-            setTableData(filData);
-            setLoading(false)
-        } catch (error) {
-            console.log(error)
-            setLoading(false)
-        }
 
-    };
-    async function readData(){
-        // const id = await getSess();
-        const { data, error } = await supabase
-        .from('connectors')
-        .select('connect_id')
-        .eq('user_id', session.user.id);
-        
-        if(data.length > 0){
-            var arr = []
-            for(const val of data){
-                arr.push(...val.connect_id)
-            };
-            return arr
-        }
-    };
-
-    function iconSelectore(icon){
-        if(icon === "web"){
-            return web
-        }else if(icon === "file"){
-            return fileIcon
-        }else if(icon === "github"){
-            return gitIcon
-        }else if(icon === "slack"){
-            return slackIcon
-        }else if(icon === "confluence"){
-            return confluenceIcon
-        }else{
-            return gDriveIcon
-        }
-    };
     function statusBackGround(status){
         if(status === "success"){
             return ('text-[#22C55E]')
@@ -99,20 +53,16 @@ const Indexing = () => {
         dialog.click()
     }
     useEffect(()=> {
-        indexingStatus()
-        const int = setInterval(()=> {
-            indexingStatus()
-        }, 5000);
-        return ()=> {
-            clearInterval(int)
-        }
-    }, [])
+        if(allConnectors !== null ){
+            setTableData(allConnectors)
+            setLoading(false)
+        } 
+    }, [allConnectors])
 
     
     return (
-        <>
-
-            <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2'>
+        <div className='w-full sticky top-0 self-start h-screen flex flex-col rounded-[6px] gap-5 items-center  box-border text-[#64748B] '>
+             <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2 overflow-scroll no-scrollbar h-full px-4 py-10'>
                 <div className='flex justify-start items-center gap-2'>
                     <Image src={threeLines} alt='more' className='w-5 h-5' />
                     <h1 className='font-[600] text-[20px] leading-7 tracking-[-0.5%] text-start'>Indexing Status</h1>
@@ -160,7 +110,7 @@ const Indexing = () => {
                         </DialogContent>
                     </Dialog>
             </div>
-        </>
+        </div>
     )
 }
 

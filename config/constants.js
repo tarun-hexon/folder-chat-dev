@@ -38,11 +38,13 @@ export const selectOptions = [
 export const sidebarOptions = [
     {
         title: 'My Profile',
-        icon: user
+        icon: user,
+        id:'profile'
     },
     {
         title: 'Plan',
-        icon: creditCardIcon
+        icon: creditCardIcon,
+        id:'plans'
     },
     {
         title: 'Settings',
@@ -127,7 +129,7 @@ export const advanceOption = [
     icon: confluenceIcon
   },
   {
-    id:'git',
+    id:'github',
     title:'Github PRs',
     icon: gitPrsIcon
   },

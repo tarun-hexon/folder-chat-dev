@@ -1,20 +1,20 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import { Input } from '../../../components/ui/input';
-import { Button } from '../../../components/ui/button';
+import { Input } from '../../../../components/ui/input';
+import { Button } from '../../../../components/ui/button';
 
-import webIcon from '../../../public/assets/Danswer-web-B.svg'
+import webIcon from '../../../../public/assets/Danswer-web-B.svg'
 
-import check from '../../../public/assets/check-circle.svg';
-import trash from '../../../public/assets/trash-2.svg';
+import check from '../../../../public/assets/check-circle.svg';
+import trash from '../../../../public/assets/trash-2.svg';
 
-import { Label } from '../../../components/ui/label';
-import { useToast } from '../../../components/ui/use-toast';
-import { deleteConnectorFromTable, fetchAllConnector, getSess } from '../../../lib/helpers';
+import { Label } from '../../../../components/ui/label';
+import { useToast } from '../../../../components/ui/use-toast';
+import { deleteConnectorFromTable, fetchAllConnector, getSess } from '../../../../lib/helpers';
 import { useAtom } from 'jotai';
-import { sessionAtom } from '../../store';
-import supabase from '../../../config/supabse';
+import { sessionAtom, allConnectorsAtom } from '../../../store';
+import supabase from '../../../../config/supabse';
 import { Loader2 } from 'lucide-react';
 
 const Web = () => {
@@ -23,11 +23,12 @@ const Web = () => {
     const [webList, setWebList] = useState([]);
     const [connectorId, setConnectorId] = useState(null);
     const [credentialID, setCredentialID] = useState(null);
-    const [baseURL, setBaseURL] = useState('');
+    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
     const [session, setSession] = useAtom(sessionAtom);
     const [loading, setLoading] = useState(true)
     const [existConnector ,setExistConnector] = useState([])
     const { toast } = useToast();
+    
 
     async function addList(url) {
         existConnector
@@ -107,29 +108,6 @@ const Web = () => {
         setExistConnector(data[0].connect_id)
     };
 
-    async function readData(){
-        try {
-            const id = await getSess();
-            const { data, error } = await supabase
-            .from('connectors')
-            .select('connect_id')
-            .eq('user_id', id);
-            if(error){
-                throw error
-            }else{
-                if(data !== null){
-                    setExistConnector(data[0].connect_id)
-                    return data[0].connect_id
-                }else{
-                    setExistConnector([])
-                    return []
-                }
-            }
-        } catch (error) {
-            setExistConnector([]);
-            console.log(error)
-        }
-    };  
     async function getCredentials(id, baseName){
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/credential`, {
@@ -168,35 +146,16 @@ const Web = () => {
                 body: JSON.stringify({ 'name':url })
             });
             const json = await data.json();
-            await getAllExistingServerConnector()
-                setWebUrl('');
-                setCredentialID(null);
-                setConnectorId(null)
+            setWebUrl('');
+            setCredentialID(null);
+            setConnectorId(null)
         } catch (error) {
             console.log('error while sendURL:', error)
         }
     };
-    async function getAllExistingServerConnector() {
-        try {
-            const data = await fetchAllConnector();
-
-            const allConID = await readData();
-
-            const currentConnector = data.filter((item)=> { if(allConID?.includes(item?.id)) return item });
-
-            const filData = currentConnector.filter((item)=> item.source === 'web');
-
-            if(filData.length > 0){
-                setWebList(filData)
-            };
-            setLoading(false)
-        } catch (error) {
-            console.log(error);
-            setLoading(false)
-        }
-    };
 
     async function deleteConnector(id1, id2){
+        return null
         try {
             const body = {
                 "connector_id": id1,
@@ -208,13 +167,19 @@ const Web = () => {
         }
     }
     useEffect(()=> {
-        getAllExistingServerConnector();
-        readData();
-    }, [])
-    return (
-        <>
 
-            <div className='sm:w-[80%] sm:h-[30rem] w-full rounded-[6px] flex flex-col box-border space-y-2 gap-2'>
+        if(allConnectors !== null ){
+            const filData = allConnectors.filter((item)=> item?.connector?.source === 'web');
+            if(filData.length > 0){
+                setWebList(filData);
+            };
+            setLoading(false)
+        }
+        
+    }, [allConnectors])
+    return (
+        <div className='w-full sticky top-0 self-start h-screen flex flex-col rounded-[6px] gap-5 items-center  box-border text-[#64748B] '>
+             <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2 overflow-scroll no-scrollbar h-full px-4 py-10'>
                 <div className='flex justify-start items-center gap-2'>
                     <Image src={webIcon} alt='file' className='w-5 h-5' />
                     <h1 className='font-[600] text-[20px] leading-7 tracking-[-0.5%] text-start'>Web</h1>
@@ -253,7 +218,7 @@ const Web = () => {
                             
                             return (
                                 <tr className='border-b' key={idx}>
-                                    <td className="font-medium w-96 text-left px-2 py-3 text-ellipsis break-all text-emphasis overflow-hidden">{item?.connector_specific_config?.base_url}</td>
+                                    <td className="font-medium w-96 text-left px-2 py-3 text-ellipsis break-all text-emphasis overflow-hidden">{item?.name}</td>
                                     <td>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Running!
@@ -267,7 +232,7 @@ const Web = () => {
                 </table>
             </div>
 
-        </>
+        </div>
     )
 }
 

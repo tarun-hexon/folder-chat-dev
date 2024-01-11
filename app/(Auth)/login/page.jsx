@@ -13,7 +13,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react';
 
-import { Header } from '../../(components)'
+import { Header } from '../../(components)/(common)'
 
 
 const Login = () => {
@@ -51,7 +51,7 @@ const Login = () => {
         setErrorMsg(error.message);
       }else{
         getSess()
-        console.log(session)
+        
         setErrorMsg(false)
         router.push('/chat')
       }

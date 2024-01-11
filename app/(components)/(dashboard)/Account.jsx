@@ -18,6 +18,7 @@ const Account = () => {
     const [isPostOtpComplete, setPostSignupComplete] = useAtom(isPostSignUpCompleteAtom);
     const [isPostUserComplete, setPostUserComplete] = useAtom(isPostUserCompleteAtom);
     const [open, setOpen] = useState(false);
+    const [item, setItem] = useState('profile')
     const [workSpace, setWorkSpace] = useState(null)
     const router = useRouter();
     
@@ -66,21 +67,21 @@ const Account = () => {
                             {sidebarOptions.map(option => {
                                 return (
                                     option.title !== 'Settings' ? 
-                                    <div key={option.title} className='inline-flex gap-2 hover:cursor-pointer w-full'>
+                                    <div key={option.title} className='inline-flex gap-2 hover:cursor-pointer w-full' onClick={()=> {setItem(option.id); setOpen(true); }}>
                                         <Image src={option.icon} alt={option.title} />
                                         <span className='text-sm leading-5 font-[500]'>{option.title}</span>
                                     </div> :
-                                        <Dialog open={open} onOpenChange={setOpen} key={option.title}>
+                                        <Dialog open={open} onOpenChange={()=> {setOpen(!open); setItem('')}} key={option.title}>
 
                                             <DialogTrigger asChild className='self-start'>
 
-                                                <div key={option.title} className='inline-flex gap-2 hover:cursor-pointer w-full'>
+                                                <div key={option.title} className='inline-flex gap-2 hover:cursor-pointer w-full' >
                                                     <Image src={option.icon} alt={option.title} />
                                                     <span className='text-sm leading-5 font-[500]'>{option.title}</span>
                                                 </div>
 
                                             </DialogTrigger>
-                                            <Setting />
+                                            <Setting itemProp={item}/>
                                         </Dialog>
                                 )
                             })}

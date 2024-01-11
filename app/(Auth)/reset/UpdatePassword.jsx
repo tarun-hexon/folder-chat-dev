@@ -10,7 +10,7 @@ import Image from 'next/image';
 import eye_icon from '../../../public/assets/eye_icon.svg'
 import { useAtom } from 'jotai';
 import { darkModeAtom, sessionAtom } from '../../store';
-import { Header } from '../../(components)';
+import { Header } from '../../(components)/(common)';
 
 
 const UpdatePassword = () => {

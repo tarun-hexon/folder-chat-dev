@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from 'react'
-import { folderOptions } from '../../config/constants';
+import { folderOptions } from '../../../config/constants';
 import Image from 'next/image';
-import threeDot from '../../public/assets/more-horizontal.svg'
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../components/ui/accordion";
-import { Account, NewFolder } from './(dashboard)'
+import threeDot from '../../../public/assets/more-horizontal.svg'
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../components/ui/accordion";
+import { Account, NewFolder } from '../(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom, fileNameAtom, openMenuAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../store';
-import rightArrow from '../../public/assets/secondary icon.svg';
-import { Popover, PopoverContent, PopoverTrigger } from '../../components/ui/popover';
+import { folderAtom, fileNameAtom, openMenuAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../../store';
+import rightArrow from '../../../public/assets/secondary icon.svg';
+import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
 import { Pencil, Trash2, Check, X, MessageSquare, Loader2 } from 'lucide-react';
 import { Advance } from './index'
-import supabase from '../../config/supabse';
-import { isUserExist } from '../../config/lib';
+import supabase from '../../../config/supabse';
+import { isUserExist } from '../../../config/lib';
 import { useRouter } from 'next/navigation';
-import { Input } from '../../components/ui/input';
-import { getSess } from '../../lib/helpers';
-import { Dialog, DialogTrigger, DialogContent, DialogFooter } from '../../components/ui/dialog';
-import { Button } from '../../components/ui/button';
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../components/ui/alert-dialog'
+import { Input } from '../../../components/ui/input';
+import { getSess } from '../../../lib/helpers';
+import { Dialog, DialogTrigger, DialogContent, DialogFooter } from '../../../components/ui/dialog';
+import { Button } from '../../../components/ui/button';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../../components/ui/alert-dialog'
 
 
 const FolderCard = (props) => {
@@ -30,10 +30,12 @@ const FolderCard = (props) => {
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [popOpen, setPopOpen] = useState(false)
     const [isRenamingChat, setIsRenamingChat] = useState(false);
-    const [isSelected, setIsSelected] = useState(true);
+    const [isSelected, setIsSelected] = useState(false);
     const [chatSessionID, setChatSessionID] = useAtom(chatSessionIDAtom)
     const [folderId, setFolderId] = useAtom(folderIdAtom);
+    const [inputChatName, setInputChatName] = useState('')
     const current_url = window.location.href;
+
     const chat_id = current_url.split("/chat/")[1];
 
     async function getChatFiles() {
@@ -57,27 +59,26 @@ const FolderCard = (props) => {
     function handleOptionsOnclick(id, fol_id) {
 
         if (id === 'new-chat') {
-            localStorage.setItem('folderId', fol_id);
+            // localStorage.setItem('folderId', fol_id);
             setFolderId(fol_id)
             setFileName('chat');
             localStorage.removeItem('chatSessionID')
             setChatSessionID('new')
-            window.history.replaceState('', '', `/chat/new`);
-            // router.push('/chat/new')
+            // window.history.replaceState('', '', `/chat/new`);
+            router.push('/chat/new')
 
         } else if (id === 'upload') {
-            setFileName('upload');
             setFolderId(fol_id)
-            window.history.replaceState('', '', `/chat/new`);
-            
+            router.push('/chat/upload')
         }
         setPopOpen(false)
     };
-    async function deleteChats(fol_id) {
+    async function deleteChatsByFolderID(fol_id) {
         const { error } = await supabase
             .from('chats')
             .delete()
             .eq('folder_id', fol_id)
+            
     }
 
     async function deleteConne(fol_id) {
@@ -88,7 +89,7 @@ const FolderCard = (props) => {
     }
 
     async function deleteFolder(fol_id) {
-        await deleteChats(fol_id);
+        await deleteChatsByFolderID(fol_id);
         await deleteConne(fol_id);
         const { error } = await supabase
             .from('folders')
@@ -100,10 +101,12 @@ const FolderCard = (props) => {
     };
 
     function handleFilessOnclick(data) {
-        window.history.replaceState('', '', `/chat/${data.session_id}`);
+        
+        // window.history.replaceState('', '', `/chat/${data.session_id}`);
         setChatSessionID(data.session_id)
-        localStorage.setItem('folderId', data.folder_id);
-        setFileName('chat')
+        // localStorage.setItem('folderId', data.folder_id);
+        setFolderId(data.folder_id)
+        router.push(`/chat/${data.session_id}`)
     };
 
     async function getFolderId(chatid) {
@@ -113,10 +116,62 @@ const FolderCard = (props) => {
                 .select('folder_id')
                 .eq('session_id', chatid);
             if (data) {
-                localStorage.setItem('folderId', data[0]?.folder_id)
+                // localStorage.setItem('folderId', data[0]?.folder_id)
             } else {
                 throw error
             }
+        } catch (error) {
+            console.log(error)
+        }
+    };
+
+    async function updateTitle(value, id, originalTitle) {
+        if(value === originalTitle){
+            setIsRenamingChat(false)
+            return null
+        }
+        try {
+            
+            const { data, error } = await supabase
+                .from('chats')
+                .update({ 'chat_title': value })
+                .eq('session_id', id)
+                .select()
+                console.log(data)
+            if (data.length > 0) {
+                setIsRenamingChat(false)
+                setChatHistory(data[0]);
+                setChatRename(!chatTitleAtom)
+                
+            } else if (error) {
+                throw error
+            }
+        } catch (error) {
+            console.log(error)
+        }
+    };
+
+    async function deleteChatsBySessionId(id){
+        await deleteChatsFromServer(id);
+        const { error } = await supabase
+            .from('chats')
+            .delete()
+            .eq('session_id', id)
+            if(!error){
+                await getChatFiles();
+                router.push('/chat/new')
+        }
+        
+    };
+
+    async function deleteChatsFromServer(chat_session_id){
+        try {
+            const res = await fetch(`https://danswer.folder.chat/api/chat/delete-chat-session/${chat_session_id}`, {
+                method:'DELETE',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+            })
         } catch (error) {
             console.log(error)
         }
@@ -139,7 +194,7 @@ const FolderCard = (props) => {
     // }, [chatSessionID]);
     return (
 
-        <Accordion type="single" collapsible defaultValue={localStorage.getItem('folderId')}>
+        <Accordion type="single" collapsible defaultValue={folderId}>
             <AccordionItem value={id} className='rounded-lg bg-[#ffffff] py-3 px-2 gap-2 flex flex-col' >
                 <div className='w-full flex justify-between'>
                     <AccordionTrigger className='flex-row-reverse items-center gap-2 w-full'>
@@ -196,28 +251,29 @@ const FolderCard = (props) => {
                             </div>
                             :
                             files.map((data, idx) => {
+                                
                                 return (
                                     <div key={data.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer ${chat_id === data.session_id ? 'bg-slate-200' : ''}`} onClick={() => handleFilessOnclick(data)}>
                                         <div className='inline-flex gap-1 items-center'>
                                             {/* <MessageSquare size={'1rem'} className='hover:cursor-pointer' /> */}
-                                            <span className='font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis' onClick={() => setFileName('chat')}>{data?.chat_title || 'New Chat'}</span>
-                                            {/* {isRenamingChat ? 
-                                                <input type='text' value={chatName} onChange={(e)=> setChatName(e.target.value)} className='rounded-md px-1 w-[90%]'/>
-                                                :    
-                                        } */}
+                                            <span className={`font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis ${isRenamingChat && chat_id === data.session_id ? 'hidden': ''}`} onClick={() => setFileName('chat')}>{data?.chat_title || 'New Chat'}</span>
+                                            {isRenamingChat ? 
+                                                chat_id === data.session_id && <input type='text' value={inputChatName} onChange={(e)=> setInputChatName(e.target.value)} className='rounded-md px-1 w-[90%]'/>
+                                                :   null
+                                            }
                                         </div>
-                                        {/* {chat_id === data.session_id &&
+                                        {chat_id === data.session_id && 
                                             (isRenamingChat ? (
                                                 <div className="ml-auto my-auto flex">
                                                     <div
-                                                        // onClick={onRename}
+                                                        onClick={()=> updateTitle(inputChatName, data.session_id, data?.chat_title)}
                                                         className={`hover:bg-black/10 p-1 -m-1 rounded`}
                                                     >
                                                         <Check size={16} />
                                                     </div>
                                                     <div
                                                         onClick={() => {
-                                                            // setChatName(chatSession.name);
+                                                            // setChatName(data?.chat_title);
                                                             setIsRenamingChat(false);
                                                         }}
                                                         className={`hover:bg-black/10 p-1 -m-1 rounded ml-2`}
@@ -228,19 +284,41 @@ const FolderCard = (props) => {
                                             ) : (
                                                 <div className="ml-auto my-auto flex">
                                                     <div
-                                                        onClick={() => setIsRenamingChat(true)}
+                                                        title='Edit Name'
+                                                        onClick={() => {setInputChatName(data?.chat_title); setIsRenamingChat(true)}}
                                                         className={`hover:bg-black/10 p-1 -m-1 rounded`}
                                                     >
                                                         <Pencil size={16} />
                                                     </div>
-                                                    <div
-                                                        onClick={() => setIsDeletionModalVisible(true)}
+                                                    
+                                                    <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                            <div
+                                                        title='Delete Chat File'
                                                         className={`hover:bg-black/10 p-1 -m-1 rounded ml-2`}
                                                     >
                                                         <Trash2 size={16} />
                                                     </div>
+                                            </AlertDialogTrigger>
+
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>
+                                                        Are you absolutely sure?
+                                                    </AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        This action cannot be undone. This file will be delete permanently.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                                    <AlertDialogAction className='bg-[#14B8A6] hover:bg-[#14B8A6] hover:opacity-75' onClick={() => deleteChatsBySessionId(data.session_id)}>Continue</AlertDialogAction>
+                                                </AlertDialogFooter>
+
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                                 </div>
-                                            ))} */}
+                                            ))}
                                     </div>
                                 )
                             })
@@ -259,6 +337,9 @@ const SideBar = () => {
     const [session, setSession] = useAtom(sessionAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
+    const current_url = window.location.href;
+    const chat_id = current_url.split("advance");
+    const router = useRouter()
     async function getFolders() {
         try {
             const userID = await getSess()
@@ -269,9 +350,9 @@ const SideBar = () => {
                 .eq('workspace_id', wkID[0].id);
             if (folders?.length>0) {
                 
-                const lastFolder = folders[folders.length - 1];
-                setFolderId(lastFolder?.id)
-                localStorage.setItem('folderId', lastFolder?.id)
+                // const lastFolder = folders[folders.length - 1];
+                // setFolderId(lastFolder?.id)
+                // localStorage.setItem('folderId', lastFolder?.id)
                 setFolder(folders);
                 return
             } 
@@ -288,6 +369,13 @@ const SideBar = () => {
         getFolders(session)
     }, [folderAdded]);
 
+
+    useEffect(() => {
+    //    console.log(chat_id)
+    }, [chat_id]);
+
+
+
     return (
         <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-4 font-Inter relative h-full'>
 
@@ -296,7 +384,7 @@ const SideBar = () => {
             </div>
 
             {!showAdvance ?
-                <div className='w-full flex justify-between items-center bg-[#DEEAEA] p-3 rounded-md hover:cursor-pointer' onClick={() => setShowAdvance(true)}>
+                <div className='w-full flex justify-between items-center bg-[#DEEAEA] p-3 rounded-md hover:cursor-pointer' onClick={() => {setShowAdvance(!showAdvance); router.push('/advance')}}>
                     <div className='flex items-center gap-2'>
 
                         <h1 className='font-[600] text-sm leading-5'>Advance</h1>

@@ -1,17 +1,18 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import { Input } from '../../../components/ui/input';
-import { Button } from '../../../components/ui/button';
-import gitIcon from '../../../public/assets/Danswer-github-B.svg';
-import check from '../../../public/assets/check-circle.svg';
-import trash from '../../../public/assets/trash-2.svg';
-import { useToast } from '../../../components/ui/use-toast';
-import { deleteAdminCredentails, fetchAllCredentials, fetchCredentialID, generateConnectorId, addNewInstance, fetchAllConnector } from '../../../lib/helpers';
-import { Dialog, DialogTrigger, DialogContent } from '../../../components/ui/dialog';
-import EditIndex from './EditIndex';
-import supabase from '../../../config/supabse';
+import { Input } from '../../../../components/ui/input';
+import { Button } from '../../../../components/ui/button';
+import gitIcon from '../../../../public/assets/Danswer-github-B.svg';
+import check from '../../../../public/assets/check-circle.svg';
+import trash from '../../../../public/assets/trash-2.svg';
+import { useToast } from '../../../../components/ui/use-toast';
+import { deleteAdminCredentails, fetchAllCredentials, fetchCredentialID, generateConnectorId, addNewInstance, fetchAllConnector } from '../../../../lib/helpers';
+import { Dialog, DialogTrigger, DialogContent } from '../../../../components/ui/dialog';
+import EditIndex from '../(component)/EditIndex';
+import supabase from '../../../../config/supabse';
 import { useAtom } from 'jotai';
-import { sessionAtom } from '../../store';
+import { sessionAtom, allConnecorsAtom } from '../../../store';
 
 const GitPrs = () => {
     const [session, setSession] = useAtom(sessionAtom)
@@ -27,6 +28,7 @@ const GitPrs = () => {
     const [existingCredentials, setExistingCredentials] = useState([])
     const [ccPairId ,setCCPairId] = useState(null);
     const [loading, setLoading] = useState(true)
+    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
 
     const { toast } = useToast();
 
@@ -281,8 +283,8 @@ const GitPrs = () => {
         getAllExistingConnector();
     }, [])
     return (
-        <>
-            <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-4'>
+        <div className='w-full sticky top-0 self-start h-screen flex flex-col rounded-[6px] gap-5 items-center  box-border text-[#64748B] '>
+             <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2 overflow-scroll no-scrollbar h-full px-4 py-10'>
                 <div className='flex justify-start items-center gap-2'>
                     <Image src={gitIcon} alt='github' className='w-5 h-5' />
                     <h1 className='font-[600] text-[20px] leading-7 tracking-[-0.5%] text-start'>Github PRs</h1>
@@ -365,7 +367,7 @@ const GitPrs = () => {
 
             </div>
 
-        </>
+        </div>
     )
 }
 

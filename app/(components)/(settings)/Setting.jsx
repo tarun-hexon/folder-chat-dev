@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { DialogContent } from '../../../components/ui/dialog';
 import { Mail, MessageSquare, Plus, PlusCircle, UserPlus, Users} from "lucide-react"
 import { useAtom } from 'jotai';
@@ -12,10 +12,11 @@ import { setting } from '../../../config/constants';
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Button } from '../../../components/ui/button';
 import { useToast } from '../../../components/ui/use-toast';
-const Setting = () => {
+const Setting = ({ itemProp }) => {
+    // console.log(itemProp)
     const [session, setSession] = useAtom(sessionAtom);
     const { toast } = useToast()
-    const [item, setItem] = useState('profile');
+    const [item, setItem] = useState(itemProp);
 
 
     function shareByEmail() {
@@ -27,7 +28,13 @@ const Setting = () => {
       }
 
 
-
+useEffect(()=> {
+    if(itemProp){
+        // console.log(item)
+        // setItem(itemProp)
+    }
+    console.log(item)
+}, [item])
 
     return (
         <DialogContent className="sm:max-w-[65rem] h-[32rem] p-0 font-Inter flex flex-row">
@@ -88,10 +95,12 @@ const Setting = () => {
 
             </div>
             <div className='w-[75%] px-8 py-2 h-full overflow-y-scroll no-scrollbar'>
+
+                 {item === 'plans' && <Plans />}
                 {item === 'profile' && <MyProfile />}
                 {item === 'settings' && <InnerSetting />}
                 {item === 'n-settings' && <Notification />}
-                {item === 'plans' && <Plans />}
+               
             </div>
 
         </DialogContent>

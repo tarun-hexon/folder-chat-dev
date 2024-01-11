@@ -1,11 +1,12 @@
 import React from 'react'
 import Image from 'next/image';
-import filter from '../../../public/assets/Danswer-filter-Default.svg';
-import { advanceOption } from '../../../config/constants';
-import album from '../../../public/assets/album.svg';
+import filter from '../../../../public/assets/Danswer-filter-Default.svg';
+import { advanceOption } from '../../../../config/constants';
+import album from '../../../../public/assets/album.svg';
 import { useAtom } from 'jotai';
-import { advanceItemAtom, fileNameAtom } from '../../store';
-import key from '../../../public/assets/key.svg';
+import { advanceItemAtom, fileNameAtom } from '../../../store';
+import key from '../../../../public/assets/key.svg';
+import { useRouter } from 'next/navigation';
 
 
 const Advance = () => {
@@ -13,17 +14,24 @@ const Advance = () => {
 
     const [item, setItem] = useAtom(advanceItemAtom);
     const [fileName, setFileName] = useAtom(fileNameAtom)
-
+    const router = useRouter()
 
     function handleOnClick(name) {
         setFileName('advance')
-        setItem(name);
+        if(name === 'advance'){
+            router.push('/advance')
+            // window.history.replaceState('', '', `/advance`)
+
+        }else{
+            router.push('/advance/'+name)
+            // window.history.replaceState('', '', `/advance/${name}`)
+
+        }
 
     }
 
     return (
         <>
-
             <div className='flex gap-2 hover:cursor-pointer items-center justify-between p-3 rounded-md' onClick={() => handleOnClick('indexing')}>
                 <span className='font-[700] text-sm leading-5'>Indexing</span>
                 <Image src={album} alt={'album'} className='w-4 h-4' />
