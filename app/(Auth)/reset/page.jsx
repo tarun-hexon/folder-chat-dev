@@ -9,7 +9,7 @@ import { useRouter } from 'next/navigation';
 
 import { useAtom } from 'jotai';
 import { darkModeAtom, folderAtom } from '../../store';
-import { Header, UpdatePassword } from '../../(components)/index';
+import { Header, UpdatePassword } from '../../(components)/(common)';
 import Link from 'next/link';
 
 

@@ -36,7 +36,6 @@ yarn-error.log*
 next-env.d.ts
 
 # temp files and folder
-slack
 hooks.ts
 int.ts
 interfaces.ts
