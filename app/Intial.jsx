@@ -17,14 +17,15 @@ const Intial = () => {
   async function getSess() {
     try {
       await supabase.auth.getSession().then(async ({ data: { session } }) => {
+        
         if (session) {
           setUserSession(session);
-          
         }
-  
+        setAllowSession(true)
       });
     } catch (error) {
       console.log(error)
+      setAllowSession(true)
     }
   };
 
