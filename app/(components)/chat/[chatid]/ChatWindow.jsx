@@ -476,7 +476,9 @@ const ChatWindow = () => {
     }
 
     async function isDocSetExist(folder_id){
-        
+        if(!folder_id){
+            return null
+        }
         try {
             let { data: document_set, error } = await supabase
                 .from('document_set')
@@ -515,25 +517,28 @@ const ChatWindow = () => {
         } else {
             setRcvdMsg('')
             setChatMsg([])
-            
             isDocSetExist(folderId);
             setChatSessionId('new');
             localStorage.removeItem('chatSessionID');
-            
         }
         
-    }, [chat_id, pathname, folder]);
+    }, [chat_id, pathname, folderId]);
 
+    useEffect(()=> {
+        console.log(chat_id)
+        console.log(current_url)
+
+    }, [current_url])
 
 
     return (
         <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2 text-center'>
             <div className='w-full flex justify-between px-4 py-2 h-fit '>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
-                    {/* <Image src={Logo} alt='folder.chat'/> */}
-                    <span className='text-sm leading-5 font-[500] opacity-[60%] hover:opacity-100'>Context : {existConnectorName[0]?.doc_set_name || 'No Doc Uploaded'}</span>
+                    {folder.length === 0 ?<Image src={Logo} alt='folder.chat'/> :
+                    <span className='text-sm leading-5 font-[500] opacity-[60%] hover:opacity-100'>Context : {existConnectorName[0]?.doc_set_name || 'No Doc Uploaded'}</span>}
 
-                    {existConnectorName[0]?.doc_set_id === null ? <Image src={plus} alt='add' title='Add Documents' onClick={() => setFileName('upload')} /> :
+                    {!existConnectorName[0]?.doc_set_id ? folder.length !==0 && <Image src={plus} alt='add' title='Add Documents' onClick={() => setFileName('upload')} /> :
                         <Dialog onOpenChange={() => { setInputDocDes(''); }}>
                             <DialogTrigger asChild>
                                 <Image src={editIcon} alt='edit' />
@@ -591,9 +596,9 @@ const ChatWindow = () => {
                 </div>
             </div>
             {folder.length === 0 ?
-                <div className='border w-full h-full flex flex-col justify-center items-center gap-4'>
+                <div className='w-full h-full flex flex-col justify-center items-center gap-4'>
                     <Folder color='#14B8A6' size={'3rem'} className='block' />
-                    <p className='text-[16px] leading-5 font-[400]'><span className='font-[500] hover:underline hover:cursor-pointer' onClick={() => setOpen(true)}>Create</span> an Folder First Before Start Chating...</p>
+                    <p className='text-[16px] leading-5 font-[400]'><span className='font-[500] hover:underline hover:cursor-pointer' onClick={() => setOpen(true)}>Create</span> a Folder First Before Start Chating...</p>
                     {open && <NewFolder setFolderAdded={setFolderAdded} openMenu={open} setOpenMenu={setOpen} />}
                 </div>
                 :

@@ -81,8 +81,8 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                     setFolderAdded(prev => !prev)
                     setOpen(false);
                     setFolderId(data[0].id)
-                    setFileName('upload');
-                    router.push(`/chat/new`)
+                    
+                    router.push(`/chat/upload`)
                     // window.history.replaceState('', '', `/chat/new`);
                     return 
                 }

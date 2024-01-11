@@ -10,6 +10,7 @@ import { fileNameAtom, existConnectorDetailsAtom, folderAtom, folderIdAtom, open
 import { useToast } from '../../../../components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 import supabase from '../../../../config/supabse';
+import { Loader, Loader2Icon } from 'lucide-react';
 
 
 const Upload = () => {
@@ -26,6 +27,7 @@ const Upload = () => {
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
     const [ccIDs, setCCIds] = useState([]);
     const [currentDOC, setCurrentDoc] = useState([]);
+    
     const [context, setContext] = useState({
         name:'',
         description:''
@@ -375,6 +377,10 @@ const Upload = () => {
     };
       useEffect(() => {
         
+        if(folder.length === 0){
+            router.push('/chat/new')
+        }
+
         indexingStatus(folderId)
         
         if(userSession){
@@ -387,7 +393,7 @@ const Upload = () => {
     <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5 sticky top-0 self-start p-10 min-h-screen'>
           {uploading ? 
           <div className={`w-[70%] border flex justify-center items-center bg-[#EFF5F5] p-32`}>
-            Your File is uploading please wait...!
+            <Loader className='animate-spin'/>
           </div>
           :
           <div className='w-[70%] border p-5 flex flex-col justify-center items-center gap-2 rounded-md shadow-black shadow-sm'>
@@ -399,11 +405,11 @@ const Upload = () => {
             <div className='w-full text-start space-y-2 '>
               <div>
                 <Label className='text-start' htmlFor='context'>Name Of Context</Label>
-                <Input type='text' placeholder='' id='context' disabled={existConnector.length !== 0} value={existConnector[0]?.doc_set_name || context.name} onChange={(e) => setContext({...context, name:e.target.value})}/>
+                <Input type='text' placeholder='Name Should Be Unique' id='context' disabled={existConnector.length !== 0} value={existConnector[0]?.doc_set_name || context.name} onChange={(e) => setContext({...context, name:e.target.value})}/>
             </div>
             <div>
                 <Label className='text-start' htmlFor='context'>Description</Label>
-                <Input type='text' placeholder='' id='context' value={context.description} onChange={(e) => setContext({...context, description:e.target.value})}/></div>
+                <Input type='text' placeholder='write a short description' id='context' value={context.description} onChange={(e) => setContext({...context, description:e.target.value})}/></div>
             </div>
             <div
               className={`w-full border flex justify-center items-center bg-[#EFF5F5] p-20 ${isDragActive ? 'opacity-50' : ''} shadow-md`}
