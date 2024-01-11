@@ -476,14 +476,16 @@ const ChatWindow = () => {
     }
 
     async function isDocSetExist(folder_id){
+        let folder_ID = folderId
         if(!folder_id){
-            return null
+            folder_ID = localStorage.getItem('lastFolderId')
+            
         }
         try {
             let { data: document_set, error } = await supabase
                 .from('document_set')
                 .select('doc_set_id')
-                .eq('folder_id', folder_id);
+                .eq('folder_id', folder_ID);
                 if(error){
                     console.log(error)
                     return toast({

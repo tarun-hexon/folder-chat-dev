@@ -407,9 +407,9 @@ const SideBar = () => {
                 .eq('workspace_id', wkID[0].id);
             if (folders) {
 
-                // const lastFolder = folders[folders.length - 1];
+                const lastFolder = folders[folders.length - 1];
                 // setFolderId(lastFolder?.id)
-                // localStorage.setItem('folderId', lastFolder?.id)
+                localStorage.setItem('lastFolderId', lastFolder?.id)
                 setFolder(folders);
                 return
             }
