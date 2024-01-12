@@ -130,7 +130,7 @@ useEffect(() => {
 
     !loading &&
 
-        <div className='w-full sticky top-0 self-start h-screen'>
+        <div className='w-full h-screen'>
           <ChatWindow />
         </div>
 

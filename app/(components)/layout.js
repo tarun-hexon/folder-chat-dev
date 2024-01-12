@@ -53,10 +53,10 @@ export default function RootLayout({ children }) {
     }
   return (
     <div className='w-full flex font-Inter box-border'>
-        <div className={`w-[28%] min-h-screen`}>
+        <div className={`w-[28%] min-h-screen sticky top-0 self-start`}>
             <SideBar />
         </div>
-        <div className='w-full'>
+        <div className='w-full sticky top-0 self-start'>
         { children }
         </div>
     </div>
