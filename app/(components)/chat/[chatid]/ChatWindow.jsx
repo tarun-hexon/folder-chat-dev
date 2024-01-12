@@ -401,9 +401,9 @@ const ChatWindow = () => {
                 }
                 // console.log(data[0].folder_id, '400')
 
-                const isTrue = await isDocSetExist(data[0]?.folder_id)
+                const ccPairs = await isDocSetExist(data[0]?.folder_id)
                 // console.log(isTrue)
-                if(isTrue){
+                if(ccPairs.length > 0){
                     
                     const msgs = JSON.parse(data[0]?.chats)
                     setChatMsg(msgs);
@@ -510,13 +510,44 @@ const ChatWindow = () => {
                     router.push('/chat/upload')
                 }else {
                     setLoading(false);
-                    setDocumentSet(document_set)
-                    return true
+                    setDocumentSet(document_set);
+                    return document_set[0]?.cc_pair_id
+                    
                 }
         } catch (error) {
             console.log(error)
         }
-    }
+    };
+
+    async function indexingStatus(f_id){
+        console.log(f_id)
+        if(!f_id){
+            return false
+            
+        };
+        try {
+            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+            const json = await data.json();
+            // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
+            
+            const allConID = await isDocSetExist(f_id);
+            console.log(allConID)
+            var cc_p_id = []
+            for(const cc_id of json){
+              if(allConID?.includes(cc_id?.cc_pair_id)){
+                cc_p_id.push(cc_id)
+              }
+            };
+            setExistConnectorDetails(cc_p_id)
+            return cc_p_id
+        } catch (error) {
+            console.log(error)
+            
+        }
+    
+    };
+    
+    
     useEffect(() => {
         resizeTextarea();
 
@@ -533,26 +564,33 @@ const ChatWindow = () => {
         } else {
             setRcvdMsg('')
             setChatMsg([])
-            setLoading(false)
-            if(folderId === '' || folderId === null){
-                setTimeout(()=> {
-                    console.log(folderId)
-                isDocSetExist(localStorage.getItem('lastFolderId'));
-                }, 1000)
-            }else{
-                isDocSetExist(folderId);
-            }
+            setLoading(false);
+            setParentMessageId(null)
+            
             setChatSessionID('new');
             localStorage.removeItem('chatSessionID');
         }
+
+        if(folderId === '' || folderId === null){
+            setTimeout(()=> {
+                console.log(folderId)
+            // isDocSetExist(localStorage.getItem('lastFolderId'));
+            indexingStatus(localStorage.getItem('lastFolderId'))
+            }, 1000)
+        }else{
+            // isDocSetExist(folderId);
+            indexingStatus(folderId)
+        }
+
+        
         
     }, [chat_id, folderId]);
 
     useEffect(()=> {
-        console.log(chat_id)
-        console.log(current_url)
-
-    }, [current_url])
+        if(chatSessionID === 'new'){
+            setChatMsg([])
+        }
+    }, [chatSessionID])
 
 
     return (

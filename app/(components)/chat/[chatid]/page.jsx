@@ -60,63 +60,40 @@ const Chat = () => {
     });
   };
 
-async function indexingStatus(f_id){
-    try {
-        const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
-        const json = await data.json();
-        // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
+  async function readData(f_id){
+    let fol_id = f_id
+      console.log(f_id)
+      if(!fol_id){
+        return null
+      }
+      console.log(fol_id)
+      const { data, error } = await supabase
+      .from('document_set')
+      .select('*')
+      .eq('folder_id', fol_id);
+      console.log(data)
+      console.log(error)
+      setExistConnector(data)
+      // if(data?.length > 0){
         
-        const allConID = await readData(f_id);
-        
-        var cc_p_id = []
-        for(const cc_id of json){
-          if(allConID?.includes(cc_id?.cc_pair_id)){
-            cc_p_id.push(cc_id)
-          }
-        };
-        setExistConnectorDetails(cc_p_id)
-        return cc_p_id
-    } catch (error) {
-        console.log(error)
-        
-    }
-
-};
-
-async function readData(f_id){
-  let fol_id = f_id
-    console.log(f_id)
-    if(!fol_id){
-      return null
-    }
-    console.log(fol_id)
-    const { data, error } = await supabase
-    .from('document_set')
-    .select('*')
-    .eq('folder_id', fol_id);
-    console.log(data)
-    console.log(error)
-    setExistConnector(data)
-    // if(data?.length > 0){
-      
-    //   setExistConnector(data)
-    //   return data[0].cc_pair_id
-    // }else{
-      // alert('line 404')
-      // setExistConnector([]);
-      // router.push('/chat/upload')
-    // }
-};
+      //   setExistConnector(data)
+      //   return data[0].cc_pair_id
+      // }else{
+        // alert('line 404')
+        // setExistConnector([]);
+        // router.push('/chat/upload')
+      // }
+  };
 
 useEffect(() => {
   getSess();
   setTimeout(()=> {
-    if(folderId === '' || folderId === null){
-      console.log(folderId)
-      indexingStatus(localStorage.getItem('lastFolderId'));
-    }else{
-      indexingStatus(folderId);
-    }
+    // if(folderId === '' || folderId === null){
+    //   console.log(folderId)
+    //   indexingStatus(localStorage.getItem('lastFolderId'));
+    // }else{
+    //   indexingStatus(folderId);
+    // }
 }, 1000)
     
     if(userSession){
