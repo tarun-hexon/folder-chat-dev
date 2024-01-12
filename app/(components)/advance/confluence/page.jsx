@@ -37,12 +37,12 @@ const Confluence = () => {
             // console.log(data)
             const allCred = await readData();
             
-            const currentUserToken = data.filter((res) => { if(allCred.includes(res?.id)) return res});
+            const currentUserToken = data?.filter((res) => { if(allCred?.includes(res?.id)) return res});
             // console.log(currentUserToken)
-            const currentToken = currentUserToken.filter(res => res.credential_json.confluence_username !== undefined);
+            const currentToken = currentUserToken.filter(res => res?.credential_json?.confluence_username !== undefined);
             // console.log(currentToken)
 
-            const conCred = currentToken.filter(cred => cred.credential_json.confluence_username);
+            const conCred = currentToken?.filter(cred => cred?.credential_json?.confluence_username);
             // console.log(conCred)
             if(conCred.length > 0){
                 setConJson(conCred[0])
@@ -205,7 +205,7 @@ const Confluence = () => {
             if(error){
                 throw error
             }
-            setExistingCredentials(data[0].cred_ids)
+            setExistingCredentials(data[0]?.cred_ids)
         } catch (error) {
             setExistingCredentials([])
             console.log(error)
@@ -224,7 +224,7 @@ const Confluence = () => {
         .select()
         // console.log(data)
         console.log(error)
-        setExistingCredentials(data[0].cred_ids)
+        setExistingCredentials(data[0]?.cred_ids)
     };
 
     async function readData(){
@@ -239,13 +239,13 @@ const Confluence = () => {
                 setExistingCredentials([]);
                 throw error
             }
-            if(data[0].cred_ids === null){
+            if(data[0]?.cred_ids === null){
                 setExistingCredentials([]);
                 return []
             }
             else{
-                setExistingCredentials(data[0].cred_ids);
-                return data[0].cred_ids
+                setExistingCredentials(data[0]?.cred_ids);
+                return data[0]?.cred_ids
             }
         } catch (error) {
             console.log(error);

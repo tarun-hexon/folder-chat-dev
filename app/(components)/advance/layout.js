@@ -14,13 +14,13 @@ export default function RootLayout({ children }) {
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
             const json = await data.json();
-            console.log(json)
+            // console.log(json)
             const allConID = await readData();
             
             const filData = json.filter((item)=> { if(allConID?.includes(item?.connector?.id)) return item });
             
             setAllConnectors(filData);
-            console.log(filData)
+            // console.log(filData)
         } catch (error) {
             console.log(error)
             

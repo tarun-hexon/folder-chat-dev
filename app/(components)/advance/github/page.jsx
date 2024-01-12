@@ -39,9 +39,9 @@ const GitPrs = () => {
 
             const allCred = await readData();
             
-            const currentUserToken = json.filter((res) => { if(allCred.includes(res?.id)) return res});
+            const currentUserToken = json.filter((res) => { if(allCred?.includes(res?.id)) return res});
             
-            const currentToken = currentUserToken.filter(res => res.credential_json.github_access_token !== undefined);
+            const currentToken = currentUserToken.filter(res => res?.credential_json?.github_access_token !== undefined);
             
             if(currentToken.length > 0){
                 setAdminCredential(currentToken[0]);
@@ -229,12 +229,12 @@ const GitPrs = () => {
         const { data, error } = await supabase
         .from('credentials')
         .insert(
-          { 'cred_ids': newData, 'user_id' : session.user.id },
+          { 'cred_ids': newData, 'user_id' : session?.user?.id },
         )
         .select()
         // console.log(data)
         console.log(error)
-        setExistingCredentials(data[0].cred_ids)
+        setExistingCredentials(data[0]?.cred_ids)
     };
 
     async function updatetDataInConn(exConn, newData){
@@ -258,19 +258,19 @@ const GitPrs = () => {
             const { data, error } = await supabase
             .from('credentials')
             .select('cred_ids')
-            .eq('user_id', session.user.id);
+            .eq('user_id', session?.user?.id);
             // console.log(data);
             if(error){
                 setExistingCredentials([]);
                 throw error
             }
-            if(data[0].cred_ids === null){
+            if(data[0]?.cred_ids === null){
                 setExistingCredentials([]);
                 return []
             }
             else{
-                setExistingCredentials(data[0].cred_ids);
-                return data[0].cred_ids
+                setExistingCredentials(data[0]?.cred_ids);
+                return data[0]?.cred_ids
             }
         } catch (error) {
             console.log(error);

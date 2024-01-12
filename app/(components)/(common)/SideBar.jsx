@@ -5,7 +5,7 @@ import threeDot from '../../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../components/ui/accordion";
 import { Account, NewFolder } from '../(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom, fileNameAtom, openMenuAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../../store';
+import { folderAtom, documentSetAtom, openMenuAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../../store';
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
 import { Pencil, Trash2, Check, X, MessageSquare, Loader2 } from 'lucide-react';
@@ -27,7 +27,7 @@ const FolderCard = ({fol}) => {
     const { name, id } = fol
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
     const [files, setFiles] = useState([])
-    const [fileName, setFileName] = useAtom(fileNameAtom);
+    const [chatTitle, setChatTitle] = useAtom(chatTitleAtom);
     const router = useRouter();
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [popOpen, setPopOpen] = useState(false)
@@ -37,7 +37,8 @@ const FolderCard = ({fol}) => {
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [inputChatName, setInputChatName] = useState('');
     const [folNewName, setFolNewName] = useState('');
-    const [dialogOpen, setDialogOpen] = useState(false)
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
     const current_url = window.location.href;
 
     const chat_id = current_url.split("/chat/")[1];
@@ -61,20 +62,21 @@ const FolderCard = ({fol}) => {
     };
 
     function handleOptionsOnclick(id, fol_id) {
-        console.log(fol_id)
+        
+        
         if (id === 'new-chat') {
-            // localStorage.setItem('folderId', fol_id);
-            setFolderId(fol_id)
+            
             localStorage.removeItem('chatSessionID')
             localStorage.removeItem('lastFolderId')
             setChatSessionID('new')
-            // window.history.replaceState('', '', `/chat/new`);
+            setFolderId(fol_id);
             router.push('/chat/new')
 
         } else if (id === 'upload') {
             setFolderId(fol_id)
             router.push('/chat/upload')
         }
+        
         setPopOpen(false)
     };
     async function deleteChatsByFolderID(fol_id) {
@@ -150,11 +152,11 @@ const FolderCard = ({fol}) => {
                 .update({ 'chat_title': value })
                 .eq('session_id', id)
                 .select()
-            console.log(data)
+            // console.log(data)
             if (data.length > 0) {
                 setIsRenamingChat(false)
                 setChatHistory(data[0]);
-                setChatRename(!chatTitleAtom)
+                setChatRename(!chatTitle)
 
             } else if (error) {
                 throw error
@@ -205,7 +207,7 @@ const FolderCard = ({fol}) => {
     useEffect(() => {
         getChatFiles();
 
-    }, [chatHistory, chatTitleAtom]);
+    }, [chatHistory, chatTitle]);
 
     useEffect(() => {
         setIsSelected(chat_id);
@@ -240,7 +242,7 @@ const FolderCard = ({fol}) => {
                                             </div> :
                                             <Dialog key={option.id} open={dialogOpen} onOpenChange={setDialogOpen}>
                                                 <DialogTrigger asChild>
-                                                    <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer" onClick={()=> {setFolNewName(name); setDialogOpen(true); console.log(id)}}>
+                                                    <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer" onClick={()=> {setFolNewName(name); setDialogOpen(true);}}>
                                                         <option.icon className="mr-2 h-4 w-4" />
                                                         <span>{option.title}</span>
                                                     </div>
@@ -303,8 +305,8 @@ const FolderCard = ({fol}) => {
                 <AccordionContent className='flex flex-col gap-2 p-1'>
                     {
                         files.length === 0 ?
-                            <div className='flex justify-between bg-[#EFF5F5] hover:cursor-pointer hover:bg-slate-200 p-2 rounded-lg' onClick={() => { setFileName('chat') }}>
-                                <span className='text-sm font-[500] leading-5 '>No Chats to display</span>
+                            <div className='flex justify-between bg-[#EFF5F5] hover:cursor-pointer hover:bg-slate-200 p-2 rounded-lg' onClick={() => { setFolderId(id); router.push('/chat/new') }}>
+                                <span className='text-sm font-[500] leading-5 '>Create First Chat</span>
 
                             </div>
                             :
@@ -391,7 +393,7 @@ const SideBar = () => {
     const [openMenu, setOpenMenu] = useAtom(openMenuAtom)
     const [folder, setFolder] = useAtom(folderAtom);
     const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
-    const [fileName, setFileName] = useAtom(fileNameAtom);
+    
     const [session, setSession] = useAtom(sessionAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
@@ -411,7 +413,9 @@ const SideBar = () => {
 
                 const lastFolder = folders[folders.length - 1];
                 // setFolderId(lastFolder?.id)
-                localStorage.setItem('lastFolderId', lastFolder?.id)
+                if(!folderId && !localStorage.getItem('chatSessionID')){
+                    localStorage.setItem('lastFolderId', lastFolder?.id)
+                }
                 setFolder(folders);
                 return
             }

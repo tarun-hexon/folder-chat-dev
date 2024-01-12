@@ -62,16 +62,16 @@ const Chat = () => {
 
   async function readData(f_id){
     let fol_id = f_id
-      console.log(f_id)
+      // console.log(f_id)
       if(!fol_id){
         return null
       }
-      console.log(fol_id)
+      // console.log(fol_id)
       const { data, error } = await supabase
       .from('document_set')
       .select('*')
       .eq('folder_id', fol_id);
-      console.log(data)
+      // console.log(data)
       console.log(error)
       setExistConnector(data)
       // if(data?.length > 0){

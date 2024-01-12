@@ -86,7 +86,9 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                     // window.history.replaceState('', '', `/chat/new`);
                     return 
                 }
-                throw error
+                if(error){
+                    throw error
+                }
         } catch (error) {
             console.log(error)
         }

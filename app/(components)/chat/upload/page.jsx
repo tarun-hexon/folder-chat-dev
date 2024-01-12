@@ -300,13 +300,13 @@ const Upload = () => {
         // console.log(error)
         if(data.length > 0){
           setDocumentSet(data)
-          setFileName('chat')
+          // setFileName('chat')
           toast({
             variant: 'default',
             title: "File Uploaded!"
           });
-          setUploading(false)
           router.push('/chat/new')
+          setUploading(false)
         }
       };
     
@@ -324,7 +324,7 @@ const Upload = () => {
         if(data.length){
             setUploading(false)
             setDocumentSet(data);
-            setUploading(false)
+            
         //  setFileName('chat')
             await indexingStatus(folderId)
             toast({
@@ -332,10 +332,11 @@ const Upload = () => {
                 title: "File Uploaded!"
             });
           router.push('/chat/new')
+          setUploading(false)
         }
       };
     
-      async function indexingStatus(f_id){
+    async function indexingStatus(f_id){
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
             const json = await data.json();
@@ -375,19 +376,19 @@ const Upload = () => {
           setDocumentSet([])
         }
     };
-      useEffect(() => {
+    useEffect(() => {
         
         // if(folder.length === 0){
         //     router.push('/chat/new')
         // }
 
-        indexingStatus(folderId)
+        //indexingStatus(folderId)
         
         if(userSession){
           setLoading(false)
         }
         
-      }, [folderId]);
+    }, [folderId]);
 
   return (
     <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5 sticky top-0 self-start p-10 min-h-screen'>
