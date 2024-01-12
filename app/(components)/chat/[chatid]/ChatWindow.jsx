@@ -486,7 +486,7 @@ const ChatWindow = () => {
 
     async function isDocSetExist(folder_id){
         console.log(folder_id)
-        if(!folder_id){
+        if(!folder_id || folder_id === 'undefined'){
             return false
             
         };
@@ -521,7 +521,7 @@ const ChatWindow = () => {
 
     async function indexingStatus(f_id){
         console.log(f_id)
-        if(!f_id){
+        if(!f_id || f_id === 'undefined'){
             return false
             
         };
@@ -582,7 +582,7 @@ const ChatWindow = () => {
             indexingStatus(folderId)
         }
 
-        
+
         
     }, [chat_id, folderId]);
 
