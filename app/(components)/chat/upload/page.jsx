@@ -6,7 +6,7 @@ import { Label } from '../../../../components/ui/label';
 import { Input } from '../../../../components/ui/input';
 import Image from 'next/image';
 import { useDropzone } from 'react-dropzone';
-import { fileNameAtom, existConnectorDetailsAtom, folderAtom, folderIdAtom, openMenuAtom, sessionAtom, existConnectorAtom } from '../../../store';
+import { fileNameAtom, existConnectorDetailsAtom, folderAtom, folderIdAtom, openMenuAtom, sessionAtom, documentSetAtom } from '../../../store';
 import { useToast } from '../../../../components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 import supabase from '../../../../config/supabse';
@@ -21,9 +21,9 @@ const Upload = () => {
     const [openMenu, setOpenMenu] = useAtom(openMenuAtom);
     const router = useRouter()
     const [fileName, setFileName] = useAtom(fileNameAtom);
-    const [folder, setFolder] = useAtom(folderAtom);
+    // const [folder, setFolder] = useAtom(folderAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
-    const [existConnector, setExistConnector] = useAtom(existConnectorAtom);
+    const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
     const [ccIDs, setCCIds] = useState([]);
     const [currentDOC, setCurrentDoc] = useState([]);
@@ -34,7 +34,7 @@ const Upload = () => {
       })
     const { toast } = useToast();
     const onDrop = (acceptedFiles) => {
-        if(existConnector[0]?.doc_set_name === '' && context.name === ''){
+        if(documentSet[0]?.doc_set_name === '' && context.name === ''){
           return toast({
             variant: 'destructive',
             title: "Give your context a name first!"
@@ -72,7 +72,7 @@ const Upload = () => {
             body: formData
           });
           const json = await data.json();
-          console.log('upload done', json)
+          // console.log('upload done', json)
           // setFilePath(json.file_paths[0]);
           connectorRequest(json.file_paths[0], file)
         } catch (error) {
@@ -135,7 +135,7 @@ const Upload = () => {
             })
           });
           const json = await data.json();
-          console.log('getCredentials done', json)
+          // console.log('getCredentials done', json)
           sendURL(connectID, json.id, file)
         } catch (error) {
           console.log('error while getCredentials:', error)
@@ -162,12 +162,12 @@ const Upload = () => {
           await runOnce(connectID, credID);
           setCurrentDoc(json.data);
           setTimeout(async()=> {
-            if(existConnector.length === 0){
+            if(documentSet.length === 0){
               
-              await setDocumentSet(connectID, context.name, context.description);
+              await setDocumentSetInServer(connectID, context.name, context.description);
             }else{
                 
-                  await updateDocumentSet(existConnector[0].doc_set_id, connectID, context.description)
+                  await updateDocumentSet(documentSet[0].doc_set_id, connectID, context.description)
                  
               
             } 
@@ -198,7 +198,7 @@ const Upload = () => {
             })
           });
           const json = await data.json()
-          console.log('run once done', json);
+          // console.log('run once done', json);
 
         } catch (error) {
           console.log('error in runOnce :', error)
@@ -210,7 +210,7 @@ const Upload = () => {
         }
       };
     
-      async function setDocumentSet(ccID, f_name, des){
+      async function setDocumentSetInServer(ccID, f_name, des){
         
         const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
         const json = await data.json();
@@ -281,7 +281,7 @@ const Upload = () => {
             })
           });
           setContext({name:'', description:''})
-          await updatetDataInDB(existConnector, docSetid)
+          await updatetDataInDB(documentSet, docSetid)
         } catch (error) {
           console.log(error)
         }
@@ -296,10 +296,10 @@ const Upload = () => {
           { 'cc_pair_id': newData, 'user_id' : userSession.user.id, 'folder_id':folderId, 'doc_set_name':doc_name,  'doc_set_id':doc_id},
         )
         .select()
-        console.log(data)
-        console.log(error)
+        // console.log(data)
+        // console.log(error)
         if(data.length > 0){
-          setExistConnector(data)
+          setDocumentSet(data)
           setFileName('chat')
           toast({
             variant: 'default',
@@ -323,7 +323,7 @@ const Upload = () => {
         
         if(data.length){
             setUploading(false)
-            setExistConnector(data);
+            setDocumentSet(data);
             setUploading(false)
         //  setFileName('chat')
             await indexingStatus(folderId)
@@ -369,17 +369,17 @@ const Upload = () => {
         
         if(data?.length > 0){
           
-          setExistConnector(data)
+          setDocumentSet(data)
           return data[0].cc_pair_id
         }else{
-          setExistConnector([])
+          setDocumentSet([])
         }
     };
       useEffect(() => {
         
-        if(folder.length === 0){
-            router.push('/chat/new')
-        }
+        // if(folder.length === 0){
+        //     router.push('/chat/new')
+        // }
 
         indexingStatus(folderId)
         
@@ -397,7 +397,7 @@ const Upload = () => {
           </div>
           :
           <div className='w-[70%] border p-5 flex flex-col justify-center items-center gap-2 rounded-md shadow-black shadow-sm'>
-            {existConnector.length === 0 &&  
+            {documentSet?.length === 0 &&  
             <div>
               <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>This folder is empty</p>
               <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Upload a document to start</p>
@@ -405,7 +405,7 @@ const Upload = () => {
             <div className='w-full text-start space-y-2 '>
               <div>
                 <Label className='text-start' htmlFor='context'>Name Of Context</Label>
-                <Input type='text' placeholder='Name Should Be Unique' id='context' disabled={existConnector.length !== 0} value={existConnector[0]?.doc_set_name || context.name} onChange={(e) => setContext({...context, name:e.target.value})}/>
+                <Input type='text' placeholder='Name Should Be Unique' id='context' disabled={documentSet?.length !== 0} value={documentSet[0]?.doc_set_name || context.name} onChange={(e) => setContext({...context, name:e.target.value})}/>
             </div>
             <div>
                 <Label className='text-start' htmlFor='context'>Description</Label>

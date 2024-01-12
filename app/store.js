@@ -21,7 +21,7 @@ export const allConnectorsAtom = atom(null);
 export const existConnectorDetailsAtom = atom([])
 export const chatTitleAtom = atom('')
 export const allConnecorsAtom = atom([]);
-export const existConnectorAtom = atom([]);
+export const documentSetAtom = atom([]);
 
 export const selectOptionAtom = atom([
     {

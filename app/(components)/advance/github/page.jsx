@@ -12,7 +12,7 @@ import { Dialog, DialogTrigger, DialogContent } from '../../../../components/ui/
 import EditIndex from '../(component)/EditIndex';
 import supabase from '../../../../config/supabse';
 import { useAtom } from 'jotai';
-import { sessionAtom, allConnecorsAtom } from '../../../store';
+import { sessionAtom, allConnectorsAtom } from '../../../store';
 
 const GitPrs = () => {
     const [session, setSession] = useAtom(sessionAtom)

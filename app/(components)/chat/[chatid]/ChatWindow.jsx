@@ -9,7 +9,7 @@ import Image from 'next/image'
 import { iconSelector } from '../../../../config/constants'
 import { Folder, Loader2, Plus, MoreHorizontal } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom, existConnectorAtom, existConnectorDetailsAtom, allConnectorsAtom } from '../../../store'
+import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom, documentSetAtom, existConnectorDetailsAtom, allConnectorsAtom } from '../../../store'
 import ReactMarkdown from "react-markdown";
 import supabase from '../../../../config/supabse'
 import { useToast } from '../../../../components/ui/use-toast'
@@ -44,7 +44,7 @@ const ChatWindow = () => {
     const textareaRef = useRef(null);
     const [responseObj, setResponseObj] = useState(null)
     const [msgLoader, setMsgLoader] = useState(false);
-    const [chatSessionId, setChatSessionId] = useState(null);
+
     const [chatMsg, setChatMsg] = useState([]);
     const [parentMessageId, setParentMessageId] = useState(null);
     const [chatTitle, setChatTitle] = useState('')
@@ -53,7 +53,7 @@ const ChatWindow = () => {
     const [textFieldDisabled, setTextFieldDisabled] = useState(false);
     const [chatSessionID, setChatSessionID] = useAtom(chatSessionIDAtom);
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
-    const [existConnectorName, setExistConnectorName] = useAtom(existConnectorAtom);
+    const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
     const [inputDocDes, setInputDocDes] = useState('');
     
     const ccIDS = useRef([]);
@@ -64,7 +64,7 @@ const ChatWindow = () => {
     const current_url = window.location.href;
     const pathname = usePathname()
 
-    const chat_id = pathname.split("/chat/")[1];
+    const chat_id = current_url.split("/chat/")[1];
 
     const router = useRouter();
     const { toast } = useToast();
@@ -261,7 +261,7 @@ const ChatWindow = () => {
                         "real_time": true,
                         "filters": {
                             "source_type": null,
-                            "document_set": existConnectorName.length === 0 ? null : [existConnectorName[0]?.doc_set_name],
+                            "document_set": documentSet.length === 0 ? null : [documentSet[0]?.doc_set_name],
                             "time_cutoff": null
                         }
                     }
@@ -388,27 +388,36 @@ const ChatWindow = () => {
 
     async function getChatHistory(id) {
         try {
+            console.log(id)
             const { data, error } = await supabase
                 .from('chats')
                 .select('*')
                 .eq('session_id', id);
+                // console.log(data, 'data')
             if (data[0]?.chats) {
-                setFolderId(data[0].folder_id)
-                
+                // console.log(data)
+                if(folderId === ''){
+                    setFolderId(data[0].folder_id)
+                }
+                // console.log(data[0].folder_id, '400')
+
                 const isTrue = await isDocSetExist(data[0]?.folder_id)
-                
+                // console.log(isTrue)
                 if(isTrue){
-                    setLoading(false)
+                    
                     const msgs = JSON.parse(data[0]?.chats)
                     setChatMsg(msgs);
                     setChatHistory(data[0])
                     setChatTitle(data[0].chat_title);
                 }                
             }
-            // else if(data.length === 0){
-            //     window.history.replaceState('', '', `/chat/new`);
-            //     throw new Error('Chat session ID is Invalid')
-            // }
+            else if(data.length === 0){
+                
+                setChatMsg([]);
+                // window.history.replaceState('', '', `/chat/new`);
+                // throw new Error('Chat session ID is Invalid')
+            }
+            setLoading(false)
         } catch (error) {
             setLoading(false)
             console.log(error)
@@ -416,8 +425,8 @@ const ChatWindow = () => {
     };
     
     async function updateDocumentSet(ccID, des){
-        const db_connectors = [...existConnectorName[0].cc_pair_id, ...ccID]
-        if(!existConnectorName[0]?.doc_set_id){
+        const db_connectors = [...documentSet[0].cc_pair_id, ...ccID]
+        if(!documentSet[0]?.doc_set_id){
           return null
         }
         
@@ -428,7 +437,7 @@ const ChatWindow = () => {
               "Content-Type": "application/json",
             },
             body:JSON.stringify({
-              "id": existConnectorName[0]?.doc_set_id,
+              "id": documentSet[0]?.doc_set_id,
               "description": des,
               "cc_pair_ids": db_connectors
             })
@@ -448,7 +457,7 @@ const ChatWindow = () => {
     }
 
     async function updateDataInDB(ccID){
-        const db_connectors = [...existConnectorName[0].cc_pair_id, ...ccID]
+        const db_connectors = [...documentSet[0].cc_pair_id, ...ccID]
         
         const fol_id = folderId || localStorage.getItem('folderId')
         
@@ -461,7 +470,7 @@ const ChatWindow = () => {
         .select()
 
         if(data?.length){
-            setExistConnectorName(data)
+            setDocumentSet(data)
         }
     };
     function handleDocSet(id) {
@@ -476,16 +485,19 @@ const ChatWindow = () => {
     }
 
     async function isDocSetExist(folder_id){
-        let folder_ID = folderId
+        console.log(folder_id)
         if(!folder_id){
-            folder_ID = localStorage.getItem('lastFolderId')
+            return false
             
-        }
+        };
+        // if(folderId === ''){
+        //     setFolderId(folder_id)
+        // }
         try {
             let { data: document_set, error } = await supabase
                 .from('document_set')
-                .select('doc_set_id')
-                .eq('folder_id', folder_ID);
+                .select('*')
+                .eq('folder_id', folder_id);
                 if(error){
                     console.log(error)
                     return toast({
@@ -497,7 +509,8 @@ const ChatWindow = () => {
                 if(document_set.length === 0){
                     router.push('/chat/upload')
                 }else {
-                    setLoading(false)
+                    setLoading(false);
+                    setDocumentSet(document_set)
                     return true
                 }
         } catch (error) {
@@ -513,18 +526,27 @@ const ChatWindow = () => {
         setShowAdvance(false);
         
         if (chat_id !== 'new' && chat_id) {
+            // console.log(chat_id)
             getChatHistory(chat_id)
-            setChatSessionId(chat_id);
+            setChatSessionID(chat_id);
             localStorage.setItem('chatSessionID', chat_id)
         } else {
             setRcvdMsg('')
             setChatMsg([])
-            isDocSetExist(folderId);
-            setChatSessionId('new');
+            setLoading(false)
+            if(folderId === '' || folderId === null){
+                setTimeout(()=> {
+                    console.log(folderId)
+                isDocSetExist(localStorage.getItem('lastFolderId'));
+                }, 1000)
+            }else{
+                isDocSetExist(folderId);
+            }
+            setChatSessionID('new');
             localStorage.removeItem('chatSessionID');
         }
         
-    }, [chat_id, pathname, folderId]);
+    }, [chat_id, folderId]);
 
     useEffect(()=> {
         console.log(chat_id)
@@ -538,9 +560,9 @@ const ChatWindow = () => {
             <div className='w-full flex justify-between px-4 py-2 h-fit '>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
                     {folder.length === 0 ?<Image src={Logo} alt='folder.chat'/> :
-                    <span className='text-sm leading-5 font-[500] opacity-[60%] hover:opacity-100'>Context : {existConnectorName[0]?.doc_set_name || 'No Doc Uploaded'}</span>}
+                    <span className='text-sm leading-5 font-[500] opacity-[60%] hover:opacity-100'>Context : {documentSet[0]?.doc_set_name || 'No Doc Uploaded'}</span>}
 
-                    {!existConnectorName[0]?.doc_set_id ? folder.length !==0 && <Image src={plus} alt='add' title='Add Documents' onClick={() => setFileName('upload')} /> :
+                    {!documentSet[0]?.doc_set_id ? folder.length !==0 && <Image src={plus} alt='add' title='Add Documents' onClick={() => setFileName('upload')} /> :
                         <Dialog onOpenChange={() => { setInputDocDes(''); }}>
                             <DialogTrigger asChild>
                                 <Image src={editIcon} alt='edit' />
@@ -556,7 +578,7 @@ const ChatWindow = () => {
                                     id='doc-name'
                                     type='text'
                                     placeholder='document new name'
-                                    value={existConnectorName[0]?.doc_set_name}
+                                    value={documentSet[0]?.doc_set_name}
                                     disabled
                                     autoComplete='off'
                                     className='text-black bg-gray-200'

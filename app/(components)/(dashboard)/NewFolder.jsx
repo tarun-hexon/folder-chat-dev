@@ -29,7 +29,7 @@ import supabase from '../../../config/supabse';
 import { useRouter } from 'next/navigation';
 
 const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
-    const [folder, setFolder] = useAtom(folderAtom);
+    // const [folder, setFolder] = useAtom(folderAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
 
     const [open, setOpen] = useState(openMenu);
@@ -77,7 +77,7 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                 .select();
                 if(data){
                     // console.log(data);
-                    setFolder([...folder, data]);
+                    // setFolder([...folder, data]);
                     setFolderAdded(prev => !prev)
                     setOpen(false);
                     setFolderId(data[0].id)

@@ -22,9 +22,9 @@ import { Label } from '../../../components/ui/label';
 import { cn } from '../../../lib/utils';
 
 
-const FolderCard = (props) => {
-    
-    const { name, id } = props.fol
+const FolderCard = ({fol}) => {
+    // console.log(fol)
+    const { name, id } = fol
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
     const [files, setFiles] = useState([])
     const [fileName, setFileName] = useAtom(fileNameAtom);
@@ -43,12 +43,12 @@ const FolderCard = (props) => {
     const chat_id = current_url.split("/chat/")[1];
 
     async function getChatFiles() {
-        let ID = id === undefined ? props.fol[0].id : id
+        // let ID = id === undefined ? props.fol[0].id : id
         try {
             const { data, error } = await supabase
                 .from('chats')
                 .select('*')
-                .eq('folder_id', ID);
+                .eq('folder_id', fol.id);
             if (data) {
                 setFiles(data);
 
@@ -61,12 +61,12 @@ const FolderCard = (props) => {
     };
 
     function handleOptionsOnclick(id, fol_id) {
-
+        console.log(fol_id)
         if (id === 'new-chat') {
             // localStorage.setItem('folderId', fol_id);
             setFolderId(fol_id)
-
             localStorage.removeItem('chatSessionID')
+            localStorage.removeItem('lastFolderId')
             setChatSessionID('new')
             // window.history.replaceState('', '', `/chat/new`);
             router.push('/chat/new')
@@ -191,6 +191,7 @@ const FolderCard = (props) => {
     };
 
     async function updateFolderName(name, id){
+        
         const { data, error } = await supabase
             .from('folders')
             .update({ name: name })
@@ -239,7 +240,7 @@ const FolderCard = (props) => {
                                             </div> :
                                             <Dialog key={option.id} open={dialogOpen} onOpenChange={setDialogOpen}>
                                                 <DialogTrigger asChild>
-                                                    <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer" onClick={()=> {setFolNewName(name); setDialogOpen(true)}}>
+                                                    <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer" onClick={()=> {setFolNewName(name); setDialogOpen(true); console.log(id)}}>
                                                         <option.icon className="mr-2 h-4 w-4" />
                                                         <span>{option.title}</span>
                                                     </div>
@@ -396,11 +397,12 @@ const SideBar = () => {
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const current_url = window.location.href;
     const chat_id = current_url.split("advance");
-    const router = useRouter()
-    async function getFolders(user) {
+    const router = useRouter();
+
+    async function getFolders() {
         try {
 
-            const wkID = await isUserExist('workspaces', 'id', 'created_by', user.user.id);
+            const wkID = await isUserExist('workspaces', 'id', 'created_by', session.user.id);
             let { data: folders, error } = await supabase
                 .from('folders')
                 .select('*')
@@ -421,9 +423,8 @@ const SideBar = () => {
         }
     };
 
-
     useEffect(() => {
-        getFolders(session)
+        getFolders()
     }, [folderAdded]);
 
 
