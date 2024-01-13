@@ -12,11 +12,11 @@ import { setting } from '../../../config/constants';
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Button } from '../../../components/ui/button';
 import { useToast } from '../../../components/ui/use-toast';
-const Setting = ({ itemProp }) => {
+const Setting = ({ item, setItem }) => {
     // console.log(itemProp)
     const [session, setSession] = useAtom(sessionAtom);
     const { toast } = useToast()
-    const [item, setItem] = useState(itemProp);
+    // const [item, setItem] = useState(itemProp);
 
 
     function shareByEmail() {
@@ -27,14 +27,6 @@ const Setting = ({ itemProp }) => {
         window.location.href = mailtoLink;
       }
 
-
-useEffect(()=> {
-    if(itemProp){
-        // console.log(item)
-        // setItem(itemProp)
-    }
-    console.log(item)
-}, [item])
 
     return (
         <DialogContent className="sm:max-w-[65rem] h-[32rem] p-0 font-Inter flex flex-row">

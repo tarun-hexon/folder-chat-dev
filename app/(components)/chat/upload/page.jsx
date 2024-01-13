@@ -10,7 +10,7 @@ import { fileNameAtom, existConnectorDetailsAtom, folderAtom, folderIdAtom, open
 import { useToast } from '../../../../components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 import supabase from '../../../../config/supabse';
-import { Loader, Loader2Icon } from 'lucide-react';
+import { Loader, Loader2, Loader2Icon } from 'lucide-react';
 
 
 const Upload = () => {
@@ -33,6 +33,7 @@ const Upload = () => {
         description:''
       })
     const { toast } = useToast();
+
     const onDrop = (acceptedFiles) => {
         if(documentSet[0]?.doc_set_name === '' && context.name === ''){
           return toast({
@@ -46,7 +47,7 @@ const Upload = () => {
     
           const fileType = file.name.split('.')[1]
           if (fileType !== 'pdf' && fileType !== 'txt') {
-            setLoading(false)
+            
             toast({
               variant: 'destructive',
               title: "This File type is not supported!"
@@ -293,7 +294,13 @@ const Upload = () => {
         const { data, error } = await supabase
         .from('document_set')
         .insert(
-          { 'cc_pair_id': newData, 'user_id' : userSession.user.id, 'folder_id':folderId, 'doc_set_name':doc_name,  'doc_set_id':doc_id},
+          { 
+            'cc_pair_id': newData, 
+            'user_id' : userSession.user.id, 
+            'folder_id':folderId, 
+            'doc_set_name':doc_name,  
+            'doc_set_id':doc_id
+          },
         )
         .select()
         // console.log(data)
@@ -377,19 +384,20 @@ const Upload = () => {
         }
     };
     useEffect(() => {
-        
-        // if(folder.length === 0){
-        //     router.push('/chat/new')
-        // }
-
-        //indexingStatus(folderId)
-        
-        if(userSession){
+        if(!folderId){
+          router.push('/chat/new')
+        }else{
           setLoading(false)
-        }
-        
-    }, [folderId]);
+        }     
+    }, []);
 
+    if(loading){
+      return (
+        <div className='w-full flex justify-center items-center h-screen'>
+          <Loader2 className='animate-spin'/>
+        </div>
+      )
+    }
   return (
     <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5 sticky top-0 self-start p-10 min-h-screen'>
           {uploading ? 

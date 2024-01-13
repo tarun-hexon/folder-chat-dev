@@ -20,6 +20,7 @@ import { Button } from '../../../components/ui/button';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../../components/ui/alert-dialog'
 import { Label } from '../../../components/ui/label';
 import { cn } from '../../../lib/utils';
+import Link from 'next/link';
 
 
 const FolderCard = ({fol}) => {
@@ -116,14 +117,11 @@ const FolderCard = ({fol}) => {
     }
 
     function handleFilessOnclick(data) {
-
-        // window.history.replaceState('', '', `/chat/${data.session_id}`);
         setChatSessionID(data.session_id)
-        // localStorage.setItem('folderId', data.folder_id);
         setFolderId(data.folder_id)
-        router.push(`/chat/${data.session_id}`)
     };
 
+    //will delete this function
     async function getFolderId(chatid) {
         try {
             const { data, error } = await supabase
@@ -202,17 +200,17 @@ const FolderCard = ({fol}) => {
             setFolderAdded(!folderAdded)
             setDialogOpen(false);
             setPopOpen(false);
-        }
+    }
 
     useEffect(() => {
         getChatFiles();
 
-    }, [chatHistory, chatTitle]);
+    }, [chatHistory, chatTitle,id]);
 
     useEffect(() => {
         setIsSelected(chat_id);
         if (chat_id !== 'new' && chat_id) {
-            getFolderId(chat_id);
+            //getFolderId(chat_id);
         }
     }, [chat_id]);
 
@@ -305,15 +303,15 @@ const FolderCard = ({fol}) => {
                 <AccordionContent className='flex flex-col gap-2 p-1'>
                     {
                         files.length === 0 ?
-                            <div className='flex justify-between bg-[#EFF5F5] hover:cursor-pointer hover:bg-slate-200 p-2 rounded-lg' onClick={() => { setFolderId(id); router.push('/chat/new') }}>
+                            <Link href={'/chat/new'} className='flex justify-between bg-[#EFF5F5] hover:cursor-pointer hover:bg-slate-200 p-2 rounded-lg' onClick={() => { setFolderId(id)}}>
                                 <span className='text-sm font-[500] leading-5 '>Create First Chat</span>
 
-                            </div>
+                            </Link>
                             :
                             files.map((data, idx) => {
 
                                 return (
-                                    <div key={data.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100 ${chat_id === data.session_id ? 'bg-slate-200' : ''}`} onClick={() => handleFilessOnclick(data)}>
+                                    <Link href={`/chat/${data.session_id}`} key={data.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100 ${chat_id === data.session_id ? 'bg-slate-200' : ''}`} onClick={() => handleFilessOnclick(data)}>
                                         <div className='inline-flex gap-1 items-center'>
                                             {/* <MessageSquare size={'1rem'} className='hover:cursor-pointer' /> */}
                                             <span className={`font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis ${isRenamingChat && chat_id === data.session_id ? 'hidden' : ''} `} >{data?.chat_title || 'New Chat'}</span>
@@ -379,7 +377,7 @@ const FolderCard = ({fol}) => {
                                                     </AlertDialog>
                                                 </div>
                                             ))}
-                                    </div>
+                                    </Link>
                                 )
                             })
                     }
@@ -416,6 +414,7 @@ const SideBar = () => {
                 if(!folderId && !localStorage.getItem('chatSessionID')){
                     localStorage.setItem('lastFolderId', lastFolder?.id)
                 }
+                // console.log(folders)
                 setFolder(folders);
                 return
             }
@@ -446,13 +445,10 @@ const SideBar = () => {
             </div>
 
             {!showAdvance ?
-                <div className='w-full flex justify-between items-center bg-[#DEEAEA] p-3 rounded-md hover:cursor-pointer' onClick={() => { setShowAdvance(!showAdvance); router.push('/advance') }}>
-                    <div className='flex items-center gap-2'>
-
-                        <h1 className='font-[600] text-sm leading-5'>Advance</h1>
-                    </div>
+                <Link href={'/advance'} className='w-full flex justify-between items-center bg-[#DEEAEA] p-3 rounded-md hover:cursor-pointer' onClick={() => { setShowAdvance(!showAdvance)}}>
+                    <h1 className='font-[600] text-sm leading-5'>Advance</h1>
                     <Image src={rightArrow} alt='open' />
-                </div>
+                </Link>
                 :
                 <div className='w-full h-fit bg-[#14B8A6] text-[#FFFFFF] rounded-lg shadow-md'>
                     <Advance />

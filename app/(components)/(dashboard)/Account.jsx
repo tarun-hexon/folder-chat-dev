@@ -19,7 +19,8 @@ const Account = () => {
     const [isPostUserComplete, setPostUserComplete] = useAtom(isPostUserCompleteAtom);
     const [open, setOpen] = useState(false);
     const [item, setItem] = useState('profile')
-    const [workSpace, setWorkSpace] = useState(null)
+    const [workSpace, setWorkSpace] = useState(null);
+    
     const router = useRouter();
     
     async function signOut() {
@@ -53,8 +54,8 @@ const Account = () => {
     }, [])
     return (
         <div className='w-full'>
-            <Accordion type="single" collapsible className='w-full'>
-                <AccordionItem value="item-1" className='p-2 gap-4 flex flex-col w-full'>
+            <Accordion type="single" defaultValue='profile' collapsible className='w-full'>
+                <AccordionItem value="profile" className='p-2 gap-4 flex flex-col w-full'>
                     <AccordionTrigger className='flex-row-reverse justify-between items-center gap-2'>
                         <div className='flex w-full justify-between'>
                         
@@ -66,12 +67,12 @@ const Account = () => {
                         <div className='flex flex-col gap-4 w-full'>
                             {sidebarOptions.map(option => {
                                 return (
-                                    option.title !== 'Settings' ? 
-                                    <div key={option.title} className='inline-flex gap-2 hover:cursor-pointer w-full' onClick={()=> {setItem(option.id); setOpen(true); }}>
+                                    option.id !== 'settings' ? 
+                                    <div key={option.id} className='inline-flex gap-2 hover:cursor-pointer w-full' onClick={()=> {setItem(option.id); setOpen(true); }}>
                                         <Image src={option.icon} alt={option.title} />
                                         <span className='text-sm leading-5 font-[500]'>{option.title}</span>
                                     </div> :
-                                        <Dialog open={open} onOpenChange={()=> {setOpen(!open); setItem('')}} key={option.title}>
+                                        <Dialog open={open} onOpenChange={()=> {setOpen(!open); setItem(option.id)}} key={option.id}>
 
                                             <DialogTrigger asChild className='self-start'>
 
@@ -81,7 +82,7 @@ const Account = () => {
                                                 </div>
 
                                             </DialogTrigger>
-                                            <Setting itemProp={item}/>
+                                            <Setting item={item} setItem={setItem}/>
                                         </Dialog>
                                 )
                             })}

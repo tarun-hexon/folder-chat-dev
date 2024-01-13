@@ -38,6 +38,7 @@ export default function RootLayout({ children }) {
         if(!f_id){
           fol_id = localStorage.getItem('folderId')
         }
+        console.log(fol_id)
         const { data, error } = await supabase
         .from('document_set')
         .select('*')

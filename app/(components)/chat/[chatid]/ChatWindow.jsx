@@ -15,15 +15,14 @@ import supabase from '../../../../config/supabse'
 import { useToast } from '../../../../components/ui/use-toast'
 import { NewFolder } from '../../(dashboard)'
 import { useRouter } from 'next/navigation'
-import { fetchCCPairId, getSess } from '../../../../lib/helpers'
+import { getSess } from '../../../../lib/helpers'
 import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../components/ui/dialog'
 import { Input } from '../../../../components/ui/input';
 import { Button } from '../../../../components/ui/button';
 import { Label } from '../../../../components/ui/label'
 import { cn } from '../../../../lib/utils'
 import plus from '../../../../public/assets/plus.svg'
-import { usePathname } from 'next/navigation'
-
+import Link from 'next/link'
 
 
 
@@ -33,6 +32,7 @@ const ChatWindow = () => {
     const [session, setSession] = useAtom(sessionAtom);
     const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
     const [loading, setLoading] = useState(true)
+    const [rcvdMsg, setRcvdMsg] = useState('')
     const [userMsg, setUserMsg] = useState('');
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom);
     const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
@@ -40,11 +40,9 @@ const ChatWindow = () => {
     const [folder, setFolder] = useAtom(folderAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [open, setOpen] = useState(false)
-    const [rcvdMsg, setRcvdMsg] = useState('');
     const textareaRef = useRef(null);
     const [responseObj, setResponseObj] = useState(null)
     const [msgLoader, setMsgLoader] = useState(false);
-
     const [chatMsg, setChatMsg] = useState([]);
     const [parentMessageId, setParentMessageId] = useState(null);
     const [chatTitle, setChatTitle] = useState('')
@@ -55,14 +53,13 @@ const ChatWindow = () => {
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
     const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
     const [inputDocDes, setInputDocDes] = useState('');
-
-    const ccIDS = useRef([]);
+    const [selectedDoc, setSelectedDoc] = useState([])
+    
     const newDocSet = new Set();
 
     const botResponse = useRef('');
 
     const current_url = window.location.href;
-    const pathname = usePathname()
 
     const chat_id = current_url.split("/chat/")[1];
 
@@ -161,6 +158,7 @@ const ChatWindow = () => {
             console.log(error)
         }
     }
+    
     async function insertChatInDB(chatTitle, chatID, folderID) {
 
         try {
@@ -184,6 +182,7 @@ const ChatWindow = () => {
             console.log(error)
         }
     };
+
     async function updateTitle(value, id) {
 
         try {
@@ -212,7 +211,9 @@ const ChatWindow = () => {
 
             const { data, error } = await supabase
                 .from('chats')
-                .update({ 'chats': JSON.stringify(newMsg), 'message_id': msgID })
+                .update({   'chats': JSON.stringify(newMsg), 
+                            'message_id': msgID 
+                    })
                 .eq('session_id', localStorage.getItem('chatSessionID'))
                 .select()
             if (data.length) {
@@ -466,41 +467,44 @@ const ChatWindow = () => {
     async function updateDataInDB(ccID) {
         const db_connectors = [...documentSet[0].cc_pair_id, ...ccID]
 
-        const fol_id = folderId || localStorage.getItem('folderId')
+       
 
         const { data, error } = await supabase
             .from('document_set')
             .update(
                 { 'cc_pair_id': db_connectors },
             )
-            .eq('folder_id', fol_id)
+            .eq('folder_id', folderId)
             .select()
 
         if (data?.length) {
             setDocumentSet(data)
         }
+        if(error){
+            console.log(error)
+        }
     };
 
     function handleDocSet(id) {
 
-        if (newDocSet.has(id)) {
-            newDocSet.delete(id)
-        } else {
-            newDocSet.add(id)
+        if(selectedDoc.includes(id)){
+            const idx = selectedDoc.indexOf(id);
+            const docs = selectedDoc
+            docs.splice(idx, 1);
+            // console.log(id, idx, docs, '494')
+            setSelectedDoc(docs);
+            // console.log(selectedDoc)
+        }else{
+            setSelectedDoc([...selectedDoc, id])
+            // console.log(selectedDoc)
         }
-        ccIDS.current = ([...newDocSet])
-        console.log([...newDocSet])
+        
+       
+        
     }
 
     async function isDocSetExist(folder_id) {
-        // console.log(folder_id)
-        if (!folder_id || folder_id === 'undefined') {
-            return false
 
-        };
-        // if(folderId === ''){
-        //     setFolderId(folder_id)
-        // }
         try {
             let { data: document_set, error } = await supabase
                 .from('document_set')
@@ -515,11 +519,13 @@ const ChatWindow = () => {
             }
 
             if (document_set.length === 0) {
+                // console.log(document_set)
                 setDocumentSet([])
                 router.push('/chat/upload')
             } else {
                 setLoading(false);
                 setDocumentSet(document_set);
+                setSelectedDoc(document_set[0]?.cc_pair_id)
                 return document_set[0]?.cc_pair_id
 
             }
@@ -529,11 +535,7 @@ const ChatWindow = () => {
     };
 
     async function indexingStatus(f_id) {
-        // console.log(f_id)
-        if (!f_id || f_id === 'undefined') {
-            return false
-
-        };
+        
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
             const json = await data.json();
@@ -578,33 +580,41 @@ const ChatWindow = () => {
             setRcvdMsg('')
             setChatMsg([])
             // setLoading(false);
-            
+            if (!folderId) {
+                setTimeout(() => {
+                    
+                    indexingStatus(localStorage.getItem('lastFolderId'))
+                }, 1000)
+            } else {
+                // console.log(folderId, '591')
+                
+                indexingStatus(folderId)
+            }
             setParentMessageId(null)
             setChatSessionID('new');
             localStorage.removeItem('chatSessionID');
         }
 
-        if (folderId === '' || folderId === null) {
-            setTimeout(() => {
-                // console.log(folderId, '586')
-                // isDocSetExist(localStorage.getItem('lastFolderId'));
-                indexingStatus(localStorage.getItem('lastFolderId'))
-            }, 1000)
-        } else {
-            // console.log(folderId, '591')
-            // isDocSetExist(folderId);
-            indexingStatus(folderId)
-        }
+        // if (!folderId) {
+        //     setTimeout(() => {
+                
+        //         indexingStatus(localStorage.getItem('lastFolderId'))
+        //     }, 1000)
+        // } else {
+        //     // console.log(folderId, '591')
+            
+        //     indexingStatus(folderId)
+        // }
 
 
 
     }, [chat_id, folderId]);
 
-    useEffect(() => {
-        if (chatSessionID === 'new') {
-            setChatMsg([])
-        }
-    }, [chatSessionID])
+    // useEffect(() => {
+    //     if (chatSessionID === 'new') {
+    //         setChatMsg([])
+    //     }
+    // }, [chatSessionID])
 
 
     return (
@@ -614,51 +624,57 @@ const ChatWindow = () => {
                     {folder.length === 0 ? <Image src={Logo} alt='folder.chat' /> :
                         <span className='text-sm leading-5 font-[500] opacity-[60%] hover:opacity-100'>Context : {documentSet[0]?.doc_set_name || 'No Doc Uploaded'}</span>}
 
-                    {!documentSet[0]?.doc_set_id ? folder.length !== 0 && <Image src={plus} alt='add' title='Add Documents' onClick={() => setFileName('upload')} /> :
+                    {folder.length !== 0 && (!documentSet[0]?.doc_set_id ?  
+                        <Link href={'/chat/upload'}>
+                            <Image src={plus} alt='add' title='Add Documents'/>
+                        </Link> 
+                        :
+                        
                         <Dialog onOpenChange={() => { setInputDocDes(''); }}>
-                            <DialogTrigger asChild>
-                                <Image src={editIcon} alt='edit' />
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader className='mb-2'>
-                                    <DialogTitle>
-                                        Update Context
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <Label htmlFor='doc-name'>Name</Label>
-                                <Input
-                                    id='doc-name'
-                                    type='text'
-                                    placeholder='document new name'
-                                    value={documentSet[0]?.doc_set_name}
-                                    disabled
-                                    autoComplete='off'
-                                    className='text-black bg-gray-200'
-                                />
-                                <Label htmlFor='doc-des'>Description</Label>
-                                <Input
-                                    id='doc-des'
-                                    type='text'
-                                    placeholder='document description'
-                                    value={inputDocDes}
-                                    onChange={(e) => setInputDocDes(e.target.value)}
-                                    autoComplete='off'
-                                />
-                                <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
-                                <div className='flex w-full flex-wrap gap-1'>
+                                <DialogTrigger asChild>
+                                    <Image src={editIcon} alt='edit' title='edit'/>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader className='mb-2'>
+                                        <DialogTitle>
+                                            Update Context
+                                        </DialogTitle>
+                                    </DialogHeader>
+                                    <Label htmlFor='doc-name'>Name</Label>
+                                    <Input
+                                        id='doc-name'
+                                        type='text'
+                                        placeholder='document new name'
+                                        value={documentSet[0]?.doc_set_name}
+                                        disabled
+                                        autoComplete='off'
+                                        className='text-black bg-gray-200'
+                                    />
+                                    <Label htmlFor='doc-des'>Description</Label>
+                                    <Input
+                                        id='doc-des'
+                                        type='text'
+                                        placeholder='document description'
+                                        value={inputDocDes}
+                                        onChange={(e) => setInputDocDes(e.target.value)}
+                                        autoComplete='off'
+                                    />
+                                    <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
+                                    <div className='flex w-full flex-wrap gap-1'>
 
-                                    {existConnectorDetails?.length > 0 &&
-                                        existConnectorDetails?.map((connector) => <div key={connector.name} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 ${ccIDS.current.includes(connector.cc_pair_id) ? 'bg-gray-100' : ''}`} onClick={() => handleDocSet(connector.cc_pair_id)}>{connector.name}</div>)}
-                                </div>
-                                <DialogFooter className={cn('w-full')}>
-                                    <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet([...newDocSet], inputDocDes)}>Update</Button>
-                                </DialogFooter>
+                                        {existConnectorDetails?.length > 0 &&
+                                            existConnectorDetails?.map((connector) => <div key={connector.name} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 ${selectedDoc?.includes(connector.cc_pair_id) ? 'bg-gray-200' : ''}`} onClick={() => handleDocSet(connector.cc_pair_id)}>{connector.name}</div>)}
+                                    </div>
+                                    <DialogFooter className={cn('w-full')}>
+                                        <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet([...newDocSet], inputDocDes)}>Update</Button>
+                                    </DialogFooter>
 
-                            </DialogContent>
-                        </Dialog>}
+                                </DialogContent>
+                        </Dialog>)
+                    }
                 </div>
 
-                <div className='flex gap-4 '>
+                {folder.length > 0 && <div className='flex gap-4 '>
                     <div className='flex gap-2 justify-center items-center hover:cursor-pointer opacity-[60%] hover:opacity-100 text-[12px] font-[600] text-[#334155]'>
                         <Image src={shareIcon} alt='share' />
                         <p>Share</p>
@@ -666,15 +682,15 @@ const ChatWindow = () => {
                     </div>
                     <div className='flex gap-2 justify-center items-center hover:cursor-pointer text-[12px] font-[600] opacity-[60%] hover:opacity-100 text-[#334155]'>
                         <Image src={openDocIcon} alt='open' />
-                        <p className=''>Open Document</p>
+                        <p>Open Document</p>
 
                     </div>
-                </div>
+                </div>}
             </div>
             {folder.length === 0 ?
                 <div className='w-full h-full flex flex-col justify-center items-center gap-4'>
-                    <Folder color='#14B8A6' size={'3rem'} className='block' />
-                    <p className='text-[16px] leading-5 font-[400]'><span className='font-[500] hover:underline hover:cursor-pointer' onClick={() => setOpen(true)}>Create</span> a Folder First Before Start Chating...</p>
+                    <Folder color='#14B8A6' size={'3rem'} className='block animate-pulse' />
+                    <p className='text-[16px] leading-5 font-[400]'><strong className='hover:underline hover:cursor-pointer' onClick={() => setOpen(true)}>Create</strong> a Folder and start chating with folder.chat</p>
                     {open && <NewFolder setFolderAdded={setFolderAdded} openMenu={open} setOpenMenu={setOpen} />}
                 </div>
                 :

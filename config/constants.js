@@ -48,7 +48,8 @@ export const sidebarOptions = [
     },
     {
         title: 'Settings',
-        icon: settingsIcon
+        icon: settingsIcon,
+        id:'settings'
     }
 ];
 
@@ -108,21 +109,21 @@ export const folderOptions = [
 ];
 
 export const advanceOption = [
-  {
-    id:'advance',
-    title:'Show All',
-    icon: showAllIcon
-  },
-  {
-    id:'drive',
-    title:'Google Drive',
-    icon: gDriveIcon
-  },
-  {
-    id:'slack',
-    title:'Slack',
-    icon: slackIcon
-  },
+  // {
+  //   id:'advance',
+  //   title:'Show All',
+  //   icon: showAllIcon
+  // },
+  // {
+  //   id:'drive',
+  //   title:'Google Drive',
+  //   icon: gDriveIcon
+  // },
+  // {
+  //   id:'slack',
+  //   title:'Slack',
+  //   icon: slackIcon
+  // },
   {
     id:'confluence',
     title:'Confluence',
