@@ -13,6 +13,7 @@ import EditIndex from '../(component)/EditIndex';
 import supabase from '../../../../config/supabse';
 import { useAtom } from 'jotai';
 import { sessionAtom, allConnectorsAtom } from '../../../store';
+import { Loader2 } from 'lucide-react';
 
 const GitPrs = () => {
     const [session, setSession] = useAtom(sessionAtom)
@@ -25,6 +26,7 @@ const GitPrs = () => {
     const [connectorId, setConnectorId] = useState(null);
     const [credentialID, setCredentialID] = useState(null);
     const [adminCredential, setAdminCredential] = useState(null);
+    const [isAdminLoad, setIsAdminLoad] = useState(true)
     const [existingCredentials, setExistingCredentials] = useState([])
     const [ccPairId ,setCCPairId] = useState(null);
     const [loading, setLoading] = useState(true)
@@ -45,12 +47,15 @@ const GitPrs = () => {
             
             if(currentToken.length > 0){
                 setAdminCredential(currentToken[0]);
+                
                 setTokenStatus(true)
             }else{
                 setAdminCredential(null);
             }
+            setIsAdminLoad(false)
             
         } catch (error) {
+            setIsAdminLoad(false)
             console.log(error)
         }
     }
@@ -277,11 +282,20 @@ const GitPrs = () => {
             return []
         }
     }; 
+
     useEffect(()=> {
-        readData();
+        // readData();
         getAdminCredentials();
         getAllExistingConnector();
-    }, [])
+    }, []);
+
+    if(isAdminLoad){
+        return (
+            <div className='w-full flex h-screen items-center justify-center'>
+                <Loader2 className='animate-spin' />
+            </div>
+        )
+    }
     return (
         <div className='w-full sticky top-0 self-start h-screen flex flex-col rounded-[6px] gap-5 items-center  box-border text-[#64748B] '>
              <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2 overflow-scroll no-scrollbar h-full px-4 py-10'>

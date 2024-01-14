@@ -18,7 +18,7 @@ const Advance = () => {
 
     return (
         <>
-            <Link href={'indexing'} className='flex gap-2 hover:cursor-pointer items-center justify-between p-3 rounded-md'>
+            <Link href={'/advance/indexing'} className='flex gap-2 hover:cursor-pointer items-center justify-between p-3 rounded-md'>
                 <span className='font-[700] text-sm leading-5'>Indexing</span>
                 <Image src={album} alt={'album'} className='w-4 h-4' />
             </Link>

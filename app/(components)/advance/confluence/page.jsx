@@ -13,6 +13,7 @@ import { useToast } from '../../../../components/ui/use-toast';
 import { fetchAllConnector, fetchAllCredentials, deleteConnector, generateConnectorId, addNewInstance, deleteAdminCredentails, fetchCredentialID } from '../../../../lib/helpers';
 import { useAtom } from 'jotai';
 import { sessionAtom, allConnectorsAtom } from '../../../store';
+import { Loader2 } from 'lucide-react';
 
 const Confluence = () => {
     const [session, setSession] = useAtom(sessionAtom)
@@ -26,7 +27,8 @@ const Confluence = () => {
     const [credentialID, setCredentialID] = useState(null);
     const [connectorID, setConnectorID] = useState(null);
     const [existingCredentials, setExistingCredentials] = useState([])
-    const [conJson, setConJson] = useState(null)
+    const [conJson, setConJson] = useState(null);
+    const [isAdminLoad, setIsAdminLoad] = useState(true);
     const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
 
     const { toast } = useToast();
@@ -45,9 +47,11 @@ const Confluence = () => {
             const conCred = currentToken?.filter(cred => cred?.credential_json?.confluence_username);
             // console.log(conCred)
             if(conCred.length > 0){
+                setIsAdminLoad(false)
                 setConJson(conCred[0])
             }else{
                 setConJson(null)
+                setIsAdminLoad(false)
             }
 
         } catch (error) {
@@ -257,7 +261,18 @@ const Confluence = () => {
         readData();
         getAllCred();
         getAllExistingConnector();
-    }, [])
+    }, []);
+
+
+    if(isAdminLoad){
+        return (
+            <div className='w-full flex h-screen items-center justify-center'>
+                <Loader2 className='animate-spin' />
+            </div>
+        )
+    }
+
+
     return (
         <div className='w-full sticky top-0 self-start h-screen flex flex-col rounded-[6px] gap-5 items-center  box-border text-[#64748B] '>
             <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2 overflow-scroll no-scrollbar h-full px-4 py-10'>
