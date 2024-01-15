@@ -523,7 +523,7 @@ const ChatWindow = () => {
             }
 
             if (document_set.length === 0) {
-                // console.log(document_set)
+                console.log(document_set)
                 setDocumentSet([])
                 router.push('/chat/upload')
             } else {
@@ -614,11 +614,11 @@ const ChatWindow = () => {
 
     }, [chat_id, folderId]);
 
-    // useEffect(() => {
-    //     if (chatSessionID === 'new') {
-    //         setChatMsg([])
-    //     }
-    // }, [chatSessionID])
+    useEffect(() => {
+        if (chatSessionID === 'new') {
+            setChatMsg([])
+        }
+    }, [chatSessionID])
 
 
     return (

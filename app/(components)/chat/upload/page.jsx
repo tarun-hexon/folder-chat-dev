@@ -383,21 +383,21 @@ const Upload = () => {
           setDocumentSet([])
         }
     };
-    useEffect(() => {
-        if(!folderId){
-          router.push('/chat/new')
-        }else{
-          setLoading(false)
-        }     
-    }, []);
+    // useEffect(() => {
+    //     if(!folderId){
+    //       router.push('/chat/new')
+    //     }else{
+    //       setLoading(false)
+    //     }     
+    // }, []);
 
-    if(loading){
-      return (
-        <div className='w-full flex justify-center items-center h-screen'>
-          <Loader2 className='animate-spin'/>
-        </div>
-      )
-    }
+    // if(loading){
+    //   return (
+    //     <div className='w-full flex justify-center items-center h-screen'>
+    //       <Loader2 className='animate-spin'/>
+    //     </div>
+    //   )
+    // }
   return (
     <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5 sticky top-0 self-start p-10 min-h-screen'>
           {uploading ? 
