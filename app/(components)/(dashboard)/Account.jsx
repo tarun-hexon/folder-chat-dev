@@ -34,7 +34,8 @@ const Account = () => {
             setPostUserComplete(false);
         }
     };
-    async function getInfo(){
+
+    async function getWorkspaceName(){
         try {
             
             let { data: workspaces, error } = await supabase
@@ -49,8 +50,9 @@ const Account = () => {
             console.log(error)
         }
     };
+
     useEffect(()=> {
-        getInfo()
+        getWorkspaceName()
     }, [])
     return (
         <div className='w-full'>

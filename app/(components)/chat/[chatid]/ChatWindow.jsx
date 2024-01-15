@@ -9,7 +9,7 @@ import Image from 'next/image'
 import { iconSelector } from '../../../../config/constants'
 import { Folder, Loader2, Plus, MoreHorizontal } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, sessionAtom, showAdvanceAtom, documentSetAtom, existConnectorDetailsAtom, allConnectorsAtom } from '../../../store'
+import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, allowSessionAtom, showAdvanceAtom, documentSetAtom, existConnectorDetailsAtom, allConnectorsAtom } from '../../../store'
 import ReactMarkdown from "react-markdown";
 import supabase from '../../../../config/supabse'
 import { useToast } from '../../../../components/ui/use-toast'
@@ -29,7 +29,7 @@ import Link from 'next/link'
 const ChatWindow = () => {
 
 
-    const [session, setSession] = useAtom(sessionAtom);
+    const [allowSession, setAllowSession] = useAtom(allowSessionAtom);
     const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
     const [loading, setLoading] = useState(true)
     const [rcvdMsg, setRcvdMsg] = useState('')
@@ -234,7 +234,7 @@ const ChatWindow = () => {
     };
 
     const resizeTextarea = () => {
-        if (folder.length && !loading) {
+        if (folder?.length && !loading) {
             const { current } = textareaRef;
             current.style.height = "auto";
             current.style.height = `${current.scrollHeight}px`;
@@ -621,10 +621,10 @@ const ChatWindow = () => {
         <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2 text-center'>
             <div className='w-full flex justify-between px-4 py-2 h-fit '>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
-                    {folder.length === 0 ? <Image src={Logo} alt='folder.chat' /> :
+                    {folder?.length === 0 ? <Image src={Logo} alt='folder.chat' /> :
                         <span className='text-sm leading-5 font-[500] opacity-[60%] hover:opacity-100'>Context : {documentSet[0]?.doc_set_name || 'No Doc Uploaded'}</span>}
 
-                    {folder.length !== 0 && (!documentSet[0]?.doc_set_id ?  
+                    {folder?.length !== 0 && (!documentSet[0]?.doc_set_id ?  
                         <Link href={'/chat/upload'}>
                             <Image src={plus} alt='add' title='Add Documents'/>
                         </Link> 
@@ -674,7 +674,7 @@ const ChatWindow = () => {
                     }
                 </div>
 
-                {folder.length > 0 && <div className='flex gap-4 '>
+                {folder?.length > 0 && <div className='flex gap-4 '>
                     <div className='flex gap-2 justify-center items-center hover:cursor-pointer opacity-[60%] hover:opacity-100 text-[12px] font-[600] text-[#334155]'>
                         <Image src={shareIcon} alt='share' />
                         <p>Share</p>
@@ -687,7 +687,7 @@ const ChatWindow = () => {
                     </div>
                 </div>}
             </div>
-            {folder.length === 0 ?
+            {folder?.length === 0 ?
                 <div className='w-full h-full flex flex-col justify-center items-center gap-4'>
                     <Folder color='#14B8A6' size={'3rem'} className='block animate-pulse' />
                     <p className='text-[16px] leading-5 font-[400]'><strong className='hover:underline hover:cursor-pointer' onClick={() => setOpen(true)}>Create</strong> a Folder and start chating with folder.chat</p>
@@ -695,7 +695,9 @@ const ChatWindow = () => {
                 </div>
                 :
                 <div className='w-[70%] h-[88%] rounded-[6px] flex flex-col justify-between box-border '>
-                    {loading && <div className='w-full p-2 h-full items-center justify-center '><Loader2 className='m-auto animate-spin' /></div>}
+                    {loading && <div className='w-full p-2 h-full items-center justify-center '>
+                        <Loader2 className='m-auto animate-spin' />
+                        </div>}
                     {
                         chatMsg?.length == 0 && loading === false ?
                             <div>

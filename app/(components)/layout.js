@@ -23,15 +23,11 @@ export default function RootLayout({ children }) {
     async function getSess() {
         await supabase.auth.getSession().then(({ data: { session } }) => {
           if (session) {
-            setSession(session);
-            if (session?.user?.user_metadata?.onBoarding) {
-            } else {
+            if (!session?.user?.user_metadata?.onBoarding) {
               router.push('/signup')
-            }
-
+            } 
           }
           else {
-            
             router.push('/login')
           }
         });
@@ -45,6 +41,7 @@ export default function RootLayout({ children }) {
       }
       useEffect(()=> {
         getConn()
+        
         getSess()
       }, []);
 

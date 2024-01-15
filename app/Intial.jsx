@@ -20,18 +20,18 @@ const Intial = () => {
         
         if (session) {
           setUserSession(session);
+          setAllowSession(true)
         }
-        setAllowSession(true)
+        
       });
     } catch (error) {
       console.log(error)
-      setAllowSession(true)
     }
   };
 
-
   useEffect(() => {
     getSess();
+    
   }, [])
 
 // if(!userSession){

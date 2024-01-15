@@ -13,7 +13,7 @@ import { useRouter } from 'next/navigation';
 
 
 
-const Header = ({ children }) => {
+const Header = () => {
 
 
     const [darkMode, setDarkMode] = useAtom(darkModeAtom);
@@ -36,9 +36,11 @@ const Header = ({ children }) => {
     };
 
     return (
-        <div className={`flex font-Inter justify-start items-center h-screen w-full box-border flex-col gap-1 ${darkMode ? 'bg-[#EFF5F5] text-black' : 'bg-[#115E59] text-white'}`}>
-            <div className='w-full flex justify-between items-center px-5 py-1 h-[5rem]'>
-                <Link href={'/'}><Image src={darkMode ? Logo : LogoW} alt='logo' priority={false} className='' /></Link>
+        
+            <div className='w-full flex justify-between items-center px-5 py-1'>
+                <Link href={'/'}>
+                    <Image src={darkMode ? Logo : LogoW} alt='logo' priority={false} className='' />
+                </Link>
 
                 <div className='flex gap-5 justify-center items-center'>
                     <div>
@@ -50,8 +52,8 @@ const Header = ({ children }) => {
                     </div>
                 </div>
             </div>
-            {children}
-        </div>
+           
+       
     )
 }
 

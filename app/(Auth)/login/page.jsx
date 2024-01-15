@@ -31,16 +31,6 @@ const Login = () => {
 
   const router = useRouter()
 
-  useEffect(() => {
-    if (email !== '' && email.split('@').length > 1 && password != '') {
-      setDisabled(false)
-    } else {
-      setDisabled(true)
-    }
-  }, [email, password]);
-
-
-
   async function signInFunction() {
     try {
       const { user, error } = await supabase.auth.signInWithPassword({
@@ -50,8 +40,7 @@ const Login = () => {
       if (error) {
         setErrorMsg(error.message);
       }else{
-        getSess()
-        
+        await getSess()
         setErrorMsg(false)
         router.push('/chat')
       }
@@ -60,8 +49,6 @@ const Login = () => {
       // console.error('Error logging in:', error.message);
     }
   }
-
-
 
   async function googleSignIn() {
     try {
@@ -80,11 +67,12 @@ const Login = () => {
             return null
         }
         
-        getSess();
+        await getSess();
     } catch (error) {
         console.log(error)
     }
   };
+
   async function getSess() {
     await supabase.auth.getSession().then(({ data: { session } }) => {
       if(session){
@@ -103,10 +91,18 @@ const Login = () => {
             input.type = "text";
         }
     }
-};
+  };
 
+  useEffect(() => {
+    if (email !== '' && email.split('@').length > 1 && password != '') {
+      setDisabled(false)
+    } else {
+      setDisabled(true)
+    }
+  }, [email, password]);
 
 useEffect(()=> {
+
   if (session && session?.user?.user_metadata?.onBoarding) {
     setLoading(false);
     router.push('/chat')
@@ -122,14 +118,11 @@ useEffect(()=> {
 
   return (
   
-    <Header>
-    
-    
-    <div className={`flex font-Inter justify-center items-center w-full h-screen flex-col gap-4  box-border ${darkMode ? 'text-black bg-[#EFF5F5]' : 'text-white bg-[#115E59]'}`}>
+    <div className={`flex flex-col h-full w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'} px-5 md:px-0`}>
     {session || loading ?
       <Loader2 className='animate-spin'/>
     :
-    <div className={`flex flex-col w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'} px-5 md:px-0`}>
+    <>
       <h1 className='text-5xl space-x-0 w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-8'>Sign In</h1>
 
       <div className='w-full flex flex-col gap-3 text-sm font-inter'>
@@ -159,12 +152,11 @@ useEffect(()=> {
       <Button variant="outline" className='w-full text-black border border-[#CBD5E1] rounded-[6px] leading-[20px] flex items-center justify-center gap-1' onClick={googleSignIn}><Image src={Google} alt="google" className='w-7 h-7' /><span className='font-[700] text-sm'>Continue With Google</span></Button>
 
       <div className='w-full text-sm opacity-75 text-center'>Don&apos;t have an account &#63; <Link href={'/'} className='font-[500] hover:underline '>Sign Up</Link></div>
-      <Link href={'/reset'} className='w-full text-sm opacity-75 text-center hover:underline'>Forgot your password &#63;</Link></div>
+      <Link href={'/reset'} className='w-full text-sm opacity-75 text-center hover:underline'>Forgot your password &#63;</Link>
+      </>
     }
-      </div>
-      
-    
-    </Header>
+    </div>
+   
   )
 }
 

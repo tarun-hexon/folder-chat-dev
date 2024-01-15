@@ -10,7 +10,7 @@ import { fileNameAtom, existConnectorDetailsAtom, folderAtom, folderIdAtom, open
 import { useToast } from '../../../../components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 import supabase from '../../../../config/supabse';
-import { Loader, Loader2, Loader2Icon } from 'lucide-react';
+import { Loader, Loader2} from 'lucide-react';
 
 
 const Upload = () => {

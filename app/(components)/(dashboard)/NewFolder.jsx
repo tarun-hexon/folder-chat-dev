@@ -35,7 +35,7 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
     const [session, setSession] = useAtom(sessionAtom);
-    const [fileName, setFileName] = useAtom(fileNameAtom);
+    
     const router = useRouter()
     const id = uuidv4()
     const [fol, setFol] = useState({

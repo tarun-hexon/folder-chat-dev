@@ -53,7 +53,6 @@ export default function RootLayout({ children }) {
         }
     };
 
-
     useEffect(()=> {
         if(folderId !== '' && folderId !== 'undefined'){
             // console.log('in layout')

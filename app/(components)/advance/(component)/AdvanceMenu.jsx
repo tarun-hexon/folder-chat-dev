@@ -10,11 +10,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 
-const Advance = () => {
+const AdvanceMenu = () => {
 
-
-    const [item, setItem] = useAtom(advanceItemAtom);
-    const [fileName, setFileName] = useAtom(fileNameAtom)
 
     return (
         <>
@@ -50,4 +47,4 @@ const Advance = () => {
     )
 }
 
-export default Advance
+export default AdvanceMenu

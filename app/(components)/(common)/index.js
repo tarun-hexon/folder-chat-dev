@@ -5,7 +5,7 @@ import UpdatePassword from "../../(Auth)/reset/UpdatePassword";
 import SideBar from "./SideBar"
 import Header from './Header';
 import Signup from '../../(Auth)/signup/Signup';
-import Advance from '../advance/(component)/Advance'
+import AdvanceMenu from '../advance/(component)/AdvanceMenu'
 import AdvancePage from '../advance/(component)/AdvancePage';
 import Indexing from '../advance/indexing/page';
 import Slack from '../advance/slack/page';
@@ -14,11 +14,11 @@ import Files from '../advance/files/page'
 import Drive from '../advance/drive/page'
 import Confluence from '../advance/confluence/page';
 import Web from '../advance/web/page'
-import AllContext from './AllContext'
+
 
 
 export {
-    AllContext,
+    
     Header,
     Signup,
     PostSignup,
@@ -26,7 +26,7 @@ export {
     UserDetails,
     UpdatePassword,
     SideBar,
-    Advance,
+    AdvanceMenu,
     AdvancePage,
     Indexing,
     Slack,

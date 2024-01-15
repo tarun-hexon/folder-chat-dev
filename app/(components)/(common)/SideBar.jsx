@@ -9,7 +9,7 @@ import { folderAtom, documentSetAtom, openMenuAtom, showAdvanceAtom, chatTitleAt
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
 import { Pencil, Trash2, Check, X, MessageSquare, Loader2 } from 'lucide-react';
-import { Advance } from './index'
+import { AdvanceMenu } from './index'
 import supabase from '../../../config/supabse';
 import { isUserExist } from '../../../config/lib';
 import { useRouter } from 'next/navigation';
@@ -451,11 +451,11 @@ const SideBar = () => {
                 </Link>
                 :
                 <div className='w-full h-fit bg-[#14B8A6] text-[#FFFFFF] rounded-lg shadow-md'>
-                    <Advance />
+                    <AdvanceMenu />
                 </div>}
             {/* <h1 className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-between p-2 px-4 rounded-md hover:bg-[#DEEAEA] hover:text-black hover:cursor-pointer' onClick={() => setFileName('chat')}>New Chat</h1> */}
-            {folder.length > 0 && <div className='flex flex-col gap-2'>
-                {folder.map((fol, idx) => {
+            {folder?.length > 0 && <div className='flex flex-col gap-2'>
+                {folder?.map((fol, idx) => {
                     return (
                         <FolderCard key={idx} fol={fol} />
                     )

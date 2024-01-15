@@ -69,8 +69,8 @@ const Page = () => {
   };
 
   return (
-    <Header>
-      <div className='w-full h-screen flex flex-col justify-center items-center'>
+
+      <div className='w-full h-full flex flex-col justify-center items-center'>
 
         {!emailSent ?
           <><h1 className={`text-3xl font-Inter space-x-0 text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black' : ''}`}>Reset Password</h1>
@@ -103,7 +103,7 @@ const Page = () => {
         }
 
       </div>
-    </Header>
+    
   )
 }
 

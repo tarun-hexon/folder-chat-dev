@@ -8,28 +8,38 @@ import { sessionAtom } from '../../store';
 
 const Page = () => {
   const router = useRouter();
-  const [userSession, setUserSession] = useAtom(sessionAtom);
+  const [session, setSession] = useAtom(sessionAtom);
     
-    async function getSess() {
-      await supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          setUserSession(session);
-          if (session?.user?.user_metadata?.onBoarding) {
-            router.push('/chat/new')
-          } else {
-            router.push('/signup')
-          }
+    // async function getSess() {
+    //   await supabase.auth.getSession().then(({ data: { session } }) => {
+    //     if (session) {
+    //       setUserSession(session);
+    //       if (session?.user?.user_metadata?.onBoarding) {
+    //         router.push('/chat/new')
+    //       } else {
+    //         router.push('/signup')
+    //       }
   
-        }
-        else {
+    //     }
+    //     else {
          
-          router.push('/login')
-        }
-      });
-    };
+    //       router.push('/login')
+    //     }
+    //   });
+    // };
     
     useEffect(()=> {
-        getSess();
+      if (session) {
+        if (session?.user?.user_metadata?.onBoarding) {
+          router.push('/chat/new')
+        } else {
+          router.push('/signup')
+        }
+
+      }
+      else {
+        router.push('/login')
+      }
     }, []);
 
 
