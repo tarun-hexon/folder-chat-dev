@@ -11,22 +11,21 @@ export default function Home() {
 
 
   const [session, setSession] = useAtom(sessionAtom); 
-  const [show, setShow] = useAtom(allowSessionAtom);
+  const [allowSession, setAllowSession] = useAtom(allowSessionAtom);
+
 
   const router = useRouter() 
   
 useEffect(()=> {
-  if(show){
-    if(session){
-      router.push('/chat')
-    }else{
-      router.push('/signup')
-    }
+  if(allowSession){
+    router.push('/chat')
+  }else{
+    router.push('/signup')
   }
   
   
 
-}, [show]);
+}, [allowSession]);
 
   return (
     <div className='flex w-full justify-center items-center h-screen'>

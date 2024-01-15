@@ -38,10 +38,10 @@ const AdvanceMenu = () => {
             </div>
 
 
-            <div className='flex gap-2 hover:cursor-pointer items-center justify-between p-3 rounded-md'>
+            <Link href={'/advance'} className='flex gap-2 hover:cursor-pointer items-center justify-between p-3 rounded-md'>
                 <span className='font-[700] text-sm leading-5'>Search</span>
                 <Image src={filter} alt={'open'} className='w-4 h-4' />
-            </div>
+            </Link>
 
         </>
     )
