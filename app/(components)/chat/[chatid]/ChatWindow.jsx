@@ -86,7 +86,7 @@ const ChatWindow = () => {
 
             // router.push(`/chat?chat=${json.chat_session_id}`, undefined, {shallow: true})
 
-            window.history.pushState('', '', `http://localhost:3000/chat/${json.chat_session_id}`);
+            window.history.pushState('', '', `/chat/${json.chat_session_id}`);
 
             // window.history.replaceState('', '', `/chat/${json.chat_session_id}`);
 
@@ -504,7 +504,11 @@ const ChatWindow = () => {
     }
 
     async function isDocSetExist(folder_id) {
-
+        if(!folder_id || folder_id === 'undefined'){
+            setLoading(false);
+            return null
+        }
+        console.log(folder_id)
         try {
             let { data: document_set, error } = await supabase
                 .from('document_set')

@@ -71,7 +71,7 @@ const Signup = () => {
           access_type: 'offline',
           prompt: 'consent',
         },
-        redirectTo : `${process.env.NEXT_PUBLIC_URL}/chat`
+        redirectTo : `${process.env.NEXT_PUBLIC_URL}/chat/new`
       },
     });
     if (error) {

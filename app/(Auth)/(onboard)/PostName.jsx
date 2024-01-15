@@ -16,7 +16,7 @@ const PostName = () => {
     const [darkMode] = useAtom(darkModeAtom);
     const [selected, setSelected] = useState('');
     const [isPostNameComplete, setIsPostNameComplete] = useAtom(isPostNameCompleteAtom);
-    const [session, setSession1] = useAtom(sessionAtom);
+    const [session, setSession] = useAtom(sessionAtom);
 
 
     async function updateProfile(){
@@ -24,7 +24,7 @@ const PostName = () => {
         try {
             const value = selected === 'personal' ? true : false
             const { user, error } = await supabase.auth.updateUser({
-                data: { is_for_personal: value }
+                data: { 'is_for_personal': selected === 'personal' ? true : false }
             });
             if(error){
                 throw error

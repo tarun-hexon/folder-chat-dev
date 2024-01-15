@@ -69,7 +69,7 @@ const WorkPlace = () => {
       await createWorkPlace(workPlaceName)
       const { user, error } = await supabase.auth.updateUser({
         data:{
-          onBoarding: true,
+          'onBoarding': true,
         }
       });
       if(error){
@@ -88,7 +88,7 @@ const WorkPlace = () => {
       const { data, error } = await supabase
       .from('workspaces')
       .insert([
-        { name: name, is_active: true, created_by:sess_id, subscription_active:false },
+        { 'name': name, 'is_active': true, 'created_by':sess_id, 'subscription_active':false },
       ])
       .select();
       if(data){
@@ -136,16 +136,16 @@ const UserDetails = () => {
     try {
 
         const checkIfUser = await isUserExist('profile', 'id', 'user_id', session.user.id);
-        console.log(checkIfUser)
+        //console.log(checkIfUser)
         if(checkIfUser.length === 0){
           const { data, error } = await supabase
         .from('profile')
         .insert([
-        { is_for_personal: session?.user?.user_metadata?.is_for_personal, 
-          user_id: session?.user?.id,
-          department:selectValue[0].value,
-          designation:selectValue[1].value,
-          purpose:selectValue[3].value
+        { 'is_for_personal': session?.user?.user_metadata?.is_for_personal, 
+          'user_id': session?.user?.id,
+          'department':selectValue[0].value,
+          'designation':selectValue[1].value,
+          'purpose':selectValue[3].value
         },
         ])
         .select();
@@ -157,11 +157,11 @@ const UserDetails = () => {
           const { data, error } = await supabase
         .from('profile')
         .update([
-        { is_for_personal: session?.user?.user_metadata?.is_for_personal, 
-          user_id: session.user.id,
-          department:selectValue[0].value,
-          designation:selectValue[1].value,
-          purpose:selectValue[3].value
+        { 'is_for_personal': session?.user?.user_metadata?.is_for_personal, 
+          'user_id': session.user.id,
+          'department':selectValue[0].value,
+          'designation':selectValue[1].value,
+          'purpose':selectValue[3].value
         },
         ])
         .eq('id', checkIfUser[0].id)
@@ -192,7 +192,17 @@ const UserDetails = () => {
     }
   };
 
-
+  async function getSess() {
+    await supabase.auth.getSession().then(({ data: { session } }) => {
+      if(session){
+        setSession(session);
+      }
+      
+    });
+  };
+useEffect(()=> {
+  getSess()
+}, [])
   return (
     <>
     <div className={`flex flex-col w-full gap-10 items-center box-border ${darkMode ? '' : 'text-white'}`}>
