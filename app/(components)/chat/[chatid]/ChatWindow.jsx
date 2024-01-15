@@ -53,7 +53,8 @@ const ChatWindow = () => {
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
     const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
     const [inputDocDes, setInputDocDes] = useState('');
-    const [selectedDoc, setSelectedDoc] = useState([])
+    const [selectedDoc, setSelectedDoc] = useState([]);
+    const [docSetOpen, setDocSetOpen] = useState(false);
     
     const newDocSet = new Set();
 
@@ -433,7 +434,9 @@ const ChatWindow = () => {
     };
 
     async function updateDocumentSet(ccID, des) {
-        const db_connectors = [...documentSet[0].cc_pair_id, ...ccID]
+        // console.log(ccID)
+        // return null
+       
         if (!documentSet[0]?.doc_set_id) {
             return null
         }
@@ -447,11 +450,12 @@ const ChatWindow = () => {
                 body: JSON.stringify({
                     "id": documentSet[0]?.doc_set_id,
                     "description": des,
-                    "cc_pair_ids": db_connectors
+                    "cc_pair_ids": ccID
                 })
             });
 
-            await updateDataInDB(ccID)
+            // await updateDataInDB(ccID);
+            setDocSetOpen(false)
             setInputDocDes('')
             if (res === null) {
                 return toast({
@@ -466,9 +470,6 @@ const ChatWindow = () => {
 
     async function updateDataInDB(ccID) {
         const db_connectors = [...documentSet[0].cc_pair_id, ...ccID]
-
-       
-
         const { data, error } = await supabase
             .from('document_set')
             .update(
@@ -486,20 +487,16 @@ const ChatWindow = () => {
     };
 
     function handleDocSet(id) {
-
-        if(selectedDoc.includes(id)){
-            const idx = selectedDoc.indexOf(id);
-            const docs = selectedDoc
-            docs.splice(idx, 1);
-            // console.log(id, idx, docs, '494')
-            setSelectedDoc(docs);
-            // console.log(selectedDoc)
+        //console.log(id)
+        if(selectedDoc.includes(parseInt(id))){
+            // const idx = selectedDoc.indexOf(id);
+            setSelectedDoc(selectedDoc.filter(doc => doc !== parseInt(id)))
         }else{
-            setSelectedDoc([...selectedDoc, id])
-            // console.log(selectedDoc)
+            setSelectedDoc((prev) => [...prev, parseInt(id)])
+            
         }
         
-       
+        console.log(selectedDoc)
         
     }
 
@@ -634,9 +631,9 @@ const ChatWindow = () => {
                         </Link> 
                         :
                         
-                        <Dialog onOpenChange={() => { setInputDocDes(''); }}>
+                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen)}}>
                                 <DialogTrigger asChild>
-                                    <Image src={editIcon} alt='edit' title='edit'/>
+                                    <Image src={editIcon} alt='edit' title='edit' onClick={()=> setDocSetOpen(true)}/>
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader className='mb-2'>
@@ -667,10 +664,13 @@ const ChatWindow = () => {
                                     <div className='flex w-full flex-wrap gap-1'>
 
                                         {existConnectorDetails?.length > 0 &&
-                                            existConnectorDetails?.map((connector) => <div key={connector.name} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 ${selectedDoc?.includes(connector.cc_pair_id) ? 'bg-gray-200' : ''}`} onClick={() => handleDocSet(connector.cc_pair_id)}>{connector.name}</div>)}
+                                            existConnectorDetails?.map((connector) => 
+                                            <>
+                                            <input key={connector.name} type="checkbox" value={connector.cc_pair_id} id={connector.cc_pair_id} checked={selectedDoc.includes(connector.cc_pair_id)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSet(e.target.value)} /><label htmlFor={connector.cc_pair_id} >{connector.name}</label></>)
+                                        }
                                     </div>
                                     <DialogFooter className={cn('w-full')}>
-                                        <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet([...newDocSet], inputDocDes)}>Update</Button>
+                                        <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet(selectedDoc, inputDocDes)}>Update</Button>
                                     </DialogFooter>
 
                                 </DialogContent>

@@ -3,13 +3,14 @@ import React, { useState } from 'react'
 import Image from 'next/image';
 import { Indexing, Slack, GitPrs, Files, Drive, Confluence, Web } from '../(common)/index'
 import { Input } from '../../../components/ui/input';
-import searchIcon from '../../../public///assets/search.svg';
-import gDriveIcon from '../../../public///assets/Danswer-google-B.svg'
-import webIcon from '../../../public///assets/Danswer-web-B.svg'
-import slackIcon from '../../../public///assets/Danswer-slack-B.svg'
-import confluenceIcon from '../../../public///assets/Danswer-confluence-B.svg'
+import searchIcon from '../../../public/assets/search.svg';
+import drive from '../../../public/assets/Danswer-google-B.svg'
+import web from '../../../public/assets/Danswer-web-B.svg'
+import slack from '../../../public/assets/Danswer-slack-B.svg'
+import confluence from '../../../public/assets/Danswer-confluence-B.svg'
+import file from '../../../public/assets/Danswer-doc-B.svg'
 import { useAtom } from 'jotai';
-import { advanceItemAtom, fileNameAtom } from '../../store';
+import { advanceItemAtom } from '../../store';
 import { MoreHorizontal } from 'lucide-react';
 import ReactMarkdown from "react-markdown";
 
@@ -21,25 +22,21 @@ const AdvancePage = () => {
     const [rcvdMsg, setRcvdMsg] = useState('')
     const [inputFieldDisabled, setInputFieldDisabled] = useState(false);
     const [responseObj, setResponseObj] = useState(null)
-    const results = [
-        {
-            id: 'drive',
-            icon: gDriveIcon
-        },
-        {
-            id: 'web',
-            icon: webIcon
-        },
-        {
-            id: 'slack',
-            icon: slackIcon
-        },
-        {
-            id: 'confluence',
-            icon: confluenceIcon
-        }
-    ];
+    
 
+    function iconSelector(name){
+        if(name === 'web'){
+            return web
+        }else if(name === 'drive'){
+            return drive
+        }else if(name === 'confluence'){
+            return confluence
+        }else if(name === 'slack'){
+            return slack
+        }else if(name === 'file'){
+            return file
+        }
+    }
 
     async function sendChatMsgs(userMsg) {
         if (userMsg && userMsg.trim() === '') return null;
@@ -50,6 +47,15 @@ const AdvancePage = () => {
         setMsgLoader(true);
         setResponseObj(null)
         try {
+            const sendQuery = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/query/stream-query-validation`, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    "query": userMsg
+                })
+            });
             const sendMessageResponse = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/query/stream-answer-with-quote`, {
                 method: 'POST',
                 headers: {
@@ -134,7 +140,7 @@ const AdvancePage = () => {
                     } else if (obj.top_documents) {
 
                         setResponseObj(obj);
-                        // console.log(obj)
+                        console.log(obj)
 
                         //await updateChats({ 'bot': botResponse.current }, { 'user': userMsg }, chatMsg, obj.message_id)
                         //botResponse.current = ''
@@ -195,6 +201,96 @@ const AdvancePage = () => {
         }
     };
 
+    const buildDocumentSummaryDisplay = (matchHighlights, blurb) => {
+        if (matchHighlights.length === 0) {
+          return blurb;
+        }
+      
+        let sections = [];
+        matchHighlights.forEach((matchHighlight, matchHighlightIndex) => {
+          if (!matchHighlight) {
+            return;
+          }
+      
+          const words = matchHighlight.split(new RegExp("\\s"));
+          words.forEach((word) => {
+            if (!word) {
+              return;
+            }
+      
+            let isContinuation = false;
+            while (word.includes("<hi>") && word.includes("</hi>")) {
+              const start = word.indexOf("<hi>");
+              const end = word.indexOf("</hi>");
+              const before = word.slice(0, start);
+              const highlight = word.slice(start + 4, end);
+              const after = word.slice(end + 5);
+      
+              if (before) {
+                sections.push([before, false, isContinuation]);
+                isContinuation = true;
+              }
+              sections.push([highlight, true, isContinuation]);
+              isContinuation = true;
+              word = after;
+            }
+      
+            if (word) {
+              sections.push([word, false, isContinuation]);
+            }
+          });
+          if (matchHighlightIndex != matchHighlights.length - 1) {
+            sections.push(["...", false, false]);
+          }
+        });
+      
+        let previousIsContinuation = sections[0][2];
+        let previousIsBold = sections[0][1];
+        let currentText = "";
+        const finalJSX = [];
+        sections.forEach(([word, shouldBeBold, isContinuation], index) => {
+          if (shouldBeBold != previousIsBold) {
+            if (currentText) {
+              if (previousIsBold) {
+                currentText = currentText.trim();
+                if (!previousIsContinuation) {
+                  finalJSX[finalJSX.length - 1] = finalJSX[finalJSX.length - 1] + " ";
+                }
+                finalJSX.push(
+                  document.createElement('b').appendChild(document.createTextNode(currentText))
+                );
+              } else {
+                finalJSX.push(currentText);
+              }
+            }
+            currentText = "";
+          }
+          previousIsBold = shouldBeBold;
+          previousIsContinuation = isContinuation;
+          if (!isContinuation || index === 0) {
+            currentText += " ";
+          }
+          currentText += word;
+        });
+        if (currentText) {
+          if (previousIsBold) {
+            currentText = currentText.trim();
+            if (!previousIsContinuation) {
+              finalJSX[finalJSX.length - 1] = finalJSX[finalJSX.length - 1] + " ";
+            }
+            finalJSX.push(
+              document.createElement('b').appendChild(document.createTextNode(currentText))
+            );
+          } else {
+            finalJSX.push(currentText);
+          }
+        }
+        console.log(finalJSX)
+        return finalJSX;
+      };
+
+      
+
     return (
         <>
             <div className='w-full sticky top-0 self-start flex flex-col rounded-[6px] gap-5 items-center  box-border text-[#64748B] '>
@@ -214,10 +310,9 @@ const AdvancePage = () => {
                             disabled={inputFieldDisabled}
                             onKeyDown={(e) => {
                                 if (e.key === "Enter") {
-                                    console.log(search);
+                                    sendChatMsgs(search)
                                     setSearch('')
-                                    //e.preventDefault();
-
+                                    
                                 }
                             }}
                         />
@@ -226,7 +321,7 @@ const AdvancePage = () => {
                     <div className='flex flex-col justify-between p-2 px-3 gap-4 text-sm border rounded-md'>
                         <h2 className='font-[600]  leading-5 self-start'>AI Answer</h2>
                         <div className='font-[400] leading-6 text-justify'>
-                            {msgLoader && <p className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px]'>
+                            {msgLoader && <p className='font-[400] text-sm leading-6 self-start w-full bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px]'>
                                 {rcvdMsg === '' ? <MoreHorizontal className='m-auto animate-pulse' /> :
                                     <ReactMarkdown
                                         className='w-full'
@@ -277,24 +372,24 @@ const AdvancePage = () => {
                             </div>
                         </div> */}
                     </div>
-                    <div className='flex flex-col gap-5 pb-5'>
+                    {/* <div className='flex flex-col gap-5 pb-5'>
                         <h2 className='font-[600] text-sm leading-5 self-start'>Results</h2>
 
-                        {responseObj?.map(res => {
+                        {responseObj !== null && responseObj?.top_documents?.map(res => {
                             return (
                                 <div className='w-full relative flex flex-col gap-2 hover:cursor-pointer' key={res.id}>
                                     <div className='inline-flex gap-2 '>
-                                        <Image src={res.icon} alt='icon' />
-                                        <span className='font-[600] text-[12px] leading-5'>Onboarding - Advance Document</span>
+                                        <Image src={iconSelector(res.source_type)} alt='icon' />
+                                        <span className='font-[600] text-[12px] leading-5'>{res?.semantic_identifier}</span>
                                     </div>
-                                    <div className='font-[400] text-sm leading-6 text-justify'>
-                                        The updated onboarding flow features a smoother login process using SSO with Google Accounts, allowing users with existing Google Account to avoid creating new Folder Chat, and giving existing users the option to link their Folder Chat to a Google Account.
+                                    <div className='font-[400] text-sm leading-6 text-justify break-words'>
+                                        {buildDocumentSummaryDisplay(res.match_highlights, res.blurb)?.map((content, idx) => typeof content === String ? content : '')}
                                     </div>
                                 </div>
                             )
                         })}
 
-                    </div>
+                    </div> */}
                 </div>
             </div>
 

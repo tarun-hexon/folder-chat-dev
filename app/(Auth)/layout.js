@@ -5,8 +5,6 @@ import { Header } from "../(components)/(common)"
 import { darkModeAtom } from "../store";
 
 
-
-
 export default function RootLayout({ children }) {
     const [darkMode, setDarkMode] = useAtom(darkModeAtom);
 

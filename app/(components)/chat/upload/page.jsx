@@ -164,13 +164,9 @@ const Upload = () => {
           setCurrentDoc(json.data);
           setTimeout(async()=> {
             if(documentSet.length === 0){
-              
               await setDocumentSetInServer(connectID, context.name, context.description);
             }else{
-                
-                  await updateDocumentSet(documentSet[0].doc_set_id, connectID, context.description)
-                 
-              
+              await updateDocumentSetInServer(documentSet[0].doc_set_id, connectID, context.description)
             } 
           }, 2000)
           
@@ -255,7 +251,7 @@ const Upload = () => {
         }
       }
     
-      async function updateDocumentSet(db_id, ccID, des){
+      async function updateDocumentSetInServer(db_id, ccID, des){
         const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
         const json = await data.json();
     
@@ -366,14 +362,15 @@ const Upload = () => {
     
     };
     async function readData(f_id){
-      let fol_id = f_id
-        if(!f_id){
-          fol_id = localStorage.getItem('folderId')
-        }
+        // let fol_id = f_id
+        // if(!f_id){
+        //   fol_id = localStorage.getItem('folderId')
+        // }
+        console.log(f_id)
         const { data, error } = await supabase
         .from('document_set')
         .select('*')
-        .eq('folder_id', fol_id);
+        .eq('folder_id', f_id);
         
         if(data?.length > 0){
           
@@ -382,14 +379,15 @@ const Upload = () => {
         }else{
           setDocumentSet([])
         }
+        console.log(data, error)
     };
-    // useEffect(() => {
-    //     if(!folderId){
-    //       router.push('/chat/new')
-    //     }else{
-    //       setLoading(false)
-    //     }     
-    // }, []);
+
+    useEffect(() => {
+      // console.log(folderId)
+      if(!folderId){
+        router.push('/chat/new')
+      } 
+    }, []);
 
     // if(loading){
     //   return (
