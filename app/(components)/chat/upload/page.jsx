@@ -356,11 +356,8 @@ const Upload = () => {
         .eq('folder_id', folderId)
         .select()
         
-        if(data.length){
-            setUploading(false)
+        if(data?.length){
             setDocumentSet(data);
-            
-        //  setFileName('chat')
             await indexingStatus(folderId)
             toast({
                 variant: 'default',
