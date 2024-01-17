@@ -48,7 +48,7 @@ useEffect(()=> {
   getSess()
 }, []);
 
-if(loading){
+if(loading || !session){
   return (
     <div className='flex w-full justify-center items-center h-screen'>
       <Loader2 className='animate-spin' />

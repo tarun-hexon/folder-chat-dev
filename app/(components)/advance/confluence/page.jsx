@@ -55,6 +55,8 @@ const Confluence = () => {
             }
 
         } catch (error) {
+            setConJson(null)
+                setIsAdminLoad(false)
             console.log('error in getALlCred:', error)
         }
     };
@@ -62,13 +64,16 @@ const Confluence = () => {
     async function getAllExistingConnector() {
         try {
             const data = await fetchAllConnector();
-            const currentConnector = data.filter(conn => conn.source === 'confluence');
+            const currentConnector = data?.filter(conn => conn.source === 'confluence');
             if(currentConnector.length > 0){
                 setConUrlList(currentConnector)
+            }else{
+                setConUrlList([])
             };
             setLoading(false)
         } catch (error) {
             console.log(error)
+            setConUrlList([])
             setLoading(false)
         }
     }
@@ -237,7 +242,7 @@ const Confluence = () => {
             const { data, error } = await supabase
             .from('credentials')
             .select('cred_ids')
-            .eq('user_id', session.user.id);
+            .eq('user_id', session?.user?.id);
             // console.log(data);
             if(error){
                 setExistingCredentials([]);

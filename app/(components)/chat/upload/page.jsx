@@ -10,7 +10,9 @@ import { fileNameAtom, existConnectorDetailsAtom, folderAtom, folderIdAtom, open
 import { useToast } from '../../../../components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 import supabase from '../../../../config/supabse';
-import { Loader, Loader2} from 'lucide-react';
+import { Loader, Loader2, X} from 'lucide-react';
+import { Button } from '../../../../components/ui/button';
+import { cn } from '../../../../lib/utils';
 
 
 const Upload = () => {
@@ -35,14 +37,9 @@ const Upload = () => {
     const { toast } = useToast();
 
     const onDrop = (acceptedFiles) => {
-        if(documentSet[0]?.doc_set_name === '' && context.name === ''){
-          return toast({
-            variant: 'destructive',
-            title: "Give your context a name first!"
-          });
-        }
+        
         if (acceptedFiles && acceptedFiles.length > 0) {
-          setUploading(true)
+          
           const file = acceptedFiles[0];
     
           const fileType = file.name.split('.')[1]
@@ -55,15 +52,49 @@ const Upload = () => {
             
             return null
           }
-    
+          const maxSize = 1024 * 1024
+          if(file.size > maxSize){
+            toast({
+              variant: 'destructive',
+              title: "File size exceeded!"
+            });
+          };
+          
           setFiles(file)
-          uploadFile(file);
+          
+          ;
         } else {
           // console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
         }
-      };
+    };
     
-      async function uploadFile(file) {
+    async function uploadFile(file) {
+        if(documentSet[0]?.doc_set_name === '' && context.name === ''){
+          return toast({
+            variant: 'destructive',
+            title: "Give your context a name first!"
+          });
+        }else if(documentSet.length === 0 && context.name === ''){
+          return toast({
+            variant: 'destructive',
+            title: "Give your context a name first!"
+          });
+        };
+        let { data: doc_set_name, error } = await supabase
+          .from('document_set')
+          .select("doc_set_name")
+          // Filters
+          .eq('doc_set_name', `${context.name}-${userSession?.user?.email.split('@')[0]}`)
+          
+        
+        if(doc_set_name.length > 0){
+          return toast({
+            variant: 'destructive',
+            title: "Context Name Already Exist !"
+          });
+        }
+        
+        setUploading(true)
         try {
           const formData = new FormData();
           formData.append('files', file);
@@ -85,9 +116,9 @@ const Upload = () => {
           });
           
         }
-      };
+    };
     
-      async function connectorRequest(path, file) {
+    async function connectorRequest(path, file) {
         try {
           const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector`, {
             method: 'POST',
@@ -120,9 +151,9 @@ const Upload = () => {
             title: "Some Error Ocuured!"
           });
         }
-      };
+    };
     
-      async function getCredentials(connectID, file) {
+    async function getCredentials(connectID, file) {
         try {
           const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/credential`, {
             method: 'POST',
@@ -146,9 +177,9 @@ const Upload = () => {
             title: "Some Error Ocuured!"
           });
         }
-      };
+    };
     
-      async function sendURL(connectID, credID, file) {
+    async function sendURL(connectID, credID, file) {
         try {
           const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/connector/${connectID}/credential/${credID}`, {
             method: 'PUT',
@@ -178,9 +209,9 @@ const Upload = () => {
             title: "Some Error Ocuured!"
           });
         }
-      };
+    };
     
-      async function runOnce(conID, credID) {
+    async function runOnce(conID, credID) {
         try {
           const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/run-once`, {
             method: 'POST',
@@ -205,9 +236,9 @@ const Upload = () => {
             title: "Some Error Ocuured!"
           });
         }
-      };
+    };
     
-      async function setDocumentSetInServer(ccID, f_name, des){
+    async function setDocumentSetInServer(ccID, set_name, des){
         
         const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
         const json = await data.json();
@@ -231,7 +262,7 @@ const Upload = () => {
               "Content-Type": "application/json",
             },
             body:JSON.stringify({
-              "name": f_name,
+              "name": `${set_name}-${userSession?.user?.email.split('@')[0]}`,
               "description": des,
               "cc_pair_ids": docSetid
             })
@@ -240,7 +271,7 @@ const Upload = () => {
           const id = await res.json();
     
           setContext({name:'', description:''})
-          await insertDataInConn(docSetid, f_name, id)
+          await insertDataInDB(docSetid, `${set_name}-${userSession?.user?.email.split('@')[0]}`, id)
           
         } catch (error) {
           console.log(error)  ;
@@ -249,9 +280,9 @@ const Upload = () => {
             title: "Some Error Occured!"
           });
         }
-      }
+    }
     
-      async function updateDocumentSetInServer(db_id, ccID, des){
+    async function updateDocumentSetInServer(db_id, ccID, des){
         const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
         const json = await data.json();
     
@@ -282,10 +313,11 @@ const Upload = () => {
         } catch (error) {
           console.log(error)
         }
-      }
-      const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+    }
+      
+    const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
     
-      async function insertDataInConn(newData, doc_name, doc_id){
+    async function insertDataInDB(newData, doc_name, doc_id){
                    
         const { data, error } = await supabase
         .from('document_set')
@@ -311,9 +343,9 @@ const Upload = () => {
           router.push('/chat/new')
           setUploading(false)
         }
-      };
+    };
     
-      async function updatetDataInDB(exConn, newData){
+    async function updatetDataInDB(exConn, newData){
         // console.log(exConn, newData, folderId)
         const allConn = [...exConn[0].cc_pair_id, ...newData]
         const { data, error } = await supabase
@@ -337,7 +369,7 @@ const Upload = () => {
           router.push('/chat/new')
           setUploading(false)
         }
-      };
+    };
     
     async function indexingStatus(f_id){
         try {
@@ -418,7 +450,7 @@ const Upload = () => {
                 <Label className='text-start' htmlFor='context'>Description</Label>
                 <Input type='text' placeholder='write a short description' id='context' value={context.description} onChange={(e) => setContext({...context, description:e.target.value})}/></div>
             </div>
-            <div
+            {!files ? <div
               className={`w-full border flex justify-center items-center bg-[#EFF5F5] p-20 ${isDragActive ? 'opacity-50' : ''} shadow-md`}
               {...getRootProps()}
             >
@@ -427,6 +459,7 @@ const Upload = () => {
                 <div className='w-full text-center'>
                   <p className='font-[400] leading-6 text-[16px] opacity-[80%]'>Click to upload or drag and drop</p>
                   <p className='opacity-[50%] text-sm leading-6'>PDF & TXT</p>
+                  <p className='opacity-[50%] text-sm leading-6'>Max Size 1MB</p>
                 </div>
               </Label>
               <div
@@ -437,7 +470,17 @@ const Upload = () => {
                 accept='.pdf, .doc, .docx, .xls, .xlsx'
                 style={{ display: 'none' }}
               />
+            </div>:
+            <div className='w-full text-center space-y-4'>
+              <div className='w-full border flex justify-center items-center h-20 bg-[#EFF5F5] rounded-md relative'>
+              
+              <p className='text-sm leading-6'>{files.name}-{(files.size/1024).toFixed(2)}kb</p>
+              <X size={'1rem'} className='self-start absolute top-1 right-1 hover:cursor-pointer' onClick={()=> setFiles(false)}/>
+              </div>
+              
+              <Button className={cn('bg-[#14B8A6] hover:bg-[#14B8A6] hover:opacity-80 ml-auto')} onClick={()=> uploadFile(files)}>Upload</Button>
             </div>
+            }
           </div>
           }
         </div>

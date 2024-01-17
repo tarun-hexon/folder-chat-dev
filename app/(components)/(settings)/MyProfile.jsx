@@ -55,7 +55,7 @@ const MyProfile = () => {
             if (error) {
                 throw error
             };
-            // getSess();
+            await getSess();
             setPreName('');
             setNameDialogOpen(false);
             toast({
@@ -152,14 +152,14 @@ const MyProfile = () => {
         }
     };
 
-    // async function getSess() {
-    //     await supabase.auth.getSession().then(({ data: { session } }) => {
-    //       if (session) {
-    //         setSession(session);
-    //       }
+    async function getSess() {
+        await supabase.auth.getSession().then(({ data: { session } }) => {
+          if (session) {
+            setSession(session);
+          }
     
-    //     });
-    // };
+        });
+    };
 
     async function signOut() {
         const { error } = await supabase.auth.signOut({ scope: 'others' });

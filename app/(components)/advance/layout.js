@@ -13,7 +13,7 @@ export default function RootLayout({ children }) {
     async function indexingStatus(){
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
-            const json = await data.json();
+            const json = await data?.json();
             // console.log(json)
             const allConID = await readData();
             
@@ -22,6 +22,7 @@ export default function RootLayout({ children }) {
             setAllConnectors(filData);
             // console.log(filData)
         } catch (error) {
+            setAllConnectors([])
             console.log(error)
             
         }
@@ -35,7 +36,7 @@ export default function RootLayout({ children }) {
         .eq('user_id', session.user.id);
         
         if(data.length > 0){
-            var arr = []
+            let arr = []
             for(const val of data){
                 arr.push(...val.connect_id)
             };

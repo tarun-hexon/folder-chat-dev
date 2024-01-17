@@ -101,7 +101,7 @@ const EditIndex = ({ cc_pair_id }) => {
     }
     return (
 
-        <div className='w-full space-y-10'>
+        <div className='w-full space-y-10 break-words'>
             <h1 className='text-lg font-[600]'>{connectorDetails.name}</h1>
             <div className='w-full flex justify-around'>
                 <Button className={cn(`${body.current.connector.disabled ? 'bg-[#14B8A6] hover:bg-[#14B8A6]' : 'bg-red-500 hover:bg-red-500'} hover:opacity-75`)} onClick={()=> disableConnector(body)}>{body.current.connector.disabled ? 'Re-Enable' : 'Disable'}</Button>

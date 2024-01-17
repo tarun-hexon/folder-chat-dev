@@ -16,18 +16,105 @@ import { Label } from '../../../../components/ui/label';
 import { Trash2 } from 'lucide-react';
 import { allConnecorsAtom } from '../../../store';
 import { useAtom } from 'jotai';
+import Cookies from "js-cookie";
+
 
 const Drive = () => {
     const [files, setFiles] = useState(null)
     const [filesList, setFilesList] = useState([]);
     const [credentialJsonStr, setCredentialJsonStr] = useState(null);
     const [fileName, setFileName] = useState('')
+    const [connectorName, setConnectorName] = useState('')
     const [allConnectors, setAllConnectors] = useAtom(allConnecorsAtom);
+
     function uploadFile(file) {
         setFilesList(prev => [...prev, file[0]]);
         console.log(file[0].name)
         
         setFiles(null)
+    };
+
+    async function googleDriveAuth(){
+
+        const credentialCreationResponse = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/credential`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              admin_public: true,
+              credential_json: {},
+            }),
+          });
+        
+          if (!credentialCreationResponse.ok) {
+            return [
+              null,
+              `Failed to create credential - ${credentialCreationResponse.status}`,
+            ];
+          }
+        
+          const credential = await credentialCreationResponse.json();
+
+          console.log(credential)
+
+        //   return null
+        
+          const authorizationUrlResponse = await fetch(
+            `${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/connector/google-drive/authorize/${credential.id}`
+          );
+        
+          if (!authorizationUrlResponse.ok) {
+            return [
+              null,
+              `Failed to create credential - ${authorizationUrlResponse.status}`,
+            ];
+          }
+        
+          const authorizationUrlJson = await authorizationUrlResponse.json();
+        
+          return [authorizationUrlJson.auth_url, ""];
+    }
+    async function authWithDrive(){
+
+        // const [authUrl, errorMsg] = await googleDriveAuth();
+
+        const url = 'https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?response_type=code&client_id=476946310824-r70o0t33mmhia9c98vfkmglqucfnggrg.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fdanswer.folder.chat%2Fadmin%2Fconnectors%2Fgoogle-drive%2Fauth%2Fcallback&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly&state=7lMCLPcKrUlan9rD9D8Qb5QVBKN1eU&prompt=consent&access_type=offline&service=lso&o2v=1&theme=glif&flowName=GeneralOAuthFlow'
+
+
+        
+
+        // if (authUrl) {
+            
+        //   }
+          const width = 500;
+            const height = 600;
+            const left = window.screen.width / 2 - width / 2;
+            const top = window.screen.height / 2 - height / 2;
+            // cookie used by callback to determine where to finally redirect to
+            Cookies.set("google_drive_auth_is_admin", "true", {
+              path: "/",
+            });
+            const popupWindow = window.open(url, 'Drive Authentication', `width=${width},height=${height},left=${left},top=${top}`);
+
+            if (popupWindow) {
+                popupWindow.focus();
+            };
+        
+            // const setInt = setInterval(() => {
+            //     popupWindow.close();
+            //     // if (localStorage.getItem('access_token')) {
+            //     //     // Successful sign-in detected, close the pop-up window
+            //     //     clearInterval(checkSignInStatus);
+                    
+            //     //     // window.location.reload()
+            //     // }
+            // }, 10000)
+            
+    
+        
+
+        
     }
 
 
@@ -42,7 +129,7 @@ const Drive = () => {
                 <hr className='w-full' />
 
                 <div className='w-full self-start space-y-6'>
-                    {credentialJsonStr === null ? 
+                    {/* {credentialJsonStr === null ? 
                     <div className='text-start flex flex-col gap-4 '>
                         <div className='space-y-1'>
                             <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Step 1: Provide your app Credentials</h2>
@@ -77,23 +164,27 @@ const Drive = () => {
                         <span className='text-sm leading-5 font-[500]'>Existing CLient ID : <span className='font-[400]'>{fileName}</span> <Trash2 className='inline hover:cursor-pointer' size={'1rem'} /></span>
                         
                     </div>
-                    }
+                    } */}
 
                     <div className='text-start flex flex-col gap-4 '>
                         <div className='space-y-1'>
-                            <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Step 2: Authenticate with Advance</h2>
-                            <p className='font-[400] text-sm leading-5'>Next, you must provide credentials with OAuth. This gives us read access to the docs you have access to in your google drive account.</p>
+                            <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Step 1: Authenticate with Advance</h2>
+                            <p className='font-[400] text-sm leading-5'>You must provide credentials with OAuth. This gives us read access to the docs you have access to in your google drive account.</p>
                         </div>
-                        {credentialJsonStr !== null && <Button className='w-fit'>Authenticate with Google Drive</Button>}
+                        <Button className='w-fit' onClick={()=> googleDriveAuth()}>Authenticate with Google Drive</Button>
+                        {/* <a className='w-fit' href='https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?response_type=code&client_id=476946310824-r70o0t33mmhia9c98vfkmglqucfnggrg.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fdanswer.folder.chat%2Fadmin%2Fconnectors%2Fgoogle-drive%2Fauth%2Fcallback&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly&state=7lMCLPcKrUlan9rD9D8Qb5QVBKN1eU&prompt=consent&access_type=offline&service=lso&o2v=1&theme=glif&flowName=GeneralOAuthFlow' target='_blank'>Authenticate with Google Drive</a> */}
                     </div>
 
-                    <div className='text-start flex flex-col gap-4 '>
+                    <div className='text-start flex flex-col gap-4'>
                         <div className='space-y-1'>
-                            <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Step 3: Start indexing!</h2>
+                            <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Step 2: Start indexing!</h2>
                             <p className='font-[400] text-sm leading-5'>Click the button below to create a connector. We will refresh the latest documents from Google Drive every 10 minutes.</p>
                         </div>
+                        <Label htmlFor='connector' className='text-[#0F172A]'>Connector Name</Label>
+                        <Input id='connector' type='text' placeholder='give a name to your connector' value={connectorName} onChange={(e)=> setConnectorName(e.target.value)}/>
                         <Button className='w-fit'>Add</Button>
                     </div>
+                    
                 </div>
                 {filesList.length > 0 && <table className='w-full text-sm'>
                     <thead className='p-2'>

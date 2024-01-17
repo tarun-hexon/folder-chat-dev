@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import { folderOptions } from '../../../config/constants';
 import Image from 'next/image';
@@ -40,6 +41,7 @@ const FolderCard = ({fol}) => {
     const [folNewName, setFolNewName] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
     const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
+
     const current_url = window.location.href;
 
     const chat_id = current_url.split("/chat/")[1];
@@ -80,41 +82,43 @@ const FolderCard = ({fol}) => {
         
         setPopOpen(false)
     };
-    async function deleteChatsByFolderID(fol_id) {
-        const { error } = await supabase
-            .from('chats')
-            .delete()
-            .eq('folder_id', fol_id)
 
-    }
-
-    async function deleteConne(fol_id) {
-        const { error } = await supabase
-            .from('connectors')
-            .delete()
-            .eq('folder_id', fol_id)
-    }
 
     async function deleteFolder(fol_id) {
-        await deleteChatsByFolderID(fol_id);
-        await deleteConne(fol_id);
-        await deleteDocSet(fol_id)
+        
+        await supabase
+            .from('connectors')
+            .delete()
+            .eq('folder_id', fol_id);
+
+        await supabase
+            .from('document_set')
+            .delete()
+            .eq('folder_id', fol_id);
+
+        await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set/${documentSet[0]?.doc_set_id}`, {
+            method: "DELETE",
+            headers: {
+              "Content-Type": "application/json",
+            },
+        });
+
         const { error } = await supabase
             .from('folders')
             .delete()
             .eq('id', fol_id);
         if (!error) {
+            for(let i = 0; i < files.length; i++){
+                await deleteChatsBySessionId(files[i]?.session_id)
+            }
             setFolderAdded(!folderAdded)
             setPopOpen(false)
         }
 
     };
-    async function deleteDocSet(id) {
-        const { error } = await supabase
-            .from('document_set')
-            .delete()
-            .eq('folder_id', id)
-    }
+    
+
+    
 
     function handleFilessOnclick(data) {
         setChatSessionID(data.session_id)
@@ -179,7 +183,7 @@ const FolderCard = ({fol}) => {
 
     async function deleteChatsFromServer(chat_session_id) {
         try {
-            const res = await fetch(`https://danswer.folder.chat/api/chat/delete-chat-session/${chat_session_id}`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/delete-chat-session/${chat_session_id}`, {
                 method: 'DELETE',
                 headers: {
                     "Content-Type": "application/json"

@@ -47,11 +47,13 @@ const Indexing = () => {
             return ('text-[#FF5737]')
         }
     }
+    
     function dialogTrgr(id){
         setCcPairId(id)
         const dialog = document.getElementById('dialog');
         dialog.click()
     }
+
     useEffect(()=> {
         if(allConnectors !== null ){
             setTableData(allConnectors)

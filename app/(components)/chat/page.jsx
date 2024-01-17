@@ -6,7 +6,7 @@ import supabase from '../../../config/supabse';
 import { useAtom } from 'jotai';
 import { sessionAtom } from '../../store';
 
-const Page = () => {
+const Chat = () => {
   const router = useRouter();
   const [session, setSession] = useAtom(sessionAtom);
     
@@ -50,4 +50,4 @@ const Page = () => {
   )
 }
 
-export default Page
+export default Chat

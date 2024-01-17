@@ -12,6 +12,7 @@ import { setting } from '../../../config/constants';
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Button } from '../../../components/ui/button';
 import { useToast } from '../../../components/ui/use-toast';
+
 const Setting = ({ item, setItem }) => {
     // console.log(itemProp)
     const [session, setSession] = useAtom(sessionAtom);

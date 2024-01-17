@@ -114,11 +114,11 @@ export const advanceOption = [
   //   title:'Show All',
   //   icon: showAllIcon
   // },
-  // {
-  //   id:'drive',
-  //   title:'Google Drive',
-  //   icon: gDriveIcon
-  // },
+  {
+    id:'drive',
+    title:'Google Drive',
+    icon: gDriveIcon
+  },
   // {
   //   id:'slack',
   //   title:'Slack',
