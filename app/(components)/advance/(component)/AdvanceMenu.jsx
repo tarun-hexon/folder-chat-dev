@@ -3,15 +3,11 @@ import Image from 'next/image';
 import filter from '../../../../public/assets/Danswer-filter-Default.svg';
 import { advanceOption } from '../../../../config/constants';
 import album from '../../../../public/assets/album.svg';
-import { useAtom } from 'jotai';
-import { advanceItemAtom, fileNameAtom } from '../../../store';
 import key from '../../../../public/assets/key.svg';
-import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
 
 const AdvanceMenu = () => {
-
 
     return (
         <>

@@ -16,7 +16,6 @@ import supabase from '../../../../config/supabse';
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
@@ -25,17 +24,18 @@ import {
 import { cn } from '../../../../lib/utils';
 import EditIndex from '../(component)/EditIndex';
 import { useAtom } from 'jotai';
-import { sessionAtom, allConnectorsAtom } from '../../../store';
+import { sessionAtom, userConnectorsAtom } from '../../../store';
 
   
 
 const Indexing = () => {
+    
     const [tableData, setTableData] = useState([]);
     const [loading, setLoading] = useState(true)
     const [ccPairId, setCcPairId] = useState(null);
     const [open, setOpen] = useState(ccPairId !== null);
     const [session, setSession] = useAtom(sessionAtom);
-    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
+    const [allConnectors, setAllConnectors] = useAtom(userConnectorsAtom);
 
 
     function statusBackGround(status){
@@ -74,9 +74,9 @@ const Indexing = () => {
                     <TableHeader className='p-2 w-full'>
                         <TableRow className='border-b p-2 hover:bg-transparent'>
                             <TableHead className="text-left p-2">Connector</TableHead>
-                            <TableHead className='text-center '>Status</TableHead>
-                            <TableHead className='text-center '>Last Indexed</TableHead>
-                            <TableHead className="text-center ">Docs Indexed</TableHead>
+                            <TableHead className='text-center'>Status</TableHead>
+                            <TableHead className='text-center'>Last Indexed</TableHead>
+                            <TableHead className="text-center">Docs Indexed</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody className='w-full'>
@@ -86,16 +86,16 @@ const Indexing = () => {
                                 
                                     <TableRow key={item?.cc_pair_id} className='border-b hover:cursor-pointer hover:bg-[#eaeaea]' onClick={()=> dialogTrgr(item?.cc_pair_id)}>
                                         
-                                            <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1 ">
+                                            <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1">
                                                 <Image src={iconSelector(item?.connector?.source)} alt={item?.connector?.source} /><span className='text-ellipsis break-all line-clamp-1 text-emphasis'>{item?.name}</span>
                                             </TableCell>
-                                            <TableCell className=''>
+                                            <TableCell className='text-center'>
                                                 <div className={`flex justify-center items-center gap-1 ${statusBackGround(item?.latest_index_attempt?.status)}`}>
                                                     {`${item?.latest_index_attempt?.status || 'Processsing'}`}
                                                 </div>
                                             </TableCell>
-                                            <TableCell className=''>{timeAgo(item?.latest_index_attempt?.time_updated)}</TableCell>
-                                            <TableCell className="text-center ">{`${item?.docs_indexed} ${item?.docs_indexed > 1 ?'documents' : 'document'}`} </TableCell>
+                                            <TableCell className='text-center'>{timeAgo(item?.latest_index_attempt?.time_updated)}</TableCell>
+                                            <TableCell className="text-center">{`${item?.docs_indexed} ${item?.docs_indexed > 1 ?'documents' : 'document'}`} </TableCell>
                                         
                                     </TableRow>
                                
@@ -103,14 +103,14 @@ const Indexing = () => {
                         })}
                     </TableBody>
                 </Table>
-                <Dialog open={open} onOpenChange={setOpen}>
+                <Dialog open={open} onOpenChange={setOpen} className='z-30'>
                     <DialogTrigger asChild >
                         <div id='dialog'></div>
                     </DialogTrigger>
-                        <DialogContent>
-                                <EditIndex cc_pair_id={ccPairId}/>
-                        </DialogContent>
-                    </Dialog>
+                    <DialogContent>
+                        <EditIndex cc_pair_id={ccPairId}/>
+                    </DialogContent>
+                </Dialog>
             </div>
         </div>
     )

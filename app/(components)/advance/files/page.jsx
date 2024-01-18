@@ -9,18 +9,30 @@ import { useDropzone } from 'react-dropzone';
 import { Label } from '../../../../components/ui/label';
 import { deleteConnectorFromTable, fetchAllConnector, getSess } from '../../../../lib/helpers';
 import { useAtom } from 'jotai';
-import { sessionAtom, allConnectorsAtom } from '../../../store';
+import { sessionAtom, userConnectorsAtom } from '../../../store';
 import supabase from '../../../../config/supabse';
+import { Loader } from 'lucide-react';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "../../../../components/ui/table";
 
 const Files = () => {
 
     const [files, setFiles] = useState([]);
     const [loading, setLoading] = useState(true)
-    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
+    const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom);
     const [session, setSession] = useAtom(sessionAtom);
     const [existConnector ,setExistConnector] = useState([]);
+    const [uploading, setUploading] = useState(false);
 
     async function uploadFile(file, name) {
+        
+        setUploading(true)
         try {
             const formData = new FormData();
             formData.append('files', file);
@@ -35,6 +47,7 @@ const Files = () => {
             connectorRequest(json.file_paths[0], name, file)
         } catch (error) {
             console.log(error)
+            setUploading(false)
         }
     };
 
@@ -60,17 +73,18 @@ const Files = () => {
             }
 
             );
-            const json = await data.json();
-            if(existConnector.length === 0){
-                await insertDataInConn([json.id])
+            const json = await data?.json();
+            if(existConnector?.length === 0){
+                await insertDataInConn([json?.id])
             }else{
-                await updatetDataInConn(existConnector, json.id)
+                await updatetDataInConn(existConnector, json?.id)
             }
             // setConnectorId(json.id)
             // console.log(json.id)
-            getCredentials(json.id, name, file)
+            getCredentials(json?.id, name, file)
         } catch (error) {
             console.log('error while connectorRequest :', error)
+            setUploading(false)
         }
     };
 
@@ -84,7 +98,8 @@ const Files = () => {
         .select()
         // console.log(data)
         // console.log(error)
-        setExistConnector(data[0].connect_id)
+        setExistConnector(data[0]?.connect_id);
+        setUploading(false)
     };
 
     async function updatetDataInConn(exConn, newData){
@@ -95,11 +110,12 @@ const Files = () => {
         .update(
           { 'connect_id': allConn },
         )
-        .eq('user_id', session.user.id)
+        .eq('user_id', session?.user?.id)
         .select()
         // console.log(data)
         // console.log(error)
-        setExistConnector(data[0].connect_id)
+        setExistConnector(data[0]?.connect_id);
+        setUploading(false)
     };
 
     async function getCredentials(connectID, name, file) {
@@ -119,7 +135,8 @@ const Files = () => {
             // setCredentialID(json.id);
             sendURL(connectID, json.id, name, file)
         } catch (error) {
-            console.log('error while getCredentials:', error)
+            console.log('error while getCredentials:', error);
+            setUploading(false)
         }
     };
 
@@ -157,7 +174,8 @@ const Files = () => {
             })
         })
         } catch (error) {
-            console.log('error in runOnce :', error)
+            console.log('error in runOnce :', error);
+            setUploading(false);
         }
     };
 
@@ -176,56 +194,58 @@ const Files = () => {
             // await getAllExistingConnector();
            
         } catch (error) {
-            console.log('error while sendURL:', error)
+            console.log('error while sendURL:', error);
+            setUploading(false)
         }
     };
 
-    async function getAllExistingConnector() {
-        try {
-            const data = await fetchAllConnector();
+    // async function getAllExistingConnector() {
+    //     try {
+    //         const data = await fetchAllConnector();
 
-            //calling api bcoz soetimes local state is not updating
-            //const allConID = await readData();
+    //         //calling api bcoz soetimes local state is not updating
+    //         //const allConID = await readData();
 
-            const currentConnector = data.filter((item)=> { if(allConID?.includes(item?.id)) return item });
+    //         const currentConnector = data.filter((item)=> { if(allConID?.includes(item?.id)) return item });
 
-            const filData = currentConnector.filter((item)=> item.source === 'file');
+    //         const filData = currentConnector.filter((item)=> item.source === 'file');
 
-            if(filData.length > 0){
-                setFiles(filData)
-            };
-            setLoading(false)
+    //         if(filData.length > 0){
+    //             setFiles(filData)
+    //         };
+    //         setLoading(false)
             
-        } catch (error) {
-            console.log(error)
-            setLoading(false)
-        }
-    };
+    //     } catch (error) {
+    //         console.log(error)
+    //         setLoading(false)
+    //     }
+    // };
 
-    async function readData(){
-        try {
-            // const id = await getSess();
-            const { data, error } = await supabase
-            .from('connectors')
-            .select('connect_id')
-            .eq('user_id', session.user.id);
-            if(error){
-                throw error
-            }else{
-                if(data !== null){
-                    setExistConnector(data[0]?.connect_id)
-                    return data[0]?.connect_id
-                }else{
-                    setExistConnector([])
-                    return []
-                }
-            }
+    // async function readData(){
+    //     try {
+    //         // const id = await getSess();
+    //         const { data, error } = await supabase
+    //         .from('connectors')
+    //         .select('connect_id')
+    //         .eq('user_id', session?.user?.id);
+    //         if(error){
+    //             throw error
+    //         }else{
+                
+    //             if(data.length > 0){
+    //                 setExistConnector(data[0]?.connect_id)
+    //                 return data[0]?.connect_id
+    //             }else{
+    //                 setExistConnector([])
+    //                 return []
+    //             }
+    //         }
             
-        } catch (error) {
-            setExistConnector([])
-            console.log(error)
-        }
-    };
+    //     } catch (error) {
+    //         setExistConnector([])
+    //         console.log(error)
+    //     }
+    // };
 
     async function deleteConnector(id1, id2){
         return null
@@ -245,18 +265,22 @@ const Files = () => {
 
 
     useEffect(()=> {
-        // readData();
         // getAllExistingConnector();
 
-        if(allConnectors !== null ){
-            const filData = allConnectors.filter((item)=> item?.connector?.source === 'file');
+        if(userConnectors !== null ){
+            const filData = userConnectors?.filter((item)=> item?.connector?.source === 'file');
             if(filData.length > 0){
                 setFiles(filData);
+                const conn_ids = filData?.map(conn => {return conn?.connector?.id});
+                
+                setExistConnector(conn_ids)
             };
             setLoading(false)
         }
         
-    }, [allConnectors])
+    }, [userConnectors]);
+
+   
     return (
         <div className='w-full sticky top-0 self-start h-screen flex flex-col rounded-[6px] gap-5 items-center  box-border text-[#64748B] '>
              <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2 overflow-scroll no-scrollbar h-full px-4 py-10'>
@@ -272,7 +296,9 @@ const Files = () => {
                             <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Upload Files</h2>
                             <p className='font-[400] text-sm leading-5'>Specify files below, click the Upload button, and the contents of these files will be searchable via Advance!</p>
                         </div>
-                        <div className={`w-full bg-slate-100 shadow-md border rounded-lg flex flex-col justify-center items-center p-5 gap-4 ${isDragActive && 'opacity-50'}`} {...getRootProps()}>
+
+                        {!uploading ? 
+                            <div className={`w-full bg-slate-100 shadow-md border rounded-lg flex flex-col justify-center items-center p-5 gap-4 ${isDragActive && 'opacity-50'}`} {...getRootProps()}>
                             <div >
                                 <Label htmlFor='upload-files' className={`font-[500] text-[16px] leading-6`}>Drag and drop files here, or click ‘Upload’ button and select files</Label>
                                 <div
@@ -285,35 +311,41 @@ const Files = () => {
                                 />
                             </div>
                             <Button className='w-20'>Upload</Button>
-                        </div>
+                            </div>
+                            :
+                            <div className={`w-full bg-slate-100 shadow-md border rounded-lg flex flex-col justify-center items-center p-8 gap-4 `}>
+                                <Loader className='animate-spin' />
+                            </div>
+                        }
+
                     </div>
                 </div>
-                <table className='w-full text-sm'>
-                    <thead className='p-2'>
-                        <tr className='border-b p-2'>
-                            <th className="w-96 text-left p-2">File Name</th>
-                            <th className='text-center'>Status</th>
-                            <th className="text-center">Remove</th>
-                        </tr>
-                    </thead>    
-                    <tbody>
+                <Table className='w-full text-sm'>
+                    <TableHeader className='p-2 '>
+                        <TableRow className='border-b p-2 hover:bg-transparent'>
+                            <TableHead className="w-96 text-left p-2">File Name</TableHead>
+                            <TableHead className='text-center'>Status</TableHead>
+                            {/* <TableHead className="text-center">Remove</TableHead> */}
+                        </TableRow>
+                    </TableHeader>    
+                    <TableBody>
                     {loading && <div className='w-full text-start p-2'>Loading...</div>}
                         {files.map((item, idx) => {
                             // console.log(item)
                             return (
-                                <tr className='border-b' key={idx}>
-                                    <td className="font-medium w-96 text-left p-2 py-3 text-ellipsis break-all line-clamp-1 text-emphasis">{item?.name}</td>
-                                    <td>
+                                <TableRow className='border-b hover:cursor-pointer' key={idx}>
+                                    <TableCell className="font-medium w-96 text-left p-2 py-3 text-ellipsis break-all text-emphasis overflow-hidden">{item?.name}</TableCell>
+                                    <TableCell>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Enabled
                                         </div>
-                                    </td>
-                                    <td><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' onClick={()=> deleteConnector(item.id, item.credential_ids[0])}/></td>
-                                </tr>
+                                    </TableCell>
+                                    {/* <TableCell><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer'/></TableCell> */}
+                                </TableRow>
                             )
                         })}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
             </div>
 
         </div>

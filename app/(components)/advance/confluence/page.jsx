@@ -12,7 +12,7 @@ import trash from '../../../../public/assets/trash-2.svg';
 import { useToast } from '../../../../components/ui/use-toast';
 import { fetchAllConnector, fetchAllCredentials, deleteConnector, generateConnectorId, addNewInstance, deleteAdminCredentails, fetchCredentialID } from '../../../../lib/helpers';
 import { useAtom } from 'jotai';
-import { sessionAtom, allConnectorsAtom } from '../../../store';
+import { sessionAtom, userConnectorsAtom } from '../../../store';
 import { Loader2 } from 'lucide-react';
 
 const Confluence = () => {
@@ -29,7 +29,7 @@ const Confluence = () => {
     const [existingCredentials, setExistingCredentials] = useState([])
     const [conJson, setConJson] = useState(null);
     const [isAdminLoad, setIsAdminLoad] = useState(true);
-    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
+    const [allConnectors, setAllConnectors] = useAtom(userConnectorsAtom);
 
     const { toast } = useToast();
 

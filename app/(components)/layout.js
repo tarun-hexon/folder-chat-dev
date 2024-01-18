@@ -2,7 +2,7 @@
 
 import { useAtom } from 'jotai';
 import { SideBar } from './(common)';
-import { allConnecorsAtom, sessionAtom } from '../store';
+import { sessionAtom } from '../store';
 import { useEffect, useState } from 'react';
 import supabase from '../../config/supabse';
 import Logo from "../../public/assets/Logo.svg"
@@ -16,7 +16,7 @@ import { Loader2 } from 'lucide-react';
 
 export default function RootLayout({ children }) {
     const [session, setSession] = useAtom(sessionAtom);
-    const [allConnectors, setAllConnectors] = useAtom(allConnecorsAtom);
+
     const [loading, setLoading] = useState(true);
 
     const router = useRouter();
@@ -37,14 +37,7 @@ export default function RootLayout({ children }) {
         });
       };
 
-async function getConn(){
-        const connectors = await fetchCCPairId();
-        if(connectors.length > 0){
-          setAllConnectors(connectors)
-        }
-}
-useEffect(()=> {
-  getConn()   
+useEffect(()=> { 
   getSess()
 }, []);
 

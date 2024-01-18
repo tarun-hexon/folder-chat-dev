@@ -13,9 +13,17 @@ import { Label } from '../../../../components/ui/label';
 import { useToast } from '../../../../components/ui/use-toast';
 import { deleteConnectorFromTable, fetchAllConnector, getSess } from '../../../../lib/helpers';
 import { useAtom } from 'jotai';
-import { sessionAtom, allConnectorsAtom } from '../../../store';
+import { sessionAtom, userConnectorsAtom, showAdvanceAtom } from '../../../store';
 import supabase from '../../../../config/supabse';
-import { Loader2 } from 'lucide-react';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "../../../../components/ui/table";
+import { Loader, Loader2 } from 'lucide-react';
 
 const Web = () => {
 
@@ -23,24 +31,26 @@ const Web = () => {
     const [webList, setWebList] = useState([]);
     const [connectorId, setConnectorId] = useState(null);
     const [credentialID, setCredentialID] = useState(null);
-    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
+    const [allConnectors, setAllConnectors] = useAtom(userConnectorsAtom);
     const [session, setSession] = useAtom(sessionAtom);
-    const [loading, setLoading] = useState(true)
-    const [existConnector ,setExistConnector] = useState([])
+    const [loading, setLoading] = useState(true);
+    const [uploading, setUploading] = useState(false);
+    const [existConnector ,setExistConnector] = useState([]);
+    
     const { toast } = useToast();
     
 
     async function addList(url) {
-        existConnector
+        
         if (url === '') {
             return toast({
                 variant: 'destructive',
                 description: 'Please Provide a valid URL'
             })
         } else {
-            // setBaseURL(url);
+            setUploading(true)
             await connectorRequest(webUrl)
-            // setWebUrl('')
+            
         }
     };
 
@@ -73,39 +83,40 @@ const Web = () => {
             }else{
                 await updatetDataInConn(existConnector, json.id)
             }
-            await getCredentials(json.id, baseName)
+            await getCredentials(json?.id, baseName)
         } catch (error) {
             console.log('error while connectorRequest :', error)
         }        
     };
 
     async function insertDataInConn(newData){
-        const id = await getSess();
         
         const { data, error } = await supabase
         .from('connectors')
         .insert(
-          { 'connect_id': newData, 'user_id' : id },
+          { 'connect_id': newData, 'user_id' : session?.user?.id },
         )
         .select()
-        console.log(data)
-        console.log(error)
-        setExistConnector(data[0].connect_id)
+        // console.log(data)
+        // console.log(error)
+        setExistConnector(data[0]?.connect_id);
+       
     };
 
     async function updatetDataInConn(exConn, newData){
-        const id = await getSess();
+        
         const allConn = [...exConn, newData]
         const { data, error } = await supabase
         .from('connectors')
         .update(
-          { 'connect_id': allConn, 'user_id' : id },
+          { 'connect_id': allConn},
         )
-        .eq('user_id', id)
+        .eq('user_id', session?.user?.id)
         .select()
         console.log(data)
         console.log(error)
-        setExistConnector(data[0].connect_id)
+        setExistConnector(data[0]?.connect_id);
+        
     };
 
     async function getCredentials(id, baseName){
@@ -125,10 +136,10 @@ const Web = () => {
                     }
                 )
             });
-            const json = await data.json();
+            const json = await data?.json();
             
-            setCredentialID(json.id);
-            sendURL(id, json.id, baseName);
+            setCredentialID(json?.id);
+            sendURL(id, json?.id, baseName);
         } catch (error) {
             console.log('error while getCredentials:', error)
         }
@@ -145,8 +156,9 @@ const Web = () => {
                 },
                 body: JSON.stringify({ 'name':url })
             });
-            const json = await data.json();
-            setWebUrl('');
+            const json = await data?.json();
+            setWebUrl('')
+            setUploading(false)
             setCredentialID(null);
             setConnectorId(null)
         } catch (error) {
@@ -165,18 +177,26 @@ const Web = () => {
         } catch (error) {
             console.log(error)
         }
-    }
+    };
+
     useEffect(()=> {
 
         if(allConnectors !== null ){
-            const filData = allConnectors.filter((item)=> item?.connector?.source === 'web');
+            const filData = allConnectors?.filter((item)=> item?.connector?.source === 'web');
             if(filData.length > 0){
                 setWebList(filData);
+                
+                const conn_ids = filData?.map(conn => {return conn?.connector?.id});
+                
+                setExistConnector(conn_ids)
             };
             setLoading(false)
         }
         
-    }, [allConnectors])
+    }, [allConnectors]);
+
+
+
     return (
         <div className='w-full sticky top-0 self-start h-screen flex flex-col rounded-[6px] gap-5 items-center  box-border text-[#64748B] '>
              <div className='w-[80%] rounded-[6px] flex flex-col box-border space-y-2 gap-2 overflow-scroll no-scrollbar h-full px-4 py-10'>
@@ -192,6 +212,7 @@ const Web = () => {
                             <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Specify which websites to index</h2>
                             <p className='font-[400] text-sm leading-5'>We re-fetch the latest state of the website once a day</p>
                         </div>
+                        {!uploading ? 
                         <div className={`w-full border rounded-lg flex flex-col justify-center text-start items-center p-5 gap-4 bg-slate-100 shadow-md`}>
                             <div className='w-full space-y-2 text-start '>
                                 <Label htmlFor='web_url'>URL to index:</Label>
@@ -201,35 +222,40 @@ const Web = () => {
                                 <Button onClick={() => addList(webUrl)}>Connect</Button>
                             </div>
                         </div>
+                        :
+                        <div className={`w-full border rounded-lg flex flex-col justify-center text-start items-center p-10 gap-4 bg-slate-100 shadow-md`}>
+                            <Loader className='animate-spin' />
+                        </div>
+                        }
                     </div>
                 </div>
-                <table className='w-full text-sm'>
-                    <thead className='p-2'>
-                        <tr className='border-b p-2'>
-                            <th className="w-96 text-left p-2">Base URL</th>
-                            <th className='text-center'>Status</th>
-                            <th className="text-center">Remove</th>
-                        </tr>
-                    </thead>
+                <Table className='w-full text-sm'>
+                    <TableHeader className='p-2'>
+                        <TableRow className='border-b p-2 hover:bg-transparent'>
+                            <TableHead className="w-96 text-left p-2">Base URL</TableHead>
+                            <TableHead className='text-center'>Status</TableHead>
+                            {/* <TableHead className="text-center">Remove</TableHead> */}
+                        </TableRow>
+                    </TableHeader>
                     {loading && <div className='w-full text-start p-2'>Loading...</div>}
-                    <tbody className='w-full'>
+                    <TableBody className='w-full'>
                         { 
-                        webList.map((item, idx) => {
+                        webList?.map((item, idx) => {
                             
                             return (
-                                <tr className='border-b' key={idx}>
-                                    <td className="font-medium w-96 text-left px-2 py-3 text-ellipsis break-all text-emphasis overflow-hidden">{item?.name}</td>
-                                    <td>
+                                <TableRow className='border-b' key={idx}>
+                                    <TableCell className="font-medium w-96 text-left px-2 py-3 text-ellipsis break-all text-emphasis overflow-hidden">{item?.name}</TableCell>
+                                    <TableCell>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Running!
                                         </div>
-                                    </td>
-                                    <td><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' onClick={()=> deleteConnector(item.id, item.credential_ids[0])}/></td>
-                                </tr>
+                                    </TableCell>
+                                    {/* <TableCell><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' onClick={()=> deleteConnector(item.id, item.credential_ids[0])}/></TableCell> */}
+                                </TableRow>
                             )
                         })}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
             </div>
 
         </div>

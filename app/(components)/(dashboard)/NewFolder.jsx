@@ -21,7 +21,7 @@ import { Button } from "../../../components/ui/button";
 import plus from '../../../public/assets/plus - light.svg'
 import Image from 'next/image';
 import { useAtom } from 'jotai';
-import { folderAtom, sessionAtom, fileNameAtom, folderIdAtom } from '../../store';
+import { folderAtom, sessionAtom, folderIdAtom } from '../../store';
 import { Folder } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { isUserExist } from '../../../config/lib';
@@ -37,13 +37,11 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     const [session, setSession] = useAtom(sessionAtom);
     
     const router = useRouter()
-    const id = uuidv4()
+    // const id = uuidv4()
     const [fol, setFol] = useState({
-        id: id,
         title: '',
         description: '',
-        function: 'General',
-        files:[]
+        function: '',
     });
 
 
@@ -55,7 +53,6 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
             setInputError('Write some valid folder description');
             return null
         };
-
 
         try {
             
@@ -98,11 +95,9 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
         <Dialog open={open} onOpenChange={() => {
             setOpen(!open); 
             setInputError(false); setFol({
-                id:id,
                 title: '',
                 description: '',
-                function: 'General',
-                files: []
+                function: ''
             });
             setOpenMenu && setOpenMenu(false)
         }}>
@@ -158,19 +153,28 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                         <Label htmlFor="description" className="font-[500] text-sm leading-5">
                             Function
                         </Label>
-                        <Select id="function">
+                        <Select 
+                            id="function" 
+                            value={fol.function}
+                            onValueChange={(e) => setFol({
+                                ...fol,
+                                function: e
+                            })}>
+
                             <SelectTrigger className="w-full text-black flex justify-between">
                                 <SelectValue
                                     placeholder="Select an option"
                                     className='font-[400] text-[12px] leading-[20px]'
-                                    value={fol.function}
+                                    
                                 />
                             </SelectTrigger>
                             <SelectContent className="full">
-                                <SelectItem value="General" ><Folder className='inline-flex mr-1'/> General</SelectItem>
-                                <SelectItem value="option 1">option 2</SelectItem>
-                                <SelectItem value="option 2">option 3</SelectItem>
-                                <SelectItem value="option 3">option 4</SelectItem>
+                                <SelectItem value="General" >General</SelectItem>
+                                <SelectItem value="Sales and Marketing">Sales and Marketing</SelectItem>
+                                <SelectItem value="Legal">Legal</SelectItem>
+                                <SelectItem value="Finance">Finance</SelectItem>
+                                <SelectItem value="HR">HR</SelectItem>
+                                <SelectItem value="Docs">Docs</SelectItem>
                             </SelectContent>
                         </Select>
                     </div>

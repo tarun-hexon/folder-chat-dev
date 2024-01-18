@@ -16,11 +16,7 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
-  if (process.env.NODE_ENV === 'production') {
-    console.log = () => {}
-    console.error = () => {}
-    console.debug = () => {}
-  }
+  
   return (
     
       <html lang="en" className='overflow-y-scroll no-scrollbar'>

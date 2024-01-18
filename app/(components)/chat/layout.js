@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect } from "react"
-import { documentSetAtom, folderIdAtom, existConnectorDetailsAtom } from "../../store"
+import { documentSetAtom, folderIdAtom, existConnectorDetailsAtom, allIndexingConnectorAtom } from "../../store"
 import { useAtom } from "jotai"
 import supabase from "../../../config/supabse"
 
@@ -9,17 +9,18 @@ export default function RootLayout({ children }) {
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
+    const [allConnectorFromServer, setAllConnectorFromServer] = useAtom(allIndexingConnectorAtom);
 
     async function indexingStatus(f_id){
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
-            const json = await data.json();
+            // const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+            // const json = await data.json();
             // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
             
             const allConID = await readData(f_id);
             
             var cc_p_id = []
-            for(const cc_id of json){
+            for(const cc_id of allConnectorFromServer){
               if(allConID?.includes(cc_id?.cc_pair_id)){
                 cc_p_id.push(cc_id)
               }
@@ -34,7 +35,7 @@ export default function RootLayout({ children }) {
     };
     
     async function readData(f_id){
-      let fol_id = f_id
+        let fol_id = f_id
         if(!f_id){
           fol_id = localStorage.getItem('folderId')
         }
@@ -54,10 +55,9 @@ export default function RootLayout({ children }) {
     };
 
     useEffect(()=> {
-        if(folderId !== '' && folderId !== 'undefined'){
-            // console.log('in layout')
-            indexingStatus(folderId)
-        }
+        setTimeout(()=> {if(folderId !== '' && folderId !== 'undefined'){
+          indexingStatus(folderId)
+      }}, 5000)
     }, [folderId])
 
   return (

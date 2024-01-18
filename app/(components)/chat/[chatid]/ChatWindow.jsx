@@ -9,7 +9,7 @@ import Image from 'next/image'
 import { iconSelector } from '../../../../config/constants'
 import { Folder, Loader2, Plus, MoreHorizontal } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { chatHistoryAtom, chatTitleAtom, fileNameAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, allowSessionAtom, showAdvanceAtom, documentSetAtom, existConnectorDetailsAtom, allConnectorsAtom, sessionAtom } from '../../../store'
+import { chatHistoryAtom, chatTitleAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, allowSessionAtom, showAdvanceAtom, documentSetAtom, existConnectorDetailsAtom, userConnectorsAtom, sessionAtom } from '../../../store'
 import ReactMarkdown from "react-markdown";
 import supabase from '../../../../config/supabse'
 import { useToast } from '../../../../components/ui/use-toast'
@@ -30,7 +30,7 @@ const ChatWindow = () => {
 
 
     const [allowSession, setAllowSession] = useAtom(allowSessionAtom);
-    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
+    const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom);
     const [session, setSession] = useAtom(sessionAtom)
     const [loading, setLoading] = useState(true)
     const [rcvdMsg, setRcvdMsg] = useState('')
@@ -48,7 +48,6 @@ const ChatWindow = () => {
     const [parentMessageId, setParentMessageId] = useState(null);
     const [chatTitle, setChatTitle] = useState('')
     const [chatRenamed, setChatRenamed] = useAtom(chatTitleAtom);
-    const [fileName, setFileName] = useAtom(fileNameAtom);
     const [textFieldDisabled, setTextFieldDisabled] = useState(false);
     const [chatSessionID, setChatSessionID] = useAtom(chatSessionIDAtom);
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
@@ -56,8 +55,7 @@ const ChatWindow = () => {
     const [inputDocDes, setInputDocDes] = useState('');
     const [selectedDoc, setSelectedDoc] = useState([]);
     const [docSetOpen, setDocSetOpen] = useState(false);
-    
-    const newDocSet = new Set();
+
 
     const botResponse = useRef('');
 
@@ -391,35 +389,29 @@ const ChatWindow = () => {
 
     async function getChatHistory(id) {
         try {
-            // console.log(id)
             const { data, error } = await supabase
                 .from('chats')
                 .select('*')
                 .eq('session_id', id);
-            // console.log(data, 'data')
             if (data[0]?.chats) {
-                // console.log(data)
+                
                 if (folderId === '') {
-                    // localStorage.removeItem('lastFolderId')
                     setFolderId(data[0]?.folder_id)
                 }
-                // console.log(data[0].folder_id, '400')
+                await indexingStatus(folderId)
+                const msgs = JSON.parse(data[0]?.chats)
+                setChatMsg(msgs);
+                setChatHistory(data[0])
+                setChatTitle(data[0]?.chat_title);
+                // const ccPairs = await isDocSetExist(data[0]?.folder_id)
+                
+                // if (ccPairs.length > 0) {
 
-                const ccPairs = await isDocSetExist(data[0]?.folder_id)
-                // console.log(isTrue)
-                if (ccPairs.length > 0) {
-
-                    const msgs = JSON.parse(data[0]?.chats)
-                    setChatMsg(msgs);
-                    setChatHistory(data[0])
-                    setChatTitle(data[0]?.chat_title);
-                }
+                    
+                // }
             }
             else if (data.length === 0) {
-
                 setChatMsg([]);
-                // window.history.replaceState('', '', `/chat/new`);
-                // throw new Error('Chat session ID is Invalid')
             }
             
         } catch (error) {
@@ -430,9 +422,7 @@ const ChatWindow = () => {
     };
 
     async function updateDocumentSet(ccID, des) {
-        // console.log(ccID)
-        // return null
-       
+
         if (!documentSet[0]?.doc_set_id) {
             return null
         }
@@ -490,7 +480,7 @@ const ChatWindow = () => {
         }
     };
 
-    function handleDocSet(id) {
+    function handleDocSetID(id) {
         //console.log(id)
         if(selectedDoc.includes(parseInt(id))){
             // const idx = selectedDoc.indexOf(id);
@@ -523,12 +513,13 @@ const ChatWindow = () => {
             }
 
             if (document_set.length === 0) {
-                console.log(document_set);
+                // console.log(document_set);
                 if(!folderId){
                     setFolderId(folder_id)
                 }
                 setDocumentSet([])
-                router.push('/chat/upload')
+                router.push('/chat/upload');
+                
             } else {
                 setLoading(false);
                 setDocumentSet(document_set);
@@ -548,7 +539,10 @@ const ChatWindow = () => {
             const json = await data.json();
             // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
             const dbData = await readDataFromDB();
-            const allConID = await isDocSetExist(f_id);
+            let allConID = await isDocSetExist(f_id);
+            if(!allConID){
+                allConID = []
+            }
             const allCC = [...dbData, ...allConID];
             // console.log(allCC)
             if(allCC?.length){
@@ -605,7 +599,9 @@ const ChatWindow = () => {
             };
             return arr
         }
+        return []
     };
+
     useEffect(() => {
         resizeTextarea();
 
@@ -615,23 +611,18 @@ const ChatWindow = () => {
         setShowAdvance(false);
 
         if (chat_id !== 'new' && chat_id) {
-            // console.log(chat_id, 'line 569')
+            
             getChatHistory(chat_id)
             setChatSessionID(chat_id);
             localStorage.setItem('chatSessionID', chat_id)
         } else {
-            // console.log(chat_id, 'line 566')
+            
             setRcvdMsg('')
             setChatMsg([])
-            // setLoading(false);
+            
             if (!folderId) {
-                setTimeout(() => {
-                    
-                    indexingStatus(localStorage.getItem('lastFolderId'))
-                }, 1000)
+                indexingStatus(localStorage.getItem('lastFolderId'))
             } else {
-                // console.log(folderId, '591')
-                
                 indexingStatus(folderId)
             }
             setParentMessageId(null)
@@ -661,14 +652,14 @@ const ChatWindow = () => {
                         </Link> 
                         :
                         
-                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen)}}>
+                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen)}} className='fixed'>
                                 <DialogTrigger asChild>
                                     <Image src={editIcon} alt='edit' title='edit' onClick={()=> setDocSetOpen(true)}/>
                                 </DialogTrigger>
                                 <DialogContent>
                                     <DialogHeader className='mb-2'>
                                         <DialogTitle>
-                                            Remove Context
+                                            Update Context
                                         </DialogTitle>
                                     </DialogHeader>
                                     <Label htmlFor='doc-name'>Name</Label>
@@ -676,7 +667,7 @@ const ChatWindow = () => {
                                         id='doc-name'
                                         type='text'
                                         placeholder='document new name'
-                                        value={documentSet[0]?.doc_set_name}
+                                        value={documentSet[0]?.doc_set_name?.split('-')[0]}
                                         disabled
                                         autoComplete='off'
                                         className='text-black bg-gray-200'
@@ -695,8 +686,9 @@ const ChatWindow = () => {
 
                                         {existConnectorDetails?.length > 0 &&
                                             existConnectorDetails?.map((connector) => 
-                                            <>
-                                            <input key={connector.name} type="checkbox" value={connector.cc_pair_id} id={connector.cc_pair_id} checked={selectedDoc.includes(connector.cc_pair_id)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSet(e.target.value)} /><label htmlFor={connector.cc_pair_id} >{connector.name}</label></>)
+                                            <div key={connector.cc_pair_id} >
+                                            <input type="checkbox" value={connector.cc_pair_id} id={connector.cc_pair_id} checked={selectedDoc.includes(connector.cc_pair_id)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector.cc_pair_id} >{connector.name}</label>
+                                            </div>)
                                         }
                                     </div>
                                     <DialogFooter className={cn('w-full')}>
@@ -740,8 +732,6 @@ const ChatWindow = () => {
                             </div> :
                             <div className='flex w-full flex-col-reverse gap-2 overflow-y-scroll no-scrollbar px-3' >
                                 <hr className='w-full bg-transparent border-transparent' />
-
-
                                 <>
                                     {responseObj?.context_docs?.top_documents.length > 0 &&
                                         <div className='max-w-[70%] self-start float-left text-justify '>

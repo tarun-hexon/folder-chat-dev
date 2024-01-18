@@ -6,7 +6,7 @@ import SideBar from "./SideBar"
 import Header from './Header';
 import Signup from '../../(Auth)/signup/Signup';
 import AdvanceMenu from '../advance/(component)/AdvanceMenu'
-import AdvancePage from '../advance/(component)/AdvancePage';
+// import AdvancePage from '../advance/(component)/AdvancePage';
 import Indexing from '../advance/indexing/page';
 import Slack from '../advance/slack/page';
 import GitPrs from '../advance/github/page';
@@ -27,7 +27,7 @@ export {
     UpdatePassword,
     SideBar,
     AdvanceMenu,
-    AdvancePage,
+    // AdvancePage,
     Indexing,
     Slack,
     GitPrs,

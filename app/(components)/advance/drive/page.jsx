@@ -14,7 +14,7 @@ import trash from '../../../../public/assets/trash-2.svg';
 import { useDropzone } from 'react-dropzone';
 import { Label } from '../../../../components/ui/label';
 import { Trash2 } from 'lucide-react';
-import { allConnecorsAtom } from '../../../store';
+
 import { useAtom } from 'jotai';
 import Cookies from "js-cookie";
 
@@ -25,7 +25,7 @@ const Drive = () => {
     const [credentialJsonStr, setCredentialJsonStr] = useState(null);
     const [fileName, setFileName] = useState('')
     const [connectorName, setConnectorName] = useState('')
-    const [allConnectors, setAllConnectors] = useAtom(allConnecorsAtom);
+    
 
     function uploadFile(file) {
         setFilesList(prev => [...prev, file[0]]);

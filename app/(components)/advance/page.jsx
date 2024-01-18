@@ -1,5 +1,5 @@
 'use client'
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Image from 'next/image';
 import { Indexing, Slack, GitPrs, Files, Drive, Confluence, Web } from '../(common)/index'
 import { Input } from '../../../components/ui/input';
@@ -10,19 +10,18 @@ import slack from '../../../public/assets/Danswer-slack-B.svg'
 import confluence from '../../../public/assets/Danswer-confluence-B.svg'
 import file from '../../../public/assets/Danswer-doc-B.svg'
 import { useAtom } from 'jotai';
-import { advanceItemAtom } from '../../store';
+import { showAdvanceAtom } from '../../store';
 import { MoreHorizontal } from 'lucide-react';
 import ReactMarkdown from "react-markdown";
 
 const AdvancePage = () => {
     const [selected, setSelected] = useState('auto');
     const [search, setSearch] = useState('');
-    const [item, setItem] = useAtom(advanceItemAtom);
     const [msgLoader, setMsgLoader] = useState(false)
     const [rcvdMsg, setRcvdMsg] = useState('')
     const [inputFieldDisabled, setInputFieldDisabled] = useState(false);
     const [responseObj, setResponseObj] = useState(null)
-    
+    const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
 
     function iconSelector(name){
         if(name === 'web'){
@@ -289,7 +288,9 @@ const AdvancePage = () => {
         return finalJSX;
       };
 
-      
+    useEffect(()=> {
+        setShowAdvance(true)
+    }, []);
 
     return (
         <>

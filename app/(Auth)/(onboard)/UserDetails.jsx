@@ -22,7 +22,7 @@ import { getSess } from '../../../lib/helpers'
 
 const SelectCard = (props) => {
   const {id} = props
-  const [selectedValue, setSelectedValue] = useState("1");
+  const [selectedValue, setSelectedValue] = useState('');
   const [selectValue, setSelectValue] = useAtom(selectOptionAtom);
 
   const handleChange = (e) => {
@@ -43,13 +43,11 @@ const SelectCard = (props) => {
       <Label htmlFor={props.id} className='text-[14px] leading-[20px] font-[400] opacity-[50%]'>{props.title}</Label>
       <Select id={props.id}  value={selectedValue} onValueChange={(e)=> handleChange(e)} className='select-none'>
         <SelectTrigger className="w-full text-black flex justify-between select-none">
-          <SelectValue placeholder="Select an option" className='font-[400] text-[12px] leading-[20px]' />
+          <SelectValue placeholder="Select an option"/>
         </SelectTrigger>
-        <SelectContent className="w-full select-none" >
-          <SelectItem value="1">option 1</SelectItem>
-          <SelectItem value="2">option 2</SelectItem>
-          <SelectItem value="3">option 3</SelectItem>
-          <SelectItem value="4">option 4</SelectItem>
+        <SelectContent className="w-full select-none max-h-60" >
+          {props?.option?.values?.map(value => <SelectItem key={value.value} value={value.value}>{value.value}</SelectItem>)}
+          
         </SelectContent>
       </Select>
     </div>
@@ -145,7 +143,8 @@ const UserDetails = () => {
           'user_id': session?.user?.id,
           'department':selectValue[0].value,
           'designation':selectValue[1].value,
-          'purpose':selectValue[3].value
+          'purpose':selectValue[3].value,
+          'team_size':selectValue[2].value
         },
         ])
         .select();
@@ -213,11 +212,11 @@ useEffect(()=> {
                 <p className='text-[12px] leading-[20px] opacity-90 font-[300]'>We’ll customize your folder.chat experience based on your choices</p>
       </div>
       <div className='w-full flex flex-col gap-5 select-none'>
-        {selectOptions.map(item => <SelectCard key={item.id} title={item.title} id={item.id} className='select-none'/>)}
+        {selectOptions.map(item => <SelectCard key={item.id} option={item} id={item.id} className='select-none'/>)}
       </div>
       <div className='w-full select-none'>
 
-      <Button variant="outline" className={`w-full text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center text-white`} onClick={()=>submitOption()}>Continue</Button>
+      <Button variant="outline" className={`w-full text-sm font-[400] bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center text-white`} onClick={() => submitOption()}>Continue</Button>
 
       <div className={`items-center w-full opacity-60 hover:cursor-pointer text-center mt-4 text-[14px]`} onClick={()=>setIsPostNameComplete(false)}>Back</div>
       </div>

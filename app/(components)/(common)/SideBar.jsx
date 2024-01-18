@@ -6,7 +6,7 @@ import threeDot from '../../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../components/ui/accordion";
 import { Account, NewFolder } from '../(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom, documentSetAtom, openMenuAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../../store';
+import { folderAtom, documentSetAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../../store';
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
 import { Pencil, Trash2, Check, X, MessageSquare, Loader2 } from 'lucide-react';
@@ -392,7 +392,6 @@ const FolderCard = ({fol}) => {
 }
 
 const SideBar = () => {
-    const [openMenu, setOpenMenu] = useAtom(openMenuAtom)
     const [folder, setFolder] = useAtom(folderAtom);
     const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
     

@@ -19,19 +19,128 @@ import gitIconB from '../public/assets/Danswer-github-B.svg';
 export const selectOptions = [
     {
       id:'option_1',
-      title: 'What kind of work you do?'
+      title: 'What kind of work you do?',
+      values: [
+        {
+          value:'Founder / CEO'
+        },
+        {
+          value:'Internal Communication'
+        },
+        {
+          value:'Product Management'
+        },
+        {
+          value:'Knowledge Management'
+        },
+        {
+          value:'Marketing'
+        },
+        {
+          value:'Creative'
+        },
+        {
+          value:'Finance'
+        },
+        {
+          value:'Project / Program Management'
+        },
+        {
+          value:'Product Design'
+        },
+        {
+          value:'Student'
+        },
+        {
+          value:'Engineering'
+        },
+        {
+          value:'Educator'
+        },
+        {
+          value:'Operations'
+        },
+        {
+          value:'Customer Service'
+        },
+        {
+          value:'Human Resources'
+        },
+        {
+          value:'IT Admin'
+        },
+        {
+          value:'Sales'
+        },
+        {
+          value:'Other'
+        }
+
+      ]
     },
     {
       id:'option_2',
-      title: 'What is your role?'
+      title: 'What is your role?',
+      values:[
+        {
+          value:'Executive (C-level / VP)'
+        },
+        {
+          value:'Department lead'
+        },
+        {
+          value:'Team manager/lead'
+        },
+        {
+          value:'Team member'
+        },
+        {
+          value:'Solo-preneur / Freelancer'
+        }
+      ]
     },
     {
       id:'option_3',
-      title: 'Roughly how many people work at your company?'
+      title: 'Roughly how many people work at your company?',
+      values: [
+        {
+          value:'1 - 49',
+        },
+        {
+          value:'50 - 99',
+        },
+        {
+          value:'100 - 499',
+        },
+        {
+          value:'500 - 999'
+        },
+        {
+          value:'1000+'
+        }
+      ]
+      
     },
     {
       id:'option_4',
-      title: 'What are you planning to use folder.chat for?'
+      title: 'What are you planning to use folder.chat for?',
+      values: [
+        {
+          value:'Create a common knowledge base'
+        },
+        {
+          value:'Collaborate with others over specific info'
+        },
+        {
+          value:'Drive KT'
+        },
+        {
+          value:'Write with Al'
+        },
+        {
+          value:'Other'
+        }
+      ]
     }
 ];
 

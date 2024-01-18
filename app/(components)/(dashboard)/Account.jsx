@@ -5,7 +5,7 @@ import threeDot from '../../../public/assets/more-horizontal.svg'
 import supabase from '../../../config/supabse';
 import Image from 'next/image';
 import { useAtom } from 'jotai'
-import { sessionAtom, isPostSignUpCompleteAtom, isPostUserCompleteAtom, supabaseUserDataAtom } from '../../store';
+import { sessionAtom, isPostSignUpCompleteAtom, isPostUserCompleteAtom } from '../../store';
 import { useRouter } from 'next/navigation';
 import { sidebarOptions } from '../../../config/constants';
 import { Dialog, DialogTrigger } from '../../../components/ui/dialog';

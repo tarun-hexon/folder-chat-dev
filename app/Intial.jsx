@@ -2,7 +2,7 @@
 import React, { useEffect } from 'react'
 
 import { useAtom } from 'jotai';
-import { allowSessionAtom, sessionAtom, supabaseUserDataAtom } from './store';
+import { allowSessionAtom, sessionAtom, allIndexingConnectorAtom, userConnectorsAtom } from './store';
 import supabase from '../config/supabse';
 import { isUserExist } from '../config/lib';
 
@@ -11,8 +11,9 @@ import { isUserExist } from '../config/lib';
 const Intial = () => {
 
   const [userSession, setUserSession] = useAtom(sessionAtom);
-  const [userData, setUserData] = useAtom(supabaseUserDataAtom)
   const [allowSession, setAllowSession] = useAtom(allowSessionAtom);
+  const [allConnectorFromServer, setAllConnectorFromServer] = useAtom(allIndexingConnectorAtom);
+  const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom);
 
   async function getSess() {
     try {
@@ -21,6 +22,7 @@ const Intial = () => {
         if (session) {
           setUserSession(session);
           setAllowSession(true)
+          indexingStatus(session)
         }
         
       });
@@ -29,9 +31,57 @@ const Intial = () => {
     }
   };
 
+  async function indexingStatus(ses){
+    // console.log(ses)
+    try {
+        const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+        const json = await data?.json();
+        // console.log(json)
+        setAllConnectorFromServer(json)
+        const allConID = await readData(ses);
+        
+        const filData = json?.filter((item)=> { if(allConID?.includes(item?.connector?.id)) return item });
+        
+        setUserConnectors(filData);
+        // console.log(filData)
+    } catch (error) {
+        setUserConnectors([])
+        console.log(error)
+    }
+
+};
+
+async function readData(ses){
+    
+    const { data, error } = await supabase
+    .from('connectors')
+    .select('connect_id')
+    .eq('user_id', ses?.user?.id);
+    
+    if(data?.length > 0){
+        let arr = []
+        for(const val of data){
+            arr.push(...val.connect_id)
+        };
+        return arr
+    }
+    return []
+};
+
+
+
+
   useEffect(() => {
     getSess();
     
+    const int = setInterval(()=> {
+      getSess()
+    }, 5000);
+
+    return ()=> {
+      clearInterval(int)
+    }
+
   }, [])
 
 // if(!userSession){

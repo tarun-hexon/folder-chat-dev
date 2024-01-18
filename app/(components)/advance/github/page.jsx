@@ -12,7 +12,7 @@ import { Dialog, DialogTrigger, DialogContent } from '../../../../components/ui/
 import EditIndex from '../(component)/EditIndex';
 import supabase from '../../../../config/supabse';
 import { useAtom } from 'jotai';
-import { sessionAtom, allConnectorsAtom } from '../../../store';
+import { sessionAtom, userConnectorsAtom } from '../../../store';
 import { Loader2 } from 'lucide-react';
 
 const GitPrs = () => {
@@ -29,8 +29,9 @@ const GitPrs = () => {
     const [isAdminLoad, setIsAdminLoad] = useState(true)
     const [existingCredentials, setExistingCredentials] = useState([])
     const [ccPairId ,setCCPairId] = useState(null);
-    const [loading, setLoading] = useState(true)
-    const [allConnectors, setAllConnectors] = useAtom(allConnectorsAtom);
+    const [loading, setLoading] = useState(true);
+    
+    const [allConnectors, setAllConnectors] = useAtom(userConnectorsAtom);
 
     const { toast } = useToast();
 
