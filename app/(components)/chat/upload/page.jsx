@@ -212,7 +212,7 @@ const Upload = () => {
         if (documentSet.length === 0) {
           await setDocumentSetInServer(connectID, context.name, context.description);
         } else {
-          await updateDocumentSetInServer(documentSet[0].doc_set_id, connectID, context.description)
+          await updateDocumentSetInServer(documentSet[0]?.doc_set_id, connectID, context.description)
         }
       }, 2000)
 
@@ -299,7 +299,7 @@ const Upload = () => {
 
   async function updateDocumentSetInServer(db_id, ccID, des) {
 
-    let newArr = documentSet[0].cc_pair_id
+    let newArr = documentSet[0]?.cc_pair_id
     for(let i = 0; i < ccID.length; i++){
       if(newArr.indexOf(ccID[i]) < 0){
         newArr.push(ccID[i])
@@ -344,7 +344,7 @@ const Upload = () => {
       .select()
     // console.log(data)
     // console.log(error)
-    if (data.length > 0) {
+    if (data?.length > 0) {
       setDocumentSet(data)
       // setFileName('chat')
       toast({
@@ -470,11 +470,12 @@ const Upload = () => {
                 title: "Please Select Atleast One File!"
               });
     };
-    
+    console.log(selectedDoc);
+    return null
     if (documentSet.length === 0) {
       await setDocumentSetInServer(selectedDoc, context.name, context.description);
     } else {
-      await updateDocumentSetInServer(documentSet[0].doc_set_id, selectedDoc, context.description)
+      await updateDocumentSetInServer(documentSet[0]?.doc_set_id, selectedDoc, context.description)
     }
   }
 
@@ -549,7 +550,7 @@ const Upload = () => {
               </div>
               {userConnectors?.length > 0 && <div className='w-full text-sm leading-5 text-center space-y-2'>
                 <p className='font-[500]'>OR</p>
-                <Dialog className='fixed max-h-52 overflow-x-scroll no-scrollbar'>
+                <Dialog onOpenChange={() => { setSelectedDoc(documentSet[0]?.cc_pair_id)}} className='fixed max-h-52 overflow-x-scroll no-scrollbar'>
                   <DialogTrigger asChild>
                     <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer'>Select From Existing Files</p>
                   </DialogTrigger>
@@ -558,7 +559,7 @@ const Upload = () => {
                     <div className='flex gap-2 flex-wrap'>
                       {userConnectors?.map((connector) =>
                           <div className='space-x-2 p-1 border flex items-center rounded-sm hover:bg-slate-100 w-fit break-all' key={connector?.cc_pair_id}>
-                            <input type="checkbox" value={connector?.cc_pair_id} id={connector?.cc_pair_id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 `} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector?.cc_pair_id} >{connector?.name}</label></div>)
+                            <input type="checkbox" value={connector?.cc_pair_id} checked={selectedDoc?.includes(connector?.cc_pair_id)} id={connector?.cc_pair_id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 `} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector?.cc_pair_id} >{connector?.name}</label></div>)
                       }
                     </div>
                     <DialogFooter className={cn('w-full')}>
