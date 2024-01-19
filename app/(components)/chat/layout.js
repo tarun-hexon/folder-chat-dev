@@ -11,14 +11,12 @@ export default function RootLayout({ children }) {
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
     const [allConnectorFromServer, setAllConnectorFromServer] = useAtom(allIndexingConnectorAtom);
 
-    async function indexingStatus(f_id){
-        try {
-            // const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
-            // const json = await data.json();
-            // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
-            
-            const allConID = await readData(f_id);
-            
+    async function indexingStatus(){
+      if(allConnectorFromServer === null){
+        return null
+      }
+        try {            
+            const allConID = await readData();
             var cc_p_id = []
             for(const cc_id of allConnectorFromServer){
               if(allConID?.includes(cc_id?.cc_pair_id)){
@@ -34,16 +32,11 @@ export default function RootLayout({ children }) {
     
     };
     
-    async function readData(f_id){
-        let fol_id = f_id
-        if(!f_id){
-          fol_id = localStorage.getItem('folderId')
-        }
-        console.log(fol_id)
+    async function readData(){
         const { data, error } = await supabase
         .from('document_set')
         .select('*')
-        .eq('folder_id', fol_id);
+        .eq('folder_id', folderId);
         
         if(data?.length > 0){
           
@@ -55,9 +48,8 @@ export default function RootLayout({ children }) {
     };
 
     useEffect(()=> {
-        setTimeout(()=> {if(folderId !== '' && folderId !== 'undefined'){
-          indexingStatus(folderId)
-      }}, 5000)
+      indexingStatus()
+      
     }, [folderId])
 
   return (

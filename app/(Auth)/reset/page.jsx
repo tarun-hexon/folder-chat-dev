@@ -8,14 +8,14 @@ import { Label } from '../../../components/ui/label';
 import { useRouter } from 'next/navigation';
 
 import { useAtom } from 'jotai';
-import { darkModeAtom, folderAtom } from '../../store';
+import { darkModeAtom } from '../../store';
 import { Header, UpdatePassword } from '../../(components)/(common)';
 import Link from 'next/link';
 
 
 
 
-const Page = () => {
+const Reset = () => {
 
   const [email, setEmail] = useState('');
   const [emailSent, setEmailSent] = useState(false);
@@ -107,4 +107,4 @@ const Page = () => {
   )
 }
 
-export default Page
+export default Reset

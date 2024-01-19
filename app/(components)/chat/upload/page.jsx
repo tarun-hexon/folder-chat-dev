@@ -433,11 +433,7 @@ const Upload = () => {
   };
 
   async function getDocSetData(f_id) {
-    // let fol_id = f_id
-    // if(!f_id){
-    //   fol_id = localStorage.getItem('folderId')
-    // }
-    // console.log(f_id)
+    
     const { data, error } = await supabase
       .from('document_set')
       .select('*')
@@ -478,12 +474,9 @@ const Upload = () => {
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   useEffect(() => {
-    console.log(folderId)
-    if (!folderId || folder.length === 0) {
-      indexingStatus(localStorage.getItem('lastFolderId'))
-      
-    }else{
-      
+    
+    if (folder === null) {
+        router.push('/chat/new')
     }
   }, [folder]);
 
@@ -546,20 +539,18 @@ const Upload = () => {
                   style={{ display: 'none' }}
                 />  
               </div>
-              <div className='w-full text-sm leading-5 text-center space-y-2'>
+              {userConnectors?.length > 0 && <div className='w-full text-sm leading-5 text-center space-y-2'>
                 <p className='font-[500]'>OR</p>
                 <Dialog className='fixed max-h-52 overflow-x-scroll no-scrollbar'>
                   <DialogTrigger asChild>
                     <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer'>Select From Existing Files</p>
                   </DialogTrigger>
                   <DialogContent>
-
                     <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
                     <div className='flex gap-2 flex-wrap'>
-                      {userConnectors?.length > 0 &&
-                        userConnectors?.map((connector) =>
-                          <div className='space-x-2 p-1 border flex items-center rounded-sm hover:bg-slate-100 w-fit break-all' key={connector.cc_pair_id}>
-                            <input type="checkbox" value={connector.cc_pair_id} id={connector.cc_pair_id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 `} /><label htmlFor={connector.cc_pair_id} >{connector.name}</label></div>)
+                      {userConnectors?.map((connector) =>
+                          <div className='space-x-2 p-1 border flex items-center rounded-sm hover:bg-slate-100 w-fit break-all' key={connector?.cc_pair_id}>
+                            <input type="checkbox" value={connector?.cc_pair_id} id={connector?.cc_pair_id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 `} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector?.cc_pair_id} >{connector?.name}</label></div>)
                       }
                     </div>
                     <DialogFooter className={cn('w-full')}>
@@ -568,7 +559,7 @@ const Upload = () => {
 
                   </DialogContent>
                 </Dialog>
-              </div>
+              </div>}
             </>
             :
             <div className='w-full text-center space-y-4'>

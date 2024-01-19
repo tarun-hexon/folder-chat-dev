@@ -567,24 +567,6 @@ const ChatWindow = () => {
 
     };
 
-    // async function indexingStatusForAll(){
-    //     try {
-    //         const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
-    //         const json = await data?.json();
-    //         // console.log(json)
-    //         const allConID = await readData();
-            
-    //         const filData = json.filter((item)=> { if(allConID?.includes(item?.connector?.id)) return item });
-            
-    //         setAllConnectors(filData);
-    //         // console.log(filData)
-    //     } catch (error) {
-    //         setAllConnectors([])
-    //         console.log(error)
-            
-    //     }
-
-    // };
     async function readDataFromDB(){
         
         const { data, error } = await supabase
@@ -652,7 +634,7 @@ const ChatWindow = () => {
                         </Link> 
                         :
                         
-                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen)}} className='fixed'>
+                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen)}} className='absolute z-50'>
                                 <DialogTrigger asChild>
                                     <Image src={editIcon} alt='edit' title='edit' onClick={()=> setDocSetOpen(true)}/>
                                 </DialogTrigger>
@@ -745,7 +727,8 @@ const ChatWindow = () => {
                                             }
                                         </div>}
 
-                                    {msgLoader && <p className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>
+                                    {msgLoader && 
+                                    <div className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>
                                         {rcvdMsg === '' ? <MoreHorizontal className='m-auto animate-pulse' /> :
                                             <ReactMarkdown
                                                 className='w-full'
@@ -779,14 +762,14 @@ const ChatWindow = () => {
                                             >
                                                 {rcvdMsg?.replaceAll("\\n", "\n")}
                                             </ReactMarkdown>}
-                                    </p>}
+                                    </div>}
 
                                 </>
 
                                 {chatMsg?.map((msg, idx) => msg.user ?
-                                    <p key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.user}</p>
+                                    <div key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.user}</div>
                                     :
-                                    <p key={idx} className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>{
+                                    <div key={idx} className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>{
                                         <ReactMarkdown
                                             className='w-full'
                                             components={{
@@ -819,7 +802,7 @@ const ChatWindow = () => {
                                         >
                                             {msg?.bot?.replaceAll("\\n", "\n")}
                                         </ReactMarkdown>
-                                    }</p>
+                                    }</div>
                                 )}
 
                             </div>
