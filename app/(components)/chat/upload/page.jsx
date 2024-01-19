@@ -452,9 +452,9 @@ const Upload = () => {
 
   function handleDocSetID(id) {
     //console.log(id)
-    if(selectedDoc.includes(parseInt(id))){
+    if(selectedDoc?.includes(parseInt(id))){
         // const idx = selectedDoc.indexOf(id);
-        setSelectedDoc(selectedDoc.filter(doc => doc !== parseInt(id)))
+        setSelectedDoc(selectedDoc?.filter(doc => doc !== parseInt(id)))
     }else{
         setSelectedDoc((prev) => [...prev, parseInt(id)])
         
