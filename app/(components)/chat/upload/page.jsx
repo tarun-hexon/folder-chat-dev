@@ -150,11 +150,13 @@ const Upload = () => {
 
       );
       const json = await data?.json();
+
       if (existConnector?.length === 0) {
         await insertDataInConTable([json?.id])
       } else {
         await updatetDataInConTable(existConnector, json?.id)
       }
+
       getCredentials(json?.id, file)
     } catch (error) {
       console.log('error while connectorRequest :', error)
@@ -256,17 +258,17 @@ const Upload = () => {
     // const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
     // const json = await data.json();
 
-    const docSetid = []
-    for (const pair_id of allConnectorFromServer) {
-      if (pair_id?.connector?.id === ccID) {
-        docSetid.push(pair_id?.cc_pair_id);
-      }
-    };
-
-    if (docSetid.length === 0) {
-      return null
-    }
-
+    // const docSetid = []
+    // for (const pair_id of allConnectorFromServer) {
+    //   if (pair_id?.connector?.id === ccID) {
+    //     docSetid.push(pair_id?.cc_pair_id);
+    //   }
+    // };
+    // console.log(docSetid)
+    // if (docSetid.length === 0) {
+    //   return null
+    // }
+    
     try {
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
@@ -277,14 +279,14 @@ const Upload = () => {
         body: JSON.stringify({
           "name": `${set_name}-${session?.user?.email.split('@')[0]}`,
           "description": des,
-          "cc_pair_ids": docSetid
+          "cc_pair_ids": ccID
         })
       });
 
       const id = await res.json();
 
       setContext({ name: '', description: '' })
-      await insertDataInDB(docSetid, `${set_name}-${session?.user?.email.split('@')[0]}`, id)
+      await insertDataInDB(ccID, `${set_name}-${session?.user?.email.split('@')[0]}`, id)
 
     } catch (error) {
       console.log(error);
@@ -296,19 +298,17 @@ const Upload = () => {
   }
 
   async function updateDocumentSetInServer(db_id, ccID, des) {
-    // const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
-    // const json = await data.json();
 
-    const docSetid = [];
-    for (const pair_id of allConnectorFromServer) {
-      if (pair_id?.connector?.id === ccID) {
-        docSetid.push(pair_id?.cc_pair_id);
+    let newArr = documentSet[0].cc_pair_id
+    for(let i = 0; i < ccID.length; i++){
+      if(newArr.indexOf(ccID[i]) < 0){
+        newArr.push(ccID[i])
       }
     };
 
-    if (docSetid.length === 0) {
-      return null
-    }
+    console.log(newArr);
+    // return null
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
         method: 'PATCH',
@@ -318,11 +318,11 @@ const Upload = () => {
         body: JSON.stringify({
           "id": db_id,
           "description": des,
-          "cc_pair_ids": docSetid
+          "cc_pair_ids": newArr
         })
       });
       setContext({ name: '', description: '' })
-      await updatetDataInDB(documentSet, docSetid)
+      await updatetDataInDB(newArr)
     } catch (error) {
       console.log(error)
     }
@@ -335,7 +335,7 @@ const Upload = () => {
       .insert(
         {
           'cc_pair_id': newData,
-          'user_id': session.user.id,
+          'user_id': session?.user?.id,
           'folder_id': folderId,
           'doc_set_name': doc_name,
           'doc_set_id': doc_id
@@ -356,20 +356,20 @@ const Upload = () => {
     }
   };
 
-  async function updatetDataInDB(exConn, newData) {
+  async function updatetDataInDB(newData) {
     // console.log(exConn, newData, folderId)
-    const allConn = [...exConn[0].cc_pair_id, ...newData]
+    
     const { data, error } = await supabase
       .from('document_set')
       .update(
-        { 'cc_pair_id': allConn },
+        { 'cc_pair_id': newData },
       )
       .eq('folder_id', folderId)
       .select()
 
     if (data?.length) {
       setDocumentSet(data);
-      await indexingStatus(folderId)
+      //await indexingStatus(folderId)
       toast({
         variant: 'default',
         title: "File Uploaded!"
@@ -464,10 +464,17 @@ const Upload = () => {
 }
 
   async function uploadDocSetFiles(){
+    if(selectedDoc.length === 0){
+      return toast({
+                variant: 'destructive',
+                title: "Please Select Atleast One File!"
+              });
+    };
+    
     if (documentSet.length === 0) {
-      await setDocumentSetInServer(connectID, context.name, context.description);
+      await setDocumentSetInServer(selectedDoc, context.name, context.description);
     } else {
-      await updateDocumentSetInServer(documentSet[0].doc_set_id, connectID, context.description)
+      await updateDocumentSetInServer(documentSet[0].doc_set_id, selectedDoc, context.description)
     }
   }
 
@@ -487,8 +494,9 @@ const Upload = () => {
     if (userConnectors !== null) {
       const filData = userConnectors?.filter((item) => item?.connector?.source === 'file');
       if (filData.length > 0) {
-        const conn_ids = filData?.map(conn => { return conn?.connector?.id });
-        setExistConnector(conn_ids)
+        const conn_ids = userConnectors?.map(conn => { return conn?.connector?.id });
+        setExistConnector(conn_ids);
+        
       };
     }
   }, [userConnectors]);
@@ -509,7 +517,7 @@ const Upload = () => {
           <div className='w-full text-start space-y-2 '>
             <div>
               <Label className='text-start' htmlFor='context'>Name Of Context</Label>
-              <Input type='text' placeholder='Name Should Be Unique' id='context' disabled={documentSet?.length !== 0} value={documentSet[0]?.doc_set_name || context.name} onChange={(e) => setContext({ ...context, name: e.target.value })} />
+              <Input type='text' placeholder='Name Should Be Unique' id='context' disabled={documentSet?.length !== 0} value={documentSet[0]?.doc_set_name.split('-')[0] || context.name} onChange={(e) => setContext({ ...context, name: e.target.value })} />
             </div>
             <div>
               <Label className='text-start' htmlFor='context'>Description</Label>

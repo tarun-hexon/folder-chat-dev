@@ -463,11 +463,11 @@ const ChatWindow = () => {
     }
 
     async function updateDataInDB(ccID) {
-        const db_connectors = [...documentSet[0].cc_pair_id, ...ccID]
+        
         const { data, error } = await supabase
             .from('document_set')
             .update(
-                { 'cc_pair_id': db_connectors },
+                { 'cc_pair_id': ccID },
             )
             .eq('folder_id', folderId)
             .select()
@@ -538,23 +538,21 @@ const ChatWindow = () => {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
             const json = await data.json();
             // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
-            const dbData = await readDataFromDB();
+            // const dbData = await readDataFromDB();
             let allConID = await isDocSetExist(f_id);
             if(!allConID){
                 allConID = []
             }
-            const allCC = [...dbData, ...allConID];
+            
             // console.log(allCC)
-            if(allCC?.length){
+            if(allConID?.length){
                 // console.log(json)
                 let cc_p_id = []
                 for (const cc_id of json) {
-                    if (allCC?.includes(cc_id?.cc_pair_id)) {
+                    if (allConID?.includes(cc_id?.cc_pair_id)) {
                         cc_p_id.push(cc_id)
                     };
-                    if (dbData?.includes(cc_id?.connector?.id)) {
-                        cc_p_id.push(cc_id)
-                    }
+                    
                 };
                 // console.log(cc_p_id, '549')
                 setExistConnectorDetails(cc_p_id)
@@ -567,22 +565,22 @@ const ChatWindow = () => {
 
     };
 
-    async function readDataFromDB(){
+    // async function readDataFromDB(){
         
-        const { data, error } = await supabase
-        .from('connectors')
-        .select('connect_id')
-        .eq('user_id', session?.user?.id);
+    //     const { data, error } = await supabase
+    //     .from('connectors')
+    //     .select('connect_id')
+    //     .eq('user_id', session?.user?.id);
         
-        if(data.length > 0){
-            let arr = []
-            for(const val of data){
-                arr.push(...val.connect_id)
-            };
-            return arr
-        }
-        return []
-    };
+    //     if(data.length > 0){
+    //         let arr = []
+    //         for(const val of data){
+    //             arr.push(...val.connect_id)
+    //         };
+    //         return arr
+    //     }
+    //     return []
+    // };
 
     useEffect(() => {
         resizeTextarea();
@@ -641,7 +639,7 @@ const ChatWindow = () => {
                                 <DialogContent>
                                     <DialogHeader className='mb-2'>
                                         <DialogTitle>
-                                            Update Context
+                                            Remove Documents
                                         </DialogTitle>
                                     </DialogHeader>
                                     <Label htmlFor='doc-name'>Name</Label>
@@ -674,7 +672,7 @@ const ChatWindow = () => {
                                         }
                                     </div>
                                     <DialogFooter className={cn('w-full')}>
-                                        <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet(selectedDoc, inputDocDes)}>Update</Button>
+                                        <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet(selectedDoc, inputDocDes)}>Remove</Button>
                                     </DialogFooter>
 
                                 </DialogContent>
