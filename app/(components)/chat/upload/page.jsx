@@ -550,7 +550,7 @@ const Upload = () => {
               </div>
               {userConnectors?.length > 0 && <div className='w-full text-sm leading-5 text-center space-y-2'>
                 <p className='font-[500]'>OR</p>
-                <Dialog onOpenChange={() => { setSelectedDoc(documentSet[0]?.cc_pair_id)}} className='fixed max-h-52 overflow-x-scroll no-scrollbar'>
+                <Dialog onOpenChange={() => { setSelectedDoc(documentSet[0]?.cc_pair_id?.length>0?documentSet[0]?.cc_pair_id:[])}} className='fixed max-h-52 overflow-x-scroll no-scrollbar'>
                   <DialogTrigger asChild>
                     <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer'>Select From Existing Files</p>
                   </DialogTrigger>
