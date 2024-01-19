@@ -470,8 +470,8 @@ const Upload = () => {
                 title: "Please Select Atleast One File!"
               });
     };
-    console.log(selectedDoc);
-    return null
+    // console.log(selectedDoc);
+    // return null
     if (documentSet.length === 0) {
       await setDocumentSetInServer(selectedDoc, context.name, context.description);
     } else {
