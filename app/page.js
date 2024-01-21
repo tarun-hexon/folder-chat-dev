@@ -20,7 +20,7 @@ useEffect(()=> {
   if(allowSession){
     router.push('/chat')
   }else{
-    router.push('/signup')
+    router.push('/auth/signup')
   }
   
   

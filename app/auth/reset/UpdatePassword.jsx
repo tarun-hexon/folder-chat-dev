@@ -44,7 +44,7 @@ const UpdatePassword = () => {
             };
             supabase.auth.signOut();
             setSession(null)
-            router.push('/login')
+            router.push('/auth/login')
         } catch (error) {
             console.log(error)
         }

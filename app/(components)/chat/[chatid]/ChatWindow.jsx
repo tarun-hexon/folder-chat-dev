@@ -88,8 +88,8 @@ const ChatWindow = () => {
             await sendChatMsgs(userMsgdata, json.chat_session_id, parentMessageId);
             await createChatTitle(json.chat_session_id, null, userMsgdata)
 
-            router.push(`/chat/${json.chat_session_id}`)
-            // window.history.pushState('', '', `/chat/${json.chat_session_id}`);
+            // router.push(`/chat/${json.chat_session_id}`)
+            window.history.pushState('', '', `/chat/${json.chat_session_id}`);
         } catch (error) {
 
             console.log('error while creating chat id:', error)
@@ -98,7 +98,7 @@ const ChatWindow = () => {
     async function sendMsg(data) {
 
         if (data && data.trim() === '') return null;
-        
+
         setTextFieldDisabled(true);
         setResponseObj(null)
         if (rcvdMsg !== '') {
@@ -153,7 +153,7 @@ const ChatWindow = () => {
             console.log(error)
         }
     }
-    
+
     async function insertChatInDB(chatTitle, chatID, folderID) {
 
         try {
@@ -199,24 +199,25 @@ const ChatWindow = () => {
     };
 
 
-    async function updateChats(bot, user, oldChat, msgID) {
+    async function updateChats(bot, user, oldChat, msgID, obj) {
         var newMsg = [bot, user, ...oldChat]
-
+        if (obj) {
+            newMsg = [bot, user, ...oldChat, { 'source': obj }]
+        }
+        console.log(newMsg)
         try {
-
             const { data, error } = await supabase
                 .from('chats')
-                .update({   'chats': JSON.stringify(newMsg), 
-                            'message_id': msgID 
-                    })
+                .update({
+                    'chats': JSON.stringify(newMsg),
+                    'message_id': msgID
+                })
                 .eq('session_id', localStorage.getItem('chatSessionID'))
                 .select()
             if (data.length) {
-
                 if (data[0].chats) {
                     setParentMessageId(data[0]?.message_id)
                     const msgs = JSON.parse(data[0]?.chats)
-
                     setChatMsg(msgs);
                 }
                 setChatHistory(data[0])
@@ -328,7 +329,12 @@ const ChatWindow = () => {
                         setResponseObj(obj);
                         // console.log(obj)
 
-                        await updateChats({ 'bot': botResponse.current }, { 'user': userMsg }, chatMsg, obj.message_id)
+                        if (obj?.context_docs?.top_documents.length > 0) {
+                            await updateChats({ 'bot': botResponse.current, 'source': obj?.context_docs?.top_documents[0]}, { 'user': userMsg }, chatMsg, obj.message_id)
+                        } else {
+                            await updateChats({ 'bot': botResponse.current }, { 'user': userMsg }, chatMsg)
+                        }
+
                         botResponse.current = ''
                         setMsgLoader(false)
                     } else if (obj.error) {
@@ -394,7 +400,7 @@ const ChatWindow = () => {
                 .select('*')
                 .eq('session_id', id);
             if (data[0]?.chats) {
-                
+
                 if (folderId === '') {
                     setFolderId(data[0]?.folder_id)
                 }
@@ -404,16 +410,16 @@ const ChatWindow = () => {
                 setChatHistory(data[0])
                 setChatTitle(data[0]?.chat_title);
                 // const ccPairs = await isDocSetExist(data[0]?.folder_id)
-                
+
                 // if (ccPairs.length > 0) {
 
-                    
+
                 // }
             }
             else if (data.length === 0) {
                 setChatMsg([]);
             }
-            
+
         } catch (error) {
             // setLoading(false)
             console.log(error)
@@ -427,7 +433,7 @@ const ChatWindow = () => {
             return null
         }
 
-        if(ccID.length === 0){
+        if (ccID.length === 0) {
             return toast({
                 variant: 'destructive',
                 title: "Select Atleast One Doc !"
@@ -447,7 +453,7 @@ const ChatWindow = () => {
             });
 
             await updateDataInDB(ccID);
-            
+
             if (res?.ok === null) {
                 return toast({
                     variant: 'default',
@@ -463,7 +469,7 @@ const ChatWindow = () => {
     }
 
     async function updateDataInDB(ccID) {
-        
+
         const { data, error } = await supabase
             .from('document_set')
             .update(
@@ -475,26 +481,26 @@ const ChatWindow = () => {
         if (data?.length) {
             setDocumentSet(data)
         }
-        if(error){
+        if (error) {
             console.log(error)
         }
     };
 
     function handleDocSetID(id) {
         //console.log(id)
-        if(selectedDoc.includes(parseInt(id))){
+        if (selectedDoc.includes(parseInt(id))) {
             // const idx = selectedDoc.indexOf(id);
             setSelectedDoc(selectedDoc.filter(doc => doc !== parseInt(id)))
-        }else{
+        } else {
             setSelectedDoc((prev) => [...prev, parseInt(id)])
-            
+
         }
         console.log(selectedDoc)
-        
+
     }
 
     async function isDocSetExist(folder_id) {
-        if(!folder_id || folder_id === 'undefined'){
+        if (!folder_id || folder_id === 'undefined') {
             setLoading(false);
             return null
         }
@@ -514,12 +520,12 @@ const ChatWindow = () => {
 
             if (document_set.length === 0) {
                 // console.log(document_set);
-                if(!folderId){
+                if (!folderId) {
                     setFolderId(folder_id)
                 }
                 setDocumentSet([])
                 router.push('/chat/upload');
-                
+
             } else {
                 setLoading(false);
                 setDocumentSet(document_set);
@@ -533,26 +539,26 @@ const ChatWindow = () => {
     };
 
     async function indexingStatus(f_id) {
-        
+
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
             const json = await data.json();
             // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
             // const dbData = await readDataFromDB();
             let allConID = await isDocSetExist(f_id);
-            if(!allConID){
+            if (!allConID) {
                 allConID = []
             }
-            
+
             // console.log(allCC)
-            if(allConID?.length){
+            if (allConID?.length) {
                 // console.log(json)
                 let cc_p_id = []
                 for (const cc_id of json) {
                     if (allConID?.includes(cc_id?.cc_pair_id)) {
                         cc_p_id.push(cc_id)
                     };
-                    
+
                 };
                 // console.log(cc_p_id, '549')
                 setExistConnectorDetails(cc_p_id)
@@ -566,12 +572,12 @@ const ChatWindow = () => {
     };
 
     // async function readDataFromDB(){
-        
+
     //     const { data, error } = await supabase
     //     .from('connectors')
     //     .select('connect_id')
     //     .eq('user_id', session?.user?.id);
-        
+
     //     if(data.length > 0){
     //         let arr = []
     //         for(const val of data){
@@ -591,15 +597,15 @@ const ChatWindow = () => {
         setShowAdvance(false);
 
         if (chat_id !== 'new' && chat_id) {
-            
+
             getChatHistory(chat_id)
             setChatSessionID(chat_id);
             localStorage.setItem('chatSessionID', chat_id)
         } else {
-            
+
             setRcvdMsg('')
             setChatMsg([])
-            
+
             if (!folderId) {
                 indexingStatus(localStorage.getItem('lastFolderId'))
             } else {
@@ -626,56 +632,56 @@ const ChatWindow = () => {
                     {folder?.length === 0 ? <Image src={Logo} alt='folder.chat' /> :
                         <span className='text-sm leading-5 font-[500] opacity-[60%] hover:opacity-100'>Context : {documentSet[0]?.doc_set_name?.split('-')[0] || 'No Doc Uploaded'}</span>}
 
-                    {folder?.length !== 0 && (!documentSet[0]?.doc_set_id ?  
+                    {folder?.length !== 0 && (!documentSet[0]?.doc_set_id ?
                         <Link href={'/chat/upload'}>
-                            <Image src={plus} alt='add' title='Add Documents'/>
-                        </Link> 
+                            <Image src={plus} alt='add' title='Add Documents' />
+                        </Link>
                         :
-                        
-                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen)}} className='absolute z-50'>
-                                <DialogTrigger asChild>
-                                    <Image src={editIcon} alt='edit' title='edit' onClick={()=> setDocSetOpen(true)}/>
-                                </DialogTrigger>
-                                <DialogContent>
-                                    <DialogHeader className='mb-2'>
-                                        <DialogTitle>
-                                            Remove Documents
-                                        </DialogTitle>
-                                    </DialogHeader>
-                                    <Label htmlFor='doc-name'>Name</Label>
-                                    <Input
-                                        id='doc-name'
-                                        type='text'
-                                        placeholder='document new name'
-                                        value={documentSet[0]?.doc_set_name?.split('-')[0]}
-                                        disabled
-                                        autoComplete='off'
-                                        className='text-black bg-gray-200'
-                                    />
-                                    <Label htmlFor='doc-des'>Description</Label>
-                                    <Input
-                                        id='doc-des'
-                                        type='text'
-                                        placeholder='document description'
-                                        value={inputDocDes}
-                                        onChange={(e) => setInputDocDes(e.target.value)}
-                                        autoComplete='off'
-                                    />
-                                    <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
-                                    <div className='flex w-full flex-wrap gap-1'>
 
-                                        {existConnectorDetails?.length > 0 &&
-                                            existConnectorDetails?.map((connector) => 
+                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen) }} >
+                            <DialogTrigger asChild>
+                                <Image src={editIcon} alt='edit' title='edit' onClick={() => setDocSetOpen(true)} />
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader className='mb-2'>
+                                    <DialogTitle>
+                                        Remove Documents
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <Label htmlFor='doc-name'>Name</Label>
+                                <Input
+                                    id='doc-name'
+                                    type='text'
+                                    placeholder='document new name'
+                                    value={documentSet[0]?.doc_set_name?.split('-')[0]}
+                                    disabled
+                                    autoComplete='off'
+                                    className='text-black bg-gray-200'
+                                />
+                                <Label htmlFor='doc-des'>Description</Label>
+                                <Input
+                                    id='doc-des'
+                                    type='text'
+                                    placeholder='document description'
+                                    value={inputDocDes}
+                                    onChange={(e) => setInputDocDes(e.target.value)}
+                                    autoComplete='off'
+                                />
+                                <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
+                                <div className='flex w-full flex-wrap gap-1'>
+
+                                    {existConnectorDetails?.length > 0 &&
+                                        existConnectorDetails?.map((connector) =>
                                             <div key={connector.cc_pair_id} >
-                                            <input type="checkbox" value={connector.cc_pair_id} id={connector.cc_pair_id} checked={selectedDoc.includes(connector.cc_pair_id)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector.cc_pair_id} >{connector.name}</label>
+                                                <input type="checkbox" value={connector.cc_pair_id} id={connector.cc_pair_id} checked={selectedDoc.includes(connector.cc_pair_id)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector.cc_pair_id} >{connector.name}</label>
                                             </div>)
-                                        }
-                                    </div>
-                                    <DialogFooter className={cn('w-full')}>
-                                        <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet(selectedDoc, inputDocDes)}>Remove</Button>
-                                    </DialogFooter>
+                                    }
+                                </div>
+                                <DialogFooter className={cn('w-full')}>
+                                    <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet(selectedDoc, inputDocDes)}>Remove</Button>
+                                </DialogFooter>
 
-                                </DialogContent>
+                            </DialogContent>
                         </Dialog>)
                     }
                 </div>
@@ -703,7 +709,7 @@ const ChatWindow = () => {
                 <div className='w-[70%] h-[88%] rounded-[6px] flex flex-col justify-between box-border '>
                     {loading && <div className='w-full p-2 h-full items-center justify-center '>
                         <Loader2 className='m-auto animate-spin' />
-                        </div>}
+                    </div>}
                     {
                         chatMsg?.length == 0 && loading === false ?
                             <div>
@@ -725,48 +731,49 @@ const ChatWindow = () => {
                                             }
                                         </div>}
 
-                                    {msgLoader && 
-                                    <div className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>
-                                        {rcvdMsg === '' ? <MoreHorizontal className='m-auto animate-pulse' /> :
-                                            <ReactMarkdown
-                                                className='w-full'
-                                                components={{
-                                                    a: ({ node, ...props }) => (
-                                                        <a
-                                                            {...props}
-                                                            className="text-blue-500 hover:text-blue-700"
-                                                            target="_blank"
-                                                            rel="noopener noreferrer"
-                                                        />
-                                                    ),
-                                                    pre: ({ node, ...props }) => (
-                                                        <div className="overflow-auto  max-w-[18rem] w-full text-white my-2 bg-[#121212] p-2 rounded-lg">
-                                                            <pre {...props} />
-                                                        </div>
-                                                    ),
-                                                    code: ({ node, ...props }) => (
-                                                        <code className="bg-[#121212] text-white rounded-lg p-1 w-full" {...props} />
-                                                    ),
-                                                    ul: ({ node, ...props }) => (
-                                                        <ul className="md:pl-10 leading-8 list-disc" {...props} />
-                                                    ),
-                                                    ol: ({ node, ...props }) => (
-                                                        <ol className="md:pl-10 leading-8 list-decimal" {...props} />
-                                                    ),
-                                                    menu: ({ node, ...props }) => (
-                                                        <p className="md:pl-10 leading-8" {...props} />
-                                                    ),
-                                                }}
-                                            >
-                                                {rcvdMsg?.replaceAll("\\n", "\n")}
-                                            </ReactMarkdown>}
-                                    </div>}
+                                    {msgLoader &&
+                                        <div className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>
+                                            {rcvdMsg === '' ? <MoreHorizontal className='m-auto animate-pulse' /> :
+                                                <ReactMarkdown
+                                                    className='w-full'
+                                                    components={{
+                                                        a: ({ node, ...props }) => (
+                                                            <a
+                                                                {...props}
+                                                                className="text-blue-500 hover:text-blue-700"
+                                                                target="_blank"
+                                                                rel="noopener noreferrer"
+                                                            />
+                                                        ),
+                                                        pre: ({ node, ...props }) => (
+                                                            <div className="overflow-auto  max-w-[18rem] w-full text-white my-2 bg-[#121212] p-2 rounded-lg">
+                                                                <pre {...props} />
+                                                            </div>
+                                                        ),
+                                                        code: ({ node, ...props }) => (
+                                                            <code className="bg-[#121212] text-white rounded-lg p-1 w-full" {...props} />
+                                                        ),
+                                                        ul: ({ node, ...props }) => (
+                                                            <ul className="md:pl-10 leading-8 list-disc" {...props} />
+                                                        ),
+                                                        ol: ({ node, ...props }) => (
+                                                            <ol className="md:pl-10 leading-8 list-decimal" {...props} />
+                                                        ),
+                                                        menu: ({ node, ...props }) => (
+                                                            <p className="md:pl-10 leading-8" {...props} />
+                                                        ),
+                                                    }}
+                                                >
+                                                    {rcvdMsg?.replaceAll("\\n", "\n")}
+                                                </ReactMarkdown>}
+                                        </div>}
 
                                 </>
 
                                 {chatMsg?.map((msg, idx) => msg.user ?
                                     <div key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.user}</div>
                                     :
+                                    <div>
                                     <div key={idx} className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>{
                                         <ReactMarkdown
                                             className='w-full'
@@ -801,6 +808,10 @@ const ChatWindow = () => {
                                             {msg?.bot?.replaceAll("\\n", "\n")}
                                         </ReactMarkdown>
                                     }</div>
+                                    {msg?.source && <div className='font-[400] text-sm leading-6 self-start float-left max-w-[70%] bg-transparent text-justify break-words'>
+                                            <h1 className='font-[600] text-sm leading-6'>Source:</h1>
+                                            <a href={msg?.source?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(msg?.source?.source_type)} alt={msg?.source?.source_type} />{msg?.source?.semantic_identifier}</a> </div>}
+                                    </div>
                                 )}
 
                             </div>

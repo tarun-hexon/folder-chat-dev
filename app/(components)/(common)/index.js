@@ -1,10 +1,10 @@
-import PostSignup from "../../(Auth)/(onboard)/PostSignup";
-import PostName from "../../(Auth)/(onboard)/PostName";
-import UserDetails from "../../(Auth)/(onboard)/UserDetails";
-import UpdatePassword from "../../(Auth)/reset/UpdatePassword";
+import PostSignup from "../../auth/(onboard)/PostSignup";
+import PostName from "../../auth/(onboard)/PostName";
+import UserDetails from "../../auth/(onboard)/UserDetails";
+import UpdatePassword from "../../auth/reset/UpdatePassword";
 import SideBar from "./SideBar"
 import Header from './Header';
-import Signup from '../../(Auth)/signup/Signup';
+import Signup from '../../auth/signup/Signup';
 import AdvanceMenu from '../advance/(component)/AdvanceMenu'
 // import AdvancePage from '../advance/(component)/AdvancePage';
 import Indexing from '../advance/indexing/page';

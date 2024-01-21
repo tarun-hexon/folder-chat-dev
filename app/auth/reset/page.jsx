@@ -83,7 +83,7 @@ const Reset = () => {
               </div>
               <p className='tracking-tight text-xs text-red-400 -mt-4'>{error}</p>
               <Button onClick={sendMail} variant={'outline'} className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center'>Send Otp</Button>
-              <div className={`w-full text-sm opacity-75 text-center ${darkMode ? 'text-black' : 'text-white'}`}>Already have an account &#63; <Link href={'/login'} className='font-[500] hover:underline'>Sign In</Link></div>
+              <div className={`w-full text-sm opacity-75 text-center ${darkMode ? 'text-black' : 'text-white'}`}>Already have an account &#63; <Link href={'/auth/login'} className='font-[500] hover:underline'>Sign In</Link></div>
             </div> 
             </> :
           <>

@@ -28,7 +28,7 @@ const Account = () => {
         if (error) {
             console.log(error)
         } else {
-            router.push('/login');
+            router.push('/auth/login');
             setUserSession(null);
             setPostSignupComplete(false);
             setPostUserComplete(false);
