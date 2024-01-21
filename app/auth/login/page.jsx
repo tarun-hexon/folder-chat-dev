@@ -42,7 +42,7 @@ const Login = () => {
       }else{
         await getSess()
         setErrorMsg(false)
-        router.push('/chat')
+        router.push('/auth/chat')
       }
       
     } catch (error) {

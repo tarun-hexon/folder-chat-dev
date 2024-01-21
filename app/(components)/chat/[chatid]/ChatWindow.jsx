@@ -777,8 +777,8 @@ const ChatWindow = () => {
                                 {chatMsg?.map((msg, idx) => msg.user ?
                                     <div key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.user}</div>
                                     :
-                                    <div>
-                                    <div key={idx} className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>{
+                                    <div key={idx}>
+                                    <div className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>{
                                         <ReactMarkdown
                                             className='w-full'
                                             components={{
