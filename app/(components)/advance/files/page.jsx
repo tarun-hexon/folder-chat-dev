@@ -99,6 +99,7 @@ const Files = () => {
         // console.log(data)
         // console.log(error)
         setExistConnector(data[0]?.connect_id);
+        
         setUploading(false)
     };
 
@@ -115,6 +116,7 @@ const Files = () => {
         // console.log(data)
         // console.log(error)
         setExistConnector(data[0]?.connect_id);
+        
         setUploading(false)
     };
 
@@ -190,11 +192,13 @@ const Files = () => {
                 body: JSON.stringify({'name':name})
             });
             const json = await data.json();
+            setLoading(true)
             await runOnce(connectID, credID);
             // await getAllExistingConnector();
            
         } catch (error) {
             console.log('error while sendURL:', error);
+            
             setUploading(false)
         }
     };

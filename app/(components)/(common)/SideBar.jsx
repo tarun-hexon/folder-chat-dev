@@ -85,7 +85,9 @@ const FolderCard = ({fol}) => {
 
 
     async function deleteFolder(fol_id) {
-        
+        for(let i = 0; i < files?.length; i++){
+            await deleteChatsBySessionId(files[i]?.session_id)
+        }
         await supabase
             .from('connectors')
             .delete()
@@ -96,21 +98,20 @@ const FolderCard = ({fol}) => {
             .delete()
             .eq('folder_id', fol_id);
 
-        await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set/${documentSet[0]?.doc_set_id}`, {
-            method: "DELETE",
-            headers: {
-              "Content-Type": "application/json",
-            },
-        });
+        if(documentSet[0]?.doc_set_id){
+            await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set/${documentSet[0]?.doc_set_id}`, {
+                method: "DELETE",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+            });
+        }
 
         const { error } = await supabase
             .from('folders')
             .delete()
             .eq('id', fol_id);
         if (!error) {
-            for(let i = 0; i < files.length; i++){
-                await deleteChatsBySessionId(files[i]?.session_id)
-            }
             setFolderAdded(!folderAdded)
             setPopOpen(false)
         }
@@ -410,9 +411,12 @@ const SideBar = () => {
                 .from('folders')
                 .select('*')
                 .eq('workspace_id', wkID[0].id);
-            if (folders) {
+            if (folders.length > 0) {
 
                 const lastFolder = folders[folders.length - 1];
+                if(folder?.length === 0){
+                    setFolderId(lastFolder?.id)
+                }
                 // setFolderId(lastFolder?.id)
                 if(!folderId && !localStorage.getItem('chatSessionID')){
                     localStorage.setItem('lastFolderId', lastFolder?.id)
@@ -420,6 +424,9 @@ const SideBar = () => {
                 // console.log(folders)
                 setFolder(folders);
                 return
+            }else{
+                setFolder([])
+                localStorage.removeItem('lastFolderId')
             }
             if (error) {
                 throw error

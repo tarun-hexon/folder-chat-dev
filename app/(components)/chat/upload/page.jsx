@@ -71,12 +71,12 @@ const Upload = () => {
   };
 
   async function uploadFile(file) {
-    if (documentSet[0]?.doc_set_name === '' && context.name === '') {
+    if (documentSet?.length === 0 && context.name === '') {
       return toast({
         variant: 'destructive',
         title: "Give your context a name first!"
       });
-    } else if (documentSet.length === 0 && context.name === '') {
+    } else if (documentSet[0]?.doc_set_name === '' && context.name === '') {
       return toast({
         variant: 'destructive',
         title: "Give your context a name first!"
@@ -255,19 +255,19 @@ const Upload = () => {
 
   async function setDocumentSetInServer(ccID, set_name, des) {
 
-    // const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
-    // const json = await data.json();
+    const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    const json = await data.json();
 
-    // const docSetid = []
-    // for (const pair_id of allConnectorFromServer) {
-    //   if (pair_id?.connector?.id === ccID) {
-    //     docSetid.push(pair_id?.cc_pair_id);
-    //   }
-    // };
-    // console.log(docSetid)
-    // if (docSetid.length === 0) {
-    //   return null
-    // }
+    const docSetid = []
+    for (const pair_id of json) {
+      if (pair_id?.connector?.id === ccID) {
+        docSetid.push(pair_id?.cc_pair_id);
+      }
+    };
+    console.log(docSetid)
+    if (docSetid.length === 0) {
+      return null
+    }
     
     try {
 
@@ -279,15 +279,22 @@ const Upload = () => {
         body: JSON.stringify({
           "name": `${set_name}-${session?.user?.email.split('@')[0]}`,
           "description": des,
-          "cc_pair_ids": ccID
+          "cc_pair_ids": docSetid
         })
       });
 
       const id = await res.json();
 
-      setContext({ name: '', description: '' })
-      await insertDataInDB(ccID, `${set_name}-${session?.user?.email.split('@')[0]}`, id)
-
+      if(id){
+        setContext({ name: '', description: '' })
+        await insertDataInDB(docSetid, `${set_name}-${session?.user?.email.split('@')[0]}`, id)
+      }else{
+        return toast({
+          variant: 'destructive',
+          title: "Some Error Occured!"
+        })
+      }
+      
     } catch (error) {
       console.log(error);
       toast({
@@ -299,8 +306,42 @@ const Upload = () => {
 
   async function updateDocumentSetInServer(db_id, ccID, des) {
 
+    const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    const json = await data.json();
+
+    const docSetid = documentSet[0]?.cc_pair_id
+    for (const pair_id of json) {
+      if (pair_id?.connector?.id === ccID) {
+        docSetid.push(pair_id?.cc_pair_id);
+      }
+    };
+    console.log(docSetid)
+
+
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+        method: 'PATCH',
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          "id": db_id,
+          "description": des,
+          "cc_pair_ids": docSetid
+        })
+      });
+      setContext({ name: '', description: '' })
+      await updatetDataInDB(newArr)
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+  async function updateDocumentSetInServer2(db_id, ccID, des) {
+
     let newArr = documentSet[0]?.cc_pair_id
-    for(let i = 0; i < ccID.length; i++){
+
+    for(let i = 0; i < ccID?.length; i++){
       if(newArr.indexOf(ccID[i]) < 0){
         newArr.push(ccID[i])
       }
@@ -464,7 +505,7 @@ const Upload = () => {
 }
 
   async function uploadDocSetFiles(){
-    if(selectedDoc.length === 0){
+    if(selectedDoc?.length === 0){
       return toast({
                 variant: 'destructive',
                 title: "Please Select Atleast One File!"
@@ -472,10 +513,10 @@ const Upload = () => {
     };
     // console.log(selectedDoc);
     // return null
-    if (documentSet.length === 0) {
+    if (documentSet?.length === 0) {
       await setDocumentSetInServer(selectedDoc, context.name, context.description);
     } else {
-      await updateDocumentSetInServer(documentSet[0]?.doc_set_id, selectedDoc, context.description)
+      await updateDocumentSetInServer2(documentSet[0]?.doc_set_id, selectedDoc, context.description)
     }
   }
 
@@ -483,9 +524,12 @@ const Upload = () => {
 
   useEffect(() => {
     
-    if (folder === null) {
+    if (folder === null || folder?.length === 0) {
         router.push('/chat/new')
+    }else{
+      setLoading(false)
     }
+    
   }, [folder]);
 
 
@@ -494,13 +538,21 @@ const Upload = () => {
 
     if (userConnectors !== null) {
       const filData = userConnectors?.filter((item) => item?.connector?.source === 'file');
-      if (filData.length > 0) {
+      if (filData?.length > 0) {
         const conn_ids = userConnectors?.map(conn => { return conn?.connector?.id });
         setExistConnector(conn_ids);
-        
       };
     }
   }, [userConnectors]);
+
+  if (loading) {
+    return (
+      <div className='flex w-full justify-center items-center h-screen'>
+        <Loader2 className='animate-spin' />
+      </div>
+    )
+  };
+
 
   return (
     <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5 sticky top-0 self-start p-10 min-h-screen'>
@@ -522,31 +574,32 @@ const Upload = () => {
             </div>
             <div>
               <Label className='text-start' htmlFor='context'>Description</Label>
-              <Input type='text' placeholder='write a short description' id='context' value={context.description} onChange={(e) => setContext({ ...context, description: e.target.value })} /></div>
+              <Input type='text' placeholder='write a short description' id='context' value={context?.description} onChange={(e) => setContext({ ...context, description: e.target.value })} /></div>
           </div>
 
           {!files ?
             <>
               <div
-                className={`w-full border flex justify-center items-center bg-[#EFF5F5] p-2 ${isDragActive ? 'opacity-50' : ''} shadow-md`}
+                className={`w-full border flex flex-col justify-center items-center bg-[#EFF5F5] p-2 ${isDragActive ? 'opacity-50' : ''} shadow-md`}
                 {...getRootProps()}
               >
-                <Label htmlFor='upload-files' className='flex flex-col items-center justify-center' >
+                <input {...getInputProps()} accept='.pdf, .txt'/>
+                
                   <Image src={uploadIcon} alt='upload' />
-                  <div className='w-full text-center'>
-                    <p className='font-[400] leading-6 text-[15px] opacity-[80%]'>Click to upload or drag and drop</p>
-                    <p className='opacity-[50%] text-sm leading-6'>PDF & TXT</p>
-                    <p className='opacity-[50%] text-sm leading-6'>Max Size 1MB</p>
-                  </div>
-                </Label>
-                <div
+                    <div className='w-full text-center'>
+                      <p className='font-[400] leading-6 text-[15px] opacity-[80%]'>Click to upload or drag and drop</p>
+                      <p className='opacity-[50%] text-sm leading-6'>PDF & TXT</p>
+                      <p className='opacity-[50%] text-sm leading-6'>Max Size 1MB</p>
+                    </div>
+                
+                {/* <div
 
                   {...getInputProps()}
                   type='file'
                   id='upload-files'
                   accept='.pdf, .doc, .docx, .xls, .xlsx'
                   style={{ display: 'none' }}
-                />  
+                />   */}
               </div>
               {userConnectors?.length > 0 && <div className='w-full text-sm leading-5 text-center space-y-2'>
                 <p className='font-[500]'>OR</p>

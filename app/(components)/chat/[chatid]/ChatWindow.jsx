@@ -90,6 +90,7 @@ const ChatWindow = () => {
 
             // router.push(`/chat/${json.chat_session_id}`)
             window.history.pushState('', '', `/chat/${json.chat_session_id}`);
+
         } catch (error) {
 
             console.log('error while creating chat id:', error)
@@ -404,7 +405,7 @@ const ChatWindow = () => {
                 if (folderId === '') {
                     setFolderId(data[0]?.folder_id)
                 }
-                await indexingStatus(folderId)
+                await indexingStatus(data[0]?.folder_id)
                 const msgs = JSON.parse(data[0]?.chats)
                 setChatMsg(msgs);
                 setChatHistory(data[0])
@@ -539,7 +540,10 @@ const ChatWindow = () => {
     };
 
     async function indexingStatus(f_id) {
-
+        if(folder?.length === 0){
+            setLoading(false)
+            return null
+        }
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
             const json = await data.json();
@@ -616,7 +620,7 @@ const ChatWindow = () => {
             localStorage.removeItem('chatSessionID');
         }
 
-    }, [chat_id, folderId]);
+    }, [chat_id, folderId, folder]);
 
     useEffect(() => {
         if (chatSessionID === 'new') {
@@ -719,7 +723,7 @@ const ChatWindow = () => {
                             <div className='flex w-full flex-col-reverse gap-2 overflow-y-scroll no-scrollbar px-3' >
                                 <hr className='w-full bg-transparent border-transparent' />
                                 <>
-                                    {responseObj?.context_docs?.top_documents.length > 0 &&
+                                    {/* {responseObj?.context_docs?.top_documents.length > 0 &&
                                         <div className='max-w-[70%] self-start float-left text-justify '>
                                             {responseObj?.context_docs?.top_documents[0]?.source_type !== 'file' ?
                                                 <>
@@ -729,7 +733,7 @@ const ChatWindow = () => {
                                                     <h1 className='font-[600] text-sm leading-6'>Sources:</h1>
                                                     <a href={responseObj?.context_docs?.top_documents[0]?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(responseObj?.context_docs?.top_documents[0]?.source_type)} alt={responseObj?.context_docs?.top_documents[0]?.source_type} />{responseObj?.context_docs?.top_documents[0]?.semantic_identifier}</a> </>
                                             }
-                                        </div>}
+                                        </div>} */}
 
                                     {msgLoader &&
                                         <div className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>
@@ -795,10 +799,10 @@ const ChatWindow = () => {
                                                     <code className="bg-[#121212] text-white p-1 w-full" {...props} />
                                                 ),
                                                 ul: ({ node, ...props }) => (
-                                                    <ul className="md:pl-10 leading-8" {...props} />
+                                                    <ul className="md:pl-10 leading-8 list-disc" {...props} />
                                                 ),
                                                 ol: ({ node, ...props }) => (
-                                                    <ol className="md:pl-10 leading-8" {...props} />
+                                                    <ol className="md:pl-10 leading-8 list-decimal" {...props} />
                                                 ),
                                                 menu: ({ node, ...props }) => (
                                                     <p className="md:pl-10 leading-8" {...props} />
