@@ -10,7 +10,8 @@ import { existConnectorDetailsAtom, folderAtom, folderIdAtom, sessionAtom, docum
 import { useToast } from '../../../../components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 import supabase from '../../../../config/supabse';
-import { Loader, Loader2, X } from 'lucide-react';
+import { Loader, Loader2, XCircle } from 'lucide-react';
+
 import { Button } from '../../../../components/ui/button';
 import { cn } from '../../../../lib/utils';
 import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../components/ui/dialog'
@@ -751,8 +752,8 @@ const Upload = () => {
             <div className='w-full text-center space-y-4'>
               <div className='w-full border flex justify-center items-center h-20 bg-[#EFF5F5] rounded-md relative'>
 
-                {files?.map(file => <p className='text-sm leading-6'>{file?.name}</p>)}
-                <X size={'1rem'} className='self-start absolute top-1 right-1 hover:cursor-pointer' onClick={() => setFiles([])} />
+                {files?.map(file => <p key={file?.name} className='text-sm leading-6'>{file?.name}</p>)}
+                <XCircle size={'1rem'} className='self-start absolute top-1 right-1 hover:cursor-pointer' onClick={() => setFiles([])} />
               </div>
 
               <Button className={cn('bg-[#14B8A6] hover:bg-[#14B8A6] hover:opacity-80 ml-auto')} onClick={() => uploadFile(files)}>Upload</Button>
