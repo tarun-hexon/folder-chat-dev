@@ -121,7 +121,7 @@ useEffect(() => {
 
     !loading &&
 
-        <div className='w-full h-screen'>
+        <div className='w-full h-full'>
           <ChatWindow />
         </div>
 

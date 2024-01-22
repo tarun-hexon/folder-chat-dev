@@ -55,7 +55,7 @@ const ChatWindow = () => {
     const [inputDocDes, setInputDocDes] = useState('');
     const [selectedDoc, setSelectedDoc] = useState([]);
     const [docSetOpen, setDocSetOpen] = useState(false);
-
+    const [entireMsg, setEntireMsg] = useState([])
 
     const botResponse = useRef('');
 
@@ -65,6 +65,17 @@ const ChatWindow = () => {
 
     const router = useRouter();
     const { toast } = useToast();
+
+    function getCitedDocumentsFromMessage(message) {
+        
+        message.forEach( msg => {
+            const filData = userConnectors?.filter((item)=> { if(allConID?.includes(item?.connector?.id)) return item })
+            console.log(msg)
+        }
+            )
+        
+        
+    }
 
     async function createChatSessionId(userMsgdata) {
         setRcvdMsg('')
@@ -205,7 +216,7 @@ const ChatWindow = () => {
         if (obj) {
             newMsg = [bot, user, ...oldChat, { 'source': obj }]
         }
-        console.log(newMsg)
+        // console.log(newMsg)
         try {
             const { data, error } = await supabase
                 .from('chats')
@@ -277,9 +288,10 @@ const ChatWindow = () => {
                 throw new Error(`Failed to send message - ${errorMsg}`);
             }
 
-            await handleStream(
-                sendMessageResponse, userMsg
-            );
+            const entireResponse = await handleStream(sendMessageResponse, userMsg);
+            // console.log(entireResponse);
+            // getCitedDocumentsFromMessage(entireResponse)
+            
             setTextFieldDisabled(false)
 
         } catch (error) {
@@ -289,10 +301,86 @@ const ChatWindow = () => {
         }
     };
 
+    // async function handleStream(streamingResponse, userMsg) {
+    //     const reader = streamingResponse.body?.getReader();
+    //     const decoder = new TextDecoder("utf-8");
+
+    //     let previousPartialChunk = null;
+    //     while (true) {
+    //         const rawChunk = await reader?.read();
+    //         if (!rawChunk) {
+    //             throw new Error("Unable to process chunk");
+    //         }
+    //         const { done, value } = rawChunk;
+    //         if (done) {
+    //             console.log(value)
+    //             getCitedDocumentsFromMessage(entireMsg)
+    //             break;
+    //         }
+
+    //         const [completedChunks, partialChunk] = processRawChunkString(
+    //             decoder.decode(value, { stream: true }),
+    //             previousPartialChunk
+    //         );
+    //         if (!completedChunks.length && !partialChunk) {
+                
+    //             break;
+    //         }
+    //         previousPartialChunk = partialChunk;
+            
+    //         // console.log(partialChunk)
+    //         // console.log('completed chunk', completedChunks)
+    //         const response = await Promise.resolve(completedChunks);
+
+    //         if (response.length > 0) {
+    //             // getCitedDocumentsFromMessage(response)
+    //             // console.log(response)
+    //             for (const obj of response) {
+
+    //                 setEntireMsg((prev) => [...prev, obj])
+
+    //                 if(obj.citations){
+                        
+    //                     // console.log(obj.citations)
+    //                 }
+    //                 if (obj.answer_piece) {
+    //                     botResponse.current += obj.answer_piece;
+
+    //                     setRcvdMsg(prev => prev + obj.answer_piece);
+
+    //                 } else if (obj.parent_message) {
+
+    //                     setResponseObj(obj);
+    //                     // console.log(obj)
+
+    //                     if (obj?.context_docs?.top_documents.length > 0) {
+    //                         await updateChats({ 'bot': botResponse.current, 'source': obj?.context_docs?.top_documents[0]}, { 'user': userMsg }, chatMsg, obj.message_id)
+    //                     } else {
+    //                         await updateChats({ 'bot': botResponse.current }, { 'user': userMsg }, chatMsg)
+    //                     }
+
+    //                     botResponse.current = ''
+    //                     setMsgLoader(false)
+    //                 } else if (obj.error) {
+    //                     setMsgLoader(false);
+    //                     return toast({
+    //                         variant: 'destructive',
+    //                         description: 'Something Went Wrong!'
+    //                     })
+    //                 }
+    //             }
+
+    //         };
+
+    //     }
+    // };
+
     async function handleStream(streamingResponse, userMsg) {
         const reader = streamingResponse.body?.getReader();
         const decoder = new TextDecoder("utf-8");
-
+    
+        let entireResponse = []; // Array to store the entire response
+    
         let previousPartialChunk = null;
         while (true) {
             const rawChunk = await reader?.read();
@@ -301,57 +389,74 @@ const ChatWindow = () => {
             }
             const { done, value } = rawChunk;
             if (done) {
+
                 break;
             }
-
+    
             const [completedChunks, partialChunk] = processRawChunkString(
                 decoder.decode(value, { stream: true }),
                 previousPartialChunk
             );
             if (!completedChunks.length && !partialChunk) {
-
                 break;
             }
             previousPartialChunk = partialChunk;
-
+    
+            // Concatenate completed chunks to the entireResponse array
+            entireResponse = entireResponse.concat(completedChunks);
+    
             const response = await Promise.resolve(completedChunks);
-
+    
             if (response.length > 0) {
-
                 for (const obj of response) {
+                    if(obj.citations){
+                        console.log(obj.citations)
+                        // getCitedDocumentsFromMessage(obj.citations)
+                    }
                     if (obj.answer_piece) {
-
                         botResponse.current += obj.answer_piece;
-
-                        setRcvdMsg(prev => prev + obj.answer_piece);
+                        setRcvdMsg((prev) => prev + obj.answer_piece);
 
                     } else if (obj.parent_message) {
-
                         setResponseObj(obj);
-                        // console.log(obj)
+                        
+                        if (obj?.context_docs?.top_documents.length > 0 && Object.keys(obj.citations).length !== 0) {
+                            
 
-                        if (obj?.context_docs?.top_documents.length > 0) {
-                            await updateChats({ 'bot': botResponse.current, 'source': obj?.context_docs?.top_documents[0]}, { 'user': userMsg }, chatMsg, obj.message_id)
+                            await updateChats(
+                                {
+                                    bot: botResponse.current,
+                                    source: obj?.context_docs?.top_documents[0],
+                                },
+                                { user: userMsg },
+                                chatMsg,
+                                obj.message_id
+                            );
                         } else {
-                            await updateChats({ 'bot': botResponse.current }, { 'user': userMsg }, chatMsg)
+                            await updateChats(
+                                { bot: botResponse.current },
+                                { user: userMsg },
+                                chatMsg
+                            );
                         }
-
-                        botResponse.current = ''
-                        setMsgLoader(false)
+    
+                        botResponse.current = '';
+                        setMsgLoader(false);
                     } else if (obj.error) {
                         setMsgLoader(false);
                         return toast({
                             variant: 'destructive',
-                            description: 'Something Went Wrong!'
-                        })
+                            description: 'Something Went Wrong!',
+                        });
                     }
                 }
-
-            };
-
+            }
         }
-    };
+    
+        return entireResponse; // Return the entire response
+    }
 
+    
     const processRawChunkString = (rawChunkString, previousPartialChunk) => {
         if (!rawChunkString) {
             return [[], null];
@@ -641,42 +746,23 @@ const ChatWindow = () => {
                             <Image src={plus} alt='add' title='Add Documents' />
                         </Link>
                         :
-
-                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen) }} >
+                        
+                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen)}}>
                             <DialogTrigger asChild>
                                 <Image src={editIcon} alt='edit' title='edit' onClick={() => setDocSetOpen(true)} />
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader className='mb-2'>
                                     <DialogTitle>
-                                        Remove Documents
+                                        Remove Documents from {documentSet[0]?.doc_set_name?.split('-')[0]}
                                     </DialogTitle>
                                 </DialogHeader>
-                                <Label htmlFor='doc-name'>Name</Label>
-                                <Input
-                                    id='doc-name'
-                                    type='text'
-                                    placeholder='document new name'
-                                    value={documentSet[0]?.doc_set_name?.split('-')[0]}
-                                    disabled
-                                    autoComplete='off'
-                                    className='text-black bg-gray-200'
-                                />
-                                <Label htmlFor='doc-des'>Description</Label>
-                                <Input
-                                    id='doc-des'
-                                    type='text'
-                                    placeholder='document description'
-                                    value={inputDocDes}
-                                    onChange={(e) => setInputDocDes(e.target.value)}
-                                    autoComplete='off'
-                                />
                                 <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
                                 <div className='flex w-full flex-wrap gap-1'>
 
                                     {existConnectorDetails?.length > 0 &&
                                         existConnectorDetails?.map((connector) =>
-                                            <div key={connector.cc_pair_id} >
+                                            <div key={connector.cc_pair_id} className='flex items-center gap-2 justify-center px-2'>
                                                 <input type="checkbox" value={connector.cc_pair_id} id={connector.cc_pair_id} checked={selectedDoc.includes(connector.cc_pair_id)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector.cc_pair_id} >{connector.name}</label>
                                             </div>)
                                     }
@@ -710,7 +796,7 @@ const ChatWindow = () => {
                     {open && <NewFolder setFolderAdded={setFolderAdded} openMenu={open} setOpenMenu={setOpen} />}
                 </div>
                 :
-                <div className='w-[70%] h-[88%] rounded-[6px] flex flex-col justify-between box-border '>
+                <div className='w-[70%] h-[88%] rounded-[6px] flex flex-col justify-between box-border'>
                     {loading && <div className='w-full p-2 h-full items-center justify-center '>
                         <Loader2 className='m-auto animate-spin' />
                     </div>}
@@ -723,17 +809,6 @@ const ChatWindow = () => {
                             <div className='flex w-full flex-col-reverse gap-2 overflow-y-scroll no-scrollbar px-3' >
                                 <hr className='w-full bg-transparent border-transparent' />
                                 <>
-                                    {/* {responseObj?.context_docs?.top_documents.length > 0 &&
-                                        <div className='max-w-[70%] self-start float-left text-justify '>
-                                            {responseObj?.context_docs?.top_documents[0]?.source_type !== 'file' ?
-                                                <>
-                                                    <h1 className='font-[600] text-sm leading-6'>Sources:</h1>
-                                                    <a href={responseObj?.context_docs?.top_documents[0]?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(responseObj?.context_docs?.top_documents[0]?.source_type)} alt={responseObj?.context_docs?.top_documents[0]?.source_type} />{responseObj?.context_docs?.top_documents[0]?.semantic_identifier}</a> </> :
-                                                <>
-                                                    <h1 className='font-[600] text-sm leading-6'>Sources:</h1>
-                                                    <a href={responseObj?.context_docs?.top_documents[0]?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(responseObj?.context_docs?.top_documents[0]?.source_type)} alt={responseObj?.context_docs?.top_documents[0]?.source_type} />{responseObj?.context_docs?.top_documents[0]?.semantic_identifier}</a> </>
-                                            }
-                                        </div>} */}
 
                                     {msgLoader &&
                                         <div className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>
@@ -777,7 +852,7 @@ const ChatWindow = () => {
                                 {chatMsg?.map((msg, idx) => msg.user ?
                                     <div key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.user}</div>
                                     :
-                                    <div key={idx}>
+                                    <div key={idx} className='flex flex-col'>
                                     <div className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>{
                                         <ReactMarkdown
                                             className='w-full'
@@ -812,16 +887,23 @@ const ChatWindow = () => {
                                             {msg?.bot?.replaceAll("\\n", "\n")}
                                         </ReactMarkdown>
                                     }</div>
-                                    {msg?.source && <div className='font-[400] text-sm leading-6 self-start float-left max-w-[70%] bg-transparent text-justify break-words'>
-                                            <h1 className='font-[600] text-sm leading-6'>Source:</h1>
-                                            <a href={msg?.source?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(msg?.source?.source_type)} alt={msg?.source?.source_type} />{msg?.source?.semantic_identifier}</a> </div>}
+                                    {msg?.source && 
+                                        <div className='font-[400] text-sm leading-6 self-start float-left max-w-[70%] bg-transparent text-justify break-words'>
+                                                <h1 className='font-[600] text-sm leading-6'>Source:</h1>
+                                                {msg?.source?.source_type !== 'file' ?
+                                                <a href={msg?.source?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(msg?.source?.source_type)} alt={msg?.source?.source_type} />{msg?.source?.semantic_identifier}</a>
+                                                :
+                                                <div className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-default flex gap-1'><Image src={iconSelector(msg?.source?.source_type)} alt={msg?.source?.source_type} />{msg?.source?.semantic_identifier}</div>
+                                                }
+                                        </div>}
                                     </div>
                                 )}
 
                             </div>
                     }
 
-                    {!loading && <div className="w-full flex justify-center sm:bg-transparent p-2 pt-0 bg-white" >
+                    {!loading && 
+                    <div className="w-full flex justify-center sm:bg-transparent p-2 pt-0 bg-white">
                         <div className="flex bg-[#F7F7F7] w-full justify-around rounded-xl border-2 border-transparent "
                             style={{ boxShadow: '0 0 2px 0 rgb(18, 18, 18, 0.5)' }}>
 

@@ -303,16 +303,10 @@ const Files = () => {
 
                         {!uploading ? 
                             <div className={`w-full bg-slate-100 shadow-md border rounded-lg flex flex-col justify-center items-center p-5 gap-4 ${isDragActive && 'opacity-50'}`} {...getRootProps()}>
-                            <div >
-                                <Label htmlFor='upload-files' className={`font-[500] text-[16px] leading-6`}>Drag and drop files here, or click ‘Upload’ button and select files</Label>
-                                <div
-
-                                    {...getInputProps()}
-                                    type='file'
-                                    id='upload-files'
-                                    accept='.pdf, .doc, .docx, .xls, .xlsx'
-                                    style={{ display: 'none' }}
-                                />
+                                <input {...getInputProps()} multiple accept=".pdf, .zip, .txt, .md, .mdx" required/>
+                            <div className={`font-[500] text-[16px] leading-6`}>
+                            Drag and drop files here, or click ‘Upload’ button and select files
+                                
                             </div>
                             <Button className='w-20'>Upload</Button>
                             </div>

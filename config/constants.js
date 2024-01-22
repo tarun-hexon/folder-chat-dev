@@ -217,6 +217,15 @@ export const folderOptions = [
   }
 ];
 
+export const docsOptions = [
+  {
+    id:"delete",
+    title:'Delete',
+    icon:Trash2
+  }
+];
+
+
 export const advanceOption = [
   // {
   //   id:'advance',

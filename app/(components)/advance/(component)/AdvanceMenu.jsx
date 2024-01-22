@@ -12,7 +12,7 @@ const AdvanceMenu = () => {
     return (
         <>
             <Link href={'/advance/indexing'} className='flex gap-2 hover:cursor-pointer items-center justify-between p-3 rounded-md'>
-                <span className='font-[700] text-sm leading-5'>Indexing</span>
+                <span className='font-[700] text-sm leading-5'>Advanced</span>
                 <Image src={album} alt={'album'} className='w-4 h-4' />
             </Link>
             

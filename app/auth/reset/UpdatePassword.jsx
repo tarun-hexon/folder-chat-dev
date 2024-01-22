@@ -61,7 +61,7 @@ const UpdatePassword = () => {
         }
     };
   return (
-    <Header>
+    
     <div className='w-full flex flex-col justify-center items-center'>
 
     <h1 className={`text-3xl font-Inter space-x-0 text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black': ''}`}>Update Password</h1>
@@ -92,7 +92,7 @@ const UpdatePassword = () => {
         <Button onClick={updatePass} variant={'outline'} className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-center'>Update Password</Button>
     </div>
     </div>
-    </Header>
+  
   )
 }
 

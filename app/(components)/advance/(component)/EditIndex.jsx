@@ -75,8 +75,8 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
                     "Content-Type": "application/json"
                 },
                 body:JSON.stringify({
-                    "connector_id": bodyData.current.connector.id,
-                    "credential_id": bodyData.current.credential.id
+                    "connector_id": bodyData?.current?.connector?.id,
+                    "credential_id": bodyData?.current?.credential?.id
             })
             });
             const json = await data.json();
@@ -86,7 +86,6 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
             })
             setOpen(false);
             return null
-            console.log(json)
             
         } catch (error) {
             console.log(error)
