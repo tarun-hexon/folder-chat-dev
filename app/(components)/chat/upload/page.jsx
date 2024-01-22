@@ -121,7 +121,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured!"
+        title: "Some Error Ocuured! 124"
       });
 
     }
@@ -163,7 +163,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured!"
+        title: "Some Error Ocuured! 166"
       });
     }
   };
@@ -189,7 +189,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured!"
+        title: "Some Error Ocuured! 192"
       });
     }
   };
@@ -221,7 +221,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured!"
+        title: "Some Error Ocuured! 224"
       });
     }
   };
@@ -248,7 +248,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured!"
+        title: "Some Error Ocuured! 251"
       });
     }
   };
@@ -291,7 +291,7 @@ const Upload = () => {
       }else{
         return toast({
           variant: 'destructive',
-          title: "Some Error Occured!"
+          title: "Some Error Occured! 294"
         })
       }
       
@@ -299,7 +299,7 @@ const Upload = () => {
       console.log(error);
       toast({
         variant: 'destructive',
-        title: "Some Error Occured!"
+        title: "Some Error Occured! 302"
       });
     }
   }
@@ -580,12 +580,12 @@ const Upload = () => {
           {!files ?
             <>
               <div
-                className={`w-full border flex flex-col justify-center items-center bg-[#EFF5F5] p-2 ${isDragActive ? 'opacity-50' : ''} shadow-md`}
+                className={`w-full border rounded-md flex flex-col justify-center items-center bg-[#EFF5F5] py-5 ${isDragActive ? 'opacity-50' : ''} shadow-md`}
                 {...getRootProps()}
               >
                 <input {...getInputProps()} accept='.pdf, .txt'/>
                 
-                  <Image src={uploadIcon} alt='upload' />
+                    <Image src={uploadIcon} alt='upload' />
                     <div className='w-full text-center'>
                       <p className='font-[400] leading-6 text-[15px] opacity-[80%]'>Click to upload or drag and drop</p>
                       <p className='opacity-[50%] text-sm leading-6'>PDF & TXT</p>

@@ -108,7 +108,7 @@ useEffect(()=> {
     router.push('/chat')
   } else if(session && !session?.user?.user_metadata?.onBoarding){
     setLoading(false);
-    router.push('/signup')
+    router.push('/auth/signup')
   }
   else {
     setLoading(false)
@@ -151,8 +151,8 @@ useEffect(()=> {
 
       <Button variant="outline" className='w-full text-black border border-[#CBD5E1] rounded-[6px] leading-[20px] flex items-center justify-center gap-1' onClick={googleSignIn}><Image src={Google} alt="google" className='w-7 h-7' /><span className='font-[700] text-sm'>Continue With Google</span></Button>
 
-      <div className='w-full text-sm opacity-75 text-center'>Don&apos;t have an account &#63; <Link href={'/'} className='font-[500] hover:underline '>Sign Up</Link></div>
-      <Link href={'/reset'} className='w-full text-sm opacity-75 text-center hover:underline'>Forgot your password &#63;</Link>
+      <div className='w-full text-sm opacity-75 text-center'>Don&apos;t have an account &#63; <Link href={'/auth/signup'} className='font-[500] hover:underline '>Sign Up</Link></div>
+      <Link href={'/auth/reset'} className='w-full text-sm opacity-75 text-center hover:underline'>Forgot your password &#63;</Link>
       </>
     }
     </div>
