@@ -121,7 +121,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured! 124"
+        title: "Some Error Ocuured!"
       });
 
     }
@@ -163,7 +163,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured! 166"
+        title: "Some Error Ocuured!"
       });
     }
   };
@@ -189,7 +189,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured! 192"
+        title: "Some Error Ocuured!"
       });
     }
   };
@@ -221,7 +221,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured! 224"
+        title: "Some Error Ocuured!"
       });
     }
   };
@@ -248,7 +248,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured! 251"
+        title: "Some Error Ocuured!"
       });
     }
   };
@@ -291,7 +291,7 @@ const Upload = () => {
       }else{
         return toast({
           variant: 'destructive',
-          title: "Some Error Occured! 294"
+          title: "Some Error Occured!"
         })
       }
       
@@ -299,7 +299,7 @@ const Upload = () => {
       console.log(error);
       toast({
         variant: 'destructive',
-        title: "Some Error Occured! 302"
+        title: "Some Error Occured!"
       });
     }
   }

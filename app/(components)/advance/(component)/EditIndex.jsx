@@ -104,16 +104,16 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
     return (
 
         <div className='w-full space-y-10 break-words'>
-            <h1 className='text-lg font-[600]'>{connectorDetails.name}</h1>
+            <h1 className='text-lg font-[600]'>{connectorDetails?.name}</h1>
             <div className='w-full flex justify-around'>
-                <Button className={cn(`${body.current.connector.disabled ? 'bg-[#14B8A6] hover:bg-[#14B8A6]' : 'bg-red-500 hover:bg-red-500'} hover:opacity-75`)} onClick={()=> disableConnector(body)}>{body.current.connector.disabled ? 'Re-Enable' : 'Disable'}</Button>
+                <Button className={cn(`${body?.current?.connector?.disabled ? 'bg-[#14B8A6] hover:bg-[#14B8A6]' : 'bg-red-500 hover:bg-red-500'} hover:opacity-75`)} onClick={()=> disableConnector(body)}>{body.current.connector.disabled ? 'Re-Enable' : 'Disable'}</Button>
                 <TooltipProvider >
                     <Tooltip>
                         <TooltipTrigger asChild>
-                            <Button variant={'destructive'} className={cn(connectorDetails?.connector.disabled ? 'cursor-pointer ' : 'cursor-not-allowed opacity-50')} onClick={()=> deleteConnector(body)}>Delete</Button>
+                            <Button variant={'destructive'} className={cn(connectorDetails?.connector?.disabled ? 'cursor-pointer ' : 'cursor-not-allowed opacity-50')} onClick={()=> deleteConnector(body)}>Delete</Button>
                             
                         </TooltipTrigger>
-                        {!connectorDetails?.connector.disabled && <TooltipContent className={cn('w-[60%] m-auto text-justify bg-gray-500 text-white opacity-90')}>
+                        {!connectorDetails?.connector?.disabled && <TooltipContent className={cn('w-[60%] m-auto text-justify bg-gray-500 text-white opacity-90')}>
                                 <p className='text-sm leading-5 font-[400]'>You Must Disabled the connector first before deleting it</p>
                         </TooltipContent>}
                     </Tooltip>
