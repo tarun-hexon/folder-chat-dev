@@ -73,13 +73,13 @@ useEffect(() => {
       setLoading(false)
       // router.push('/chat/new')
     } else {
-      router.push('/signup')
+      router.push('/auth/signup')
     }
 
   }
   else {
     setLoading(false)
-    router.push('/login')
+    router.push('/auth/login')
   }
   // setTimeout(()=> {
     // if(folderId === '' || folderId === null){

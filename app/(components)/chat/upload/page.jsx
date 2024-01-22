@@ -331,7 +331,7 @@ const Upload = () => {
         })
       });
       setContext({ name: '', description: '' })
-      await updatetDataInDB(newArr)
+      await updatetDataInDB(docSetid)
     } catch (error) {
       console.log(error)
     }
@@ -431,7 +431,7 @@ const Upload = () => {
     // console.log(data)
     // console.log(error)
     setExistConnector(data[0]?.connect_id);
-    setUploading(false)
+    // setUploading(false)
   };
 
   async function updatetDataInConTable(exConn, newData) {
@@ -447,7 +447,7 @@ const Upload = () => {
     // console.log(data)
     // console.log(error)
     setExistConnector(data[0]?.connect_id);
-    setUploading(false)
+    //setUploading(false)
   };
 
   async function indexingStatus(f_id) {

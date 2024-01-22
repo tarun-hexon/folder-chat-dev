@@ -26,13 +26,13 @@ export default function RootLayout({ children }) {
           if (session) {
             if (!session?.user?.user_metadata?.onBoarding) {
               
-              router.push('/signup')
+              router.push('/auth/signup')
             }else{
               setLoading(false)
             }
           }
           else {
-            router.push('/login')
+            router.push('/auth/login')
           }
         });
       };

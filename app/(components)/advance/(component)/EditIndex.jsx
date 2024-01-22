@@ -13,7 +13,7 @@ import { fetchConnectorStatus } from '../../../../lib/helpers';
 import { useToast } from '../../../../components/ui/use-toast';
 
 
-const EditIndex = ({ cc_pair_id }) => {
+const EditIndex = ({ cc_pair_id, setOpen }) => {
     const { toast } = useToast();
    
     const [connectorDetails, setConnectorDetails] = useState(null);
@@ -80,10 +80,12 @@ const EditIndex = ({ cc_pair_id }) => {
             })
             });
             const json = await data.json();
-            return toast({
+            toast({
                 variant:'default',
                 description:'Connector Deleted Successfully!'
-              })
+            })
+            setOpen(false);
+            return null
             console.log(json)
             
         } catch (error) {

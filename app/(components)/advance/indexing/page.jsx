@@ -108,7 +108,7 @@ const Indexing = () => {
                         <div id='dialog'></div>
                     </DialogTrigger>
                     <DialogContent>
-                        <EditIndex cc_pair_id={ccPairId}/>
+                        <EditIndex cc_pair_id={ccPairId} setOpen={setOpen}/>
                     </DialogContent>
                 </Dialog>
             </div>

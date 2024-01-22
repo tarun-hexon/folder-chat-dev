@@ -172,7 +172,10 @@ const MyProfile = () => {
         }
     };
 
-
+    async function deleteUser(){
+        return null
+        await supabase.auth.admin.deleteUser(session?.user?.id);
+    }
 
     return (
         <div className='w-full p-6 font-Inter flex flex-col gap-5'>
@@ -364,7 +367,7 @@ const MyProfile = () => {
                             </AlertDialogHeader>
                             <AlertDialogFooter>
                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                <AlertDialogAction className='bg-[#14B8A6] hover:bg-[#14B8A6] hover:opacity-75'>Continue</AlertDialogAction>
+                                <AlertDialogAction className='bg-[#14B8A6] hover:bg-[#14B8A6] hover:opacity-75' onClick={()=> deleteUser()}>Continue</AlertDialogAction>
                             </AlertDialogFooter>
 
                         </AlertDialogContent>
