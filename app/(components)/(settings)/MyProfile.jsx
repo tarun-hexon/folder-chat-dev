@@ -173,7 +173,7 @@ const MyProfile = () => {
     };
 
     async function deleteUser(){
-        return null
+        // return null
         await supabase.auth.admin.deleteUser(session?.user?.id);
     }
 

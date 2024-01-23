@@ -248,12 +248,12 @@ const FolderCard = ({ fol, doc, folder }) => {
     }
 
     async function getDocSetDetails(){
-        
+        console.log('docset')
         let { data: document_set, error } = await supabase
           .from('document_set')
           .select("*")
           .eq('folder_id', fol.id)
-          
+          console.log(document_set)
           if(document_set?.length > 0){
             setDocumentSet(document_set)
             
@@ -266,7 +266,7 @@ const FolderCard = ({ fol, doc, folder }) => {
 
     useEffect(() => {
         getChatFiles();
-        getDocSetDetails()
+        getDocSetDetails();
 
     }, [chatHistory, chatTitle, id]);
 
@@ -283,9 +283,6 @@ const FolderCard = ({ fol, doc, folder }) => {
         }
     }, [chat_id]);
 
-    // useEffect(() => {
-    //     console.log(chatSessionID)
-    // }, [chatSessionID]);
     return (
 
         <Accordion type="single" collapsible defaultValue={folderId}>

@@ -16,11 +16,11 @@ const Chat = () => {
         if (session?.user?.user_metadata?.onBoarding) {
           router.push('/chat/new')
         } else {
-          router.push('/signup')
+          router.push('/auth/signup')
         }
       }
       else {
-        router.push('/login')
+        router.push('/auth/login')
       }
     }, []);
 

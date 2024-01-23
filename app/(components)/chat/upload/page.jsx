@@ -397,7 +397,7 @@ const Upload = () => {
 
       if (id) {
 
-        //await insertDataInDB(newArr, `${context.name}-${session?.user?.email.split('@')[0]}`, id, context.c_name)
+        
         const { data, error } = await supabase
           .from('document_set')
           .insert(
