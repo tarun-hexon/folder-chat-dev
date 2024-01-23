@@ -80,7 +80,7 @@ const Indexing = () => {
                         </TableRow>
                     </TableHeader>
                     <TableBody className='w-full'>
-                    {loading && <div className='w-full text-start p-2'>Loading...</div>}
+                    {loading && <p className='w-full text-start p-2'>Loading...</p>}
                         {tableData?.map((item) => {
                             return (
                                 

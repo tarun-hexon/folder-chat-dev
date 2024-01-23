@@ -9,7 +9,7 @@ import { useAtom } from 'jotai';
 import { folderAtom,  showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../../store';
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
-import { Pencil, Trash2, Check, X } from 'lucide-react';
+import { Pencil, Trash2, Check, X, MessageSquare } from 'lucide-react';
 import { AdvanceMenu } from './index'
 import supabase from '../../../config/supabse';
 import { isUserExist } from '../../../config/lib';
@@ -91,10 +91,11 @@ const FolderCard = ({ fol, doc, folder }) => {
         for (let i = 0; i < files?.length; i++) {
             await deleteChatsBySessionId(files[i]?.session_id)
         }
-        await supabase
-            .from('connectors')
-            .delete()
-            .eq('folder_id', fol_id);
+
+        // await supabase
+        //     .from('connectors')
+        //     .delete()
+        //     .eq('folder_id', fol_id);
 
         
 
@@ -194,7 +195,7 @@ const FolderCard = ({ fol, doc, folder }) => {
     };
 
     async function deleteDocSetFile(ccID, fol_id) {
-        console.log(ccID, fol_id)
+        // console.log(ccID, fol_id)
         
         const allPairIds = [...documentSet[0]?.cc_pair_id]
         const allNames = [...documentSet[0]?.c_name]
@@ -208,7 +209,11 @@ const FolderCard = ({ fol, doc, folder }) => {
         
         // console.log(allNames)
         // return null
-        const { data, error } = await supabase
+        
+        
+        if(allPairIds?.length > 0){
+
+            const { data, error } = await supabase
             .from('document_set')
             .update({ 'cc_pair_id': allPairIds, "c_name": allNames })
             .eq('folder_id', fol_id)
@@ -219,8 +224,6 @@ const FolderCard = ({ fol, doc, folder }) => {
             }else{
                 setDocumentSet([])
             };
-        
-        if(allPairIds?.length > 0){
 
             await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
                 method: 'PATCH',
@@ -236,6 +239,13 @@ const FolderCard = ({ fol, doc, folder }) => {
               
         }else if(allPairIds?.length === 0){
 
+            const { data, error } = await supabase
+            .from('document_set')
+            .delete()
+            .eq('folder_id', fol_id);
+
+            setDocumentSet([])
+
             await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set/${documentSet[0]?.doc_set_id}`, {
                 method: "DELETE",
                 headers: {
@@ -248,12 +258,12 @@ const FolderCard = ({ fol, doc, folder }) => {
     }
 
     async function getDocSetDetails(){
-        console.log('docset')
+        
         let { data: document_set, error } = await supabase
           .from('document_set')
           .select("*")
           .eq('folder_id', fol.id)
-          console.log(document_set)
+
           if(document_set?.length > 0){
             setDocumentSet(document_set)
             
@@ -379,8 +389,10 @@ const FolderCard = ({ fol, doc, folder }) => {
                                 return (
                                     <Link href={`/chat/${data.session_id}`} key={data.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100 ${chat_id === data.session_id ? 'bg-slate-200' : ''}`} onClick={() => handleFilessOnclick(data)}>
                                         <div className='inline-flex gap-1 items-center'>
-                                            {/* <MessageSquare size={'1rem'} className='hover:cursor-pointer' /> */}
-                                            <span className={`font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis ${isRenamingChat && chat_id === data.session_id ? 'hidden' : ''} `} >{data?.chat_title || 'New Chat'}</span>
+                                            <div>
+                                            <MessageSquare color='#14B8A6' size={'1rem'} className='hover:cursor-pointer' />
+                                            </div>
+                                            <span className={`w-full font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis ${isRenamingChat && chat_id === data.session_id ? 'hidden' : ''} `} >{data?.chat_title || 'New Chat'}</span>
                                             {isRenamingChat ?
                                                 chat_id === data.session_id && <input type='text' value={inputChatName} onChange={(e) => setInputChatName(e.target.value)} className='rounded-md px-1 w-[90%]' />
                                                 : null

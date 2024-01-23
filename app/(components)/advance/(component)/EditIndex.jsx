@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { DialogContent } from '../../../../components/ui/dialog';
 import { cn } from '../../../../lib/utils';
+import supabase from '../../../../config/supabse';
 import { Loader2 } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import {
@@ -11,12 +12,15 @@ import {
 } from "../../../../components/ui/tooltip"
 import { fetchConnectorStatus } from '../../../../lib/helpers';
 import { useToast } from '../../../../components/ui/use-toast';
+import { sessionAtom } from '../../../store';
+import { useAtom } from 'jotai';
 
 
 const EditIndex = ({ cc_pair_id, setOpen }) => {
     const { toast } = useToast();
-   
+    const [session, setSession] = useAtom(sessionAtom)
     const [connectorDetails, setConnectorDetails] = useState(null);
+    const [userConnectorId, setUserConnectorId] = useState([]);
     const body = useRef(null)
 
     async function connectorStatus(id) {
@@ -30,6 +34,19 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
         }
     };
 
+    async function getConnectotsID(){
+    
+        const { data, error } = await supabase
+        .from('connectors')
+        .select('connect_id')
+        .eq('user_id', session?.user?.id);
+        
+        if(data?.length > 0){
+            // console.log(data)
+            setUserConnectorId(data[0]?.connect_id)
+        }
+        return []
+    };
     async function disableConnector(bodyData){
         bodyData.current.connector.disabled = !bodyData.current.connector.disabled
         
@@ -67,6 +84,7 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
         }
     }
     async function deleteConnector(bodyData){
+
         if(!bodyData.current.connector.disabled) return null
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/deletion-attempt`, {
@@ -80,6 +98,17 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
             })
             });
             const json = await data.json();
+
+            let exConn = [...userConnectorId]
+            const index = exConn.indexOf(bodyData?.current?.connector?.id);
+            exConn.splice(index, 1)
+            
+            await supabase
+            .from('connectors')
+            .update({ 'connect_id': exConn })
+            .eq('user_id', session?.user?.id);
+            
+
             toast({
                 variant:'default',
                 description:'Connector Deleted Successfully!'
@@ -93,8 +122,8 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
     }
     
     useEffect(() => {
-        
         connectorStatus(cc_pair_id)
+        getConnectotsID()
     }, []);
 
     if (connectorDetails === null) {

@@ -15,6 +15,10 @@ import webB from '../public/assets/Danswer-web-B.svg'
 import slackIconB from '../public/assets/Danswer-slack-B.svg'
 import confluenceIconB from '../public/assets/Danswer-confluence-B.svg'
 import gitIconB from '../public/assets/Danswer-github-B.svg';
+import pdfIcon from '../public/assets/pdf.svg'
+import docIcon from '../public/assets/doc.svg'
+import xlsIcon from '../public/assets/xls.svg'
+
 
 export const selectOptions = [
     {
@@ -275,7 +279,15 @@ export function iconSelector(icon){
       return slackIconB
   }else if(icon === "confluence"){
       return confluenceIconB
-  }else{
+  }else if(icon === "pdf"){
+    return pdfIcon
+  }else if(icon === "xls"){
+      return xlsIcon
+  }else if(icon === "doc"){
+      return docIcon
+  }else if(icon === "drive"){
       return gDriveIconB
   }
 };
+
+

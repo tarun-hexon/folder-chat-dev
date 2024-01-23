@@ -93,7 +93,7 @@ const Files = () => {
         const { data, error } = await supabase
         .from('connectors')
         .insert(
-          { 'connect_id': newData, 'user_id' : session.user.id },
+          { 'connect_id': newData, 'user_id' : session?.user?.id },
         )
         .select()
         // console.log(data)
@@ -203,54 +203,7 @@ const Files = () => {
         }
     };
 
-    // async function getAllExistingConnector() {
-    //     try {
-    //         const data = await fetchAllConnector();
-
-    //         //calling api bcoz soetimes local state is not updating
-    //         //const allConID = await readData();
-
-    //         const currentConnector = data.filter((item)=> { if(allConID?.includes(item?.id)) return item });
-
-    //         const filData = currentConnector.filter((item)=> item.source === 'file');
-
-    //         if(filData.length > 0){
-    //             setFiles(filData)
-    //         };
-    //         setLoading(false)
-            
-    //     } catch (error) {
-    //         console.log(error)
-    //         setLoading(false)
-    //     }
-    // };
-
-    // async function readData(){
-    //     try {
-    //         // const id = await getSess();
-    //         const { data, error } = await supabase
-    //         .from('connectors')
-    //         .select('connect_id')
-    //         .eq('user_id', session?.user?.id);
-    //         if(error){
-    //             throw error
-    //         }else{
-                
-    //             if(data.length > 0){
-    //                 setExistConnector(data[0]?.connect_id)
-    //                 return data[0]?.connect_id
-    //             }else{
-    //                 setExistConnector([])
-    //                 return []
-    //             }
-    //         }
-            
-    //     } catch (error) {
-    //         setExistConnector([])
-    //         console.log(error)
-    //     }
-    // };
-
+    
     async function deleteConnector(id1, id2){
         return null
         try {

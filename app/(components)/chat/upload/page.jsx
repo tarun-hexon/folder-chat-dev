@@ -600,6 +600,7 @@ const Upload = () => {
     } else {
       setDocumentSet([])
     }
+    setLoading(false)
   }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
@@ -608,9 +609,10 @@ const Upload = () => {
 
     if (folder === null || folder?.length === 0) {
       router.push('/chat/new')
-    } else {
-      setLoading(false)
-    }
+    } 
+    // else {
+    //   setLoading(false)
+    // }
 
   }, [folder]);
 
@@ -645,8 +647,9 @@ const Upload = () => {
   return (
     <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5 sticky top-0 self-start p-10 min-h-screen'>
       {uploading ?
-        <div className={`w-[70%] border flex justify-center items-center bg-[#EFF5F5] p-32`}>
+        <div className={`w-[70%] border flex justify-center items-center bg-[#EFF5F5] p-32 gap-2`}>
           <Loader className='animate-spin' />
+          <p className='font-[500] text-sm leading-5'>Please wait... We are processing your document it will take some time.</p>
         </div>
         :
         <div className='w-[70%] p-5 flex flex-col justify-center items-center gap-2 rounded-md shadow-black shadow-sm'>
@@ -685,13 +688,13 @@ const Upload = () => {
                 className={`w-full border rounded-md flex flex-col justify-center items-center bg-[#EFF5F5] py-5 ${isDragActive ? 'opacity-50' : ''} shadow-md`}
                 {...getRootProps()}
               >
-                <input {...getInputProps()} multiple accept=".pdf, .zip, .txt, .md, .mdx" required />
+                <input {...getInputProps()} multiple accept=".pdf, .zip, .txt, .md, .mdx, .docx, .doc" required />
 
                 <Image src={uploadIcon} alt='upload' />
                 <div className='w-full text-center'>
                   <p className='font-[400] leading-6 text-[15px] opacity-[80%]'>Click to upload or drag and drop</p>
                   <p className='opacity-[50%] text-sm leading-6'>PDF & TXT</p>
-                  <p className='opacity-[50%] text-sm leading-6'>Max Size 1MB</p>
+                  {/* <p className='opacity-[50%] text-sm leading-6'>Max Size 1MB</p> */}
                 </div>
 
                 {/* <div

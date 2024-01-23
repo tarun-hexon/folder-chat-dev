@@ -17,7 +17,7 @@ import { NewFolder } from '../../(dashboard)'
 import { useRouter } from 'next/navigation'
 import { getSess } from '../../../../lib/helpers'
 import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../components/ui/dialog'
-import { Input } from '../../../../components/ui/input';
+import pdfIcon from '../../../../public/assets/pdf.svg'
 import { Button } from '../../../../components/ui/button';
 import { Label } from '../../../../components/ui/label'
 import { cn } from '../../../../lib/utils'
@@ -595,80 +595,7 @@ const ChatWindow = () => {
 
     }
 
-    // async function isDocSetExist(folder_id) {
-    //     if (!folder_id || folder_id === 'undefined') {
-    //         setLoading(false);
-    //         return null
-    //     }
-    //     // console.log(folder_id)
-    //     try {
-    //         let { data: document_set, error } = await supabase
-    //             .from('document_set')
-    //             .select('*')
-    //             .eq('folder_id', folder_id);
-    //         if (error) {
-    //             console.log(error)
-    //             return toast({
-    //                 variant: 'destructive',
-    //                 title: "Some Error Occured While Fetching Context List"
-    //             });
-    //         }
-
-    //         if (document_set.length === 0) {
-    //             // console.log(document_set);
-    //             if (!folderId) {
-    //                 setFolderId(folder_id)
-    //             }
-    //             setDocumentSet([])
-    //             router.push('/chat/upload');
-
-    //         } else {
-    //             setLoading(false);
-    //             setDocumentSet(document_set);
-    //             setSelectedDoc(document_set[0]?.cc_pair_id)
-    //             return document_set[0]?.cc_pair_id
-
-    //         }
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // };
-
-    // async function indexingStatus(f_id) {
-    //     if(folder?.length === 0){
-    //         setLoading(false)
-    //         return null
-    //     }
-    //     try {
-    //         const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
-    //         const json = await data.json();
-    //         // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
-    //         // const dbData = await readDataFromDB();
-    //         let allConID = await isDocSetExist(f_id);
-    //         if (!allConID) {
-    //             allConID = []
-    //         }
-
-    //         // console.log(allCC)
-    //         if (allConID?.length) {
-    //             // console.log(json)
-    //             let cc_p_id = []
-    //             for (const cc_id of json) {
-    //                 if (allConID?.includes(cc_id?.cc_pair_id)) {
-    //                     cc_p_id.push(cc_id)
-    //                 };
-
-    //             };
-    //             // console.log(cc_p_id, '549')
-    //             setExistConnectorDetails(cc_p_id)
-    //             return cc_p_id
-    //         }
-    //     } catch (error) {
-    //         console.log(error)
-
-    //     }
-
-    // };
+    
 
     async function getDocSetDetails(folder_id){
         
@@ -687,22 +614,7 @@ const ChatWindow = () => {
           setLoading(false)
       }
 
-    // async function readDataFromDB(){
-
-    //     const { data, error } = await supabase
-    //     .from('connectors')
-    //     .select('connect_id')
-    //     .eq('user_id', session?.user?.id);
-
-    //     if(data.length > 0){
-    //         let arr = []
-    //         for(const val of data){
-    //             arr.push(...val.connect_id)
-    //         };
-    //         return arr
-    //     }
-    //     return []
-    // };
+    
 
     useEffect(() => {
         resizeTextarea();
@@ -753,33 +665,34 @@ const ChatWindow = () => {
                             <Image src={plus} alt='add' title='Add Documents' />
                         </Link>
                         :
-                        
-                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen)}}>
-                            <DialogTrigger asChild>
-                                <Image src={editIcon} alt='edit' title='edit' onClick={() => {getDocSetDetails(folderId);setDocSetOpen(true)}} />
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader className='mb-2'>
-                                    <DialogTitle>
-                                        Remove Documents from {documentSet[0]?.doc_set_name?.split('-')[0]}
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
-                                <div className='flex w-full flex-wrap gap-1'>
+                        null
+                        // <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen)}}>
+                        //     <DialogTrigger asChild>
+                        //         <Image src={editIcon} alt='edit' title='edit' onClick={() => {getDocSetDetails(folderId);setDocSetOpen(true)}} />
+                        //     </DialogTrigger>
+                        //     <DialogContent>
+                        //         <DialogHeader className='mb-2'>
+                        //             <DialogTitle>
+                        //                 Remove Documents from {documentSet[0]?.doc_set_name?.split('-')[0]}
+                        //             </DialogTitle>
+                        //         </DialogHeader>
+                        //         <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
+                        //         <div className='flex w-full flex-wrap gap-1'>
 
-                                    {documentSet[0]?.cc_pair_id?.length > 0 &&
-                                        documentSet[0]?.cc_pair_id?.map((connector, idx) =>
-                                            <div key={connector} className='flex items-center gap-2 justify-center px-2'>
-                                                <input type="checkbox" value={connector} id={connector} checked={selectedDoc.includes(connector)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector} >{documentSet[0]?.c_name[idx]}</label>
-                                            </div>)
-                                    }
-                                </div>
-                                <DialogFooter className={cn('w-full')}>
-                                    <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet(selectedDoc, inputDocDes)}>Remove</Button>
-                                </DialogFooter>
+                        //             {documentSet[0]?.cc_pair_id?.length > 0 &&
+                        //                 documentSet[0]?.cc_pair_id?.map((connector, idx) =>
+                        //                     <div key={connector} className='flex items-center gap-2 justify-center px-2'>
+                        //                         <input type="checkbox" value={connector} id={connector} checked={selectedDoc.includes(connector)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector} >{documentSet[0]?.c_name[idx]}</label>
+                        //                     </div>)
+                        //             }
+                        //         </div>
+                        //         <DialogFooter className={cn('w-full')}>
+                        //             <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet(selectedDoc, inputDocDes)}>Remove</Button>
+                        //         </DialogFooter>
 
-                            </DialogContent>
-                        </Dialog>)
+                        //     </DialogContent>
+                        // </Dialog>
+                        )
                     }
                 </div>
 
@@ -900,7 +813,7 @@ const ChatWindow = () => {
                                                 {msg?.source?.source_type !== 'file' ?
                                                 <a href={msg?.source?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(msg?.source?.source_type)} alt={msg?.source?.source_type} />{msg?.source?.semantic_identifier}</a>
                                                 :
-                                                <div className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-default flex gap-1'><Image src={iconSelector(msg?.source?.source_type)} alt={msg?.source?.source_type} />{msg?.source?.semantic_identifier}</div>
+                                                <div className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-default flex gap-1'><Image src={iconSelector(msg?.source?.semantic_identifier.split('.')[1])} alt={msg?.source?.source_type} />{msg?.source?.semantic_identifier}</div>
                                                 }
                                         </div>}
                                     </div>
