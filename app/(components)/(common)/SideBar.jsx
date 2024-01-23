@@ -522,18 +522,18 @@ const SideBar = () => {
     async function getFolders() {
         try {
 
-            const wkID = await isUserExist('workspaces', 'id', 'created_by', session.user.id);
+            const wkID = await isUserExist('workspaces', 'id', 'created_by', session?.user?.id);
             let { data: folders, error } = await supabase
                 .from('folders')
                 .select('*')
-                .eq('workspace_id', wkID[0].id);
+                .eq('workspace_id', wkID[0]?.id);
             if (folders.length > 0) {
 
                 const lastFolder = folders[folders.length - 1];
-                if (folder?.length === 0) {
-                    setFolderId(lastFolder?.id)
-                }
-                // setFolderId(lastFolder?.id)
+                // if (folder?.length === 0) {
+                //     setFolderId(lastFolder?.id)
+                // }
+                setFolderId(lastFolder?.id)
                 if (!folderId && !localStorage.getItem('chatSessionID')) {
                     localStorage.setItem('lastFolderId', lastFolder?.id)
                 }

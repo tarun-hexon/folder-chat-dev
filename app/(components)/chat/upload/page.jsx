@@ -10,8 +10,7 @@ import { existConnectorDetailsAtom, folderAtom, folderIdAtom, sessionAtom, docum
 import { useToast } from '../../../../components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 import supabase from '../../../../config/supabse';
-import { Loader, Loader2, XCircle } from 'lucide-react';
-
+import { Loader, Loader2, X } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import { cn } from '../../../../lib/utils';
 import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../components/ui/dialog'
@@ -36,7 +35,7 @@ const Upload = () => {
   const router = useRouter()
   const [context, setContext] = useState({
     name: '',
-    c_name: '',
+    c_name:'',
     description: ''
   })
   const { toast } = useToast();
@@ -44,7 +43,7 @@ const Upload = () => {
   const onDrop = (acceptedFiles) => {
 
     if (acceptedFiles && acceptedFiles.length > 0) {
-
+      
       acceptedFiles?.map((file, index) => {
 
         const fileType = file?.name?.split('.')[1]
@@ -57,18 +56,18 @@ const Upload = () => {
 
         //   return null
         // }
-        // const maxSize = 1024 * 1024
-        // if (file.size > maxSize) {
-        //   toast({
-        //     variant: 'destructive',
-        //     title: "File size exceeded!"
-        //   });
-        // };
-        // const file = acceptedFiles[index];
+      // const maxSize = 1024 * 1024
+      // if (file.size > maxSize) {
+      //   toast({
+      //     variant: 'destructive',
+      //     title: "File size exceeded!"
+      //   });
+      // };
+      // const file = acceptedFiles[index];
 
         setFiles((prev) => [...prev, file])
       })
-
+      
         ;
     } else {
       // console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
@@ -92,7 +91,7 @@ const Upload = () => {
         variant: 'destructive',
         title: "Write a valid name for files identification!"
       });
-    }
+    } 
     if (context.name.split('-').length > 1) {
       return toast({
         variant: 'destructive',
@@ -116,11 +115,11 @@ const Upload = () => {
     setUploading(true)
     try {
       const formData = new FormData();
-
+      
       files?.forEach((file) => {
         formData.append("files", file);
       });
-
+      
       // console.log(formData)
       const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/file/upload`, {
         method: "POST",
@@ -298,7 +297,7 @@ const Upload = () => {
       const id = await res.json();
 
       if (id) {
-
+        
         await insertDataInDB(docSetid, `${set_name}-${session?.user?.email.split('@')[0]}`, id, context.c_name)
         setContext({ name: '', c_name: '', description: '' })
       } else {
@@ -328,7 +327,7 @@ const Upload = () => {
         docSetid.push(pair_id?.cc_pair_id);
       }
     };
-
+    
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
         method: 'PATCH',
@@ -341,9 +340,9 @@ const Upload = () => {
           "cc_pair_ids": docSetid
         })
       });
-
-      await updateDataInDB(docSetid, context.c_name)
-      setContext({ name: '', description: '', c_name: '' })
+      
+      await updatetDataInDB(docSetid, context.c_name)
+      setContext({ name: '', description: '', c_name:'' })
     } catch (error) {
       console.log(error)
     }
@@ -395,7 +394,7 @@ const Upload = () => {
       const id = await res.json();
 
       if (id) {
-
+        
         await insertDataInDB(newArr, `${set_name}-${session?.user?.email.split('@')[0]}`, id, context.c_name)
         setContext({ name: '', c_name: '', description: '' })
         setD_open(false)
@@ -418,7 +417,7 @@ const Upload = () => {
   async function updateDocumentSetInServer2(db_id, ccID, des) {
 
     let newArr = documentSet[0]?.cc_pair_id
-
+    
     for (let i = 0; i < ccID?.length; i++) {
       if (newArr.indexOf(ccID[i]) < 0) {
         newArr.push(ccID[i])
@@ -440,9 +439,9 @@ const Upload = () => {
           "cc_pair_ids": newArr
         })
       });
-
-      await updateDataInDB(newArr, context.c_name);
-      setContext({ name: '', description: '', c_name: '' })
+      
+      await updatetDataInDB(newArr, context.c_name);
+      setContext({ name: '', description: '', c_name:'' })
       setD_open(false)
     } catch (error) {
       console.log(error)
@@ -460,7 +459,7 @@ const Upload = () => {
           'folder_id': folderId,
           'doc_set_name': doc_name,
           'doc_set_id': doc_id,
-          'c_name': c_name
+          'c_name':[c_name]
         },
       )
       .select()
@@ -478,58 +477,37 @@ const Upload = () => {
     }
   };
 
-  async function updateDataInDB(newData, name) {
-    
-        // Combine existing data with new data
-        const newData1 = [...documentSet[0].c_name, name] ;
+  async function updatetDataInDB(newData, name) {
+    // console.log(exConn, newData, folderId)
+    let names = []
+    if(documentSet[0]?.c_name?.length > 0){
+      names = [...documentSet[0]?.c_name, name]
 
-        // Update the record with the combined data
-        const { data: updatedData, error: updateError } = await supabase
-          .from('document_set')
-          .update({'cc_pair_id': newData, 'c_name':newData1})
-          .eq('folder_id', folderId)
-          .select();
+      // names.push(name)
+    }else{
+      names = [...documentSet[0]?.c_name, name]
+      // names.push(documentSet[0]?.c_name)
+      // names.push(name)
+    }
+    // console.log(names)
+    const { data, error } = await supabase
+      .from('document_set')
+      .update(
+        { 'cc_pair_id': newData, 'c_name':names},
+      )
+      .eq('folder_id', folderId)
+      .select()
 
-        if (updateError) {
-          console.error('Error updating record:', updateError.message);
-        } else {
-          setDocumentSet(updatedData);
-          //await indexingStatus(folderId)
-          toast({
-            variant: 'default',
-            title: "File Uploaded!"
-          });
-          router.push('/chat/new')
-          setUploading(false)
-          console.log('Record updated successfully:', updatedData);
-        }
-    
-    // let names = []
-
-    // if (documentSet[0]?.c_name?.length > 0) {
-    //   names = [...documentSet[0]?.c_name, name]
-    // } else {
-    //   names = [name]
-    // }
-
-    // const { data, error } = await supabase
-    //   .from('document_set')
-    //   .update(
-    //     { 'cc_pair_id': newData, 'c_name': names },
-    //   )
-    //   .eq('folder_id', folderId)
-    //   .select()
-
-    // if (data?.length) {
-    //   setDocumentSet(data);
-    //   //await indexingStatus(folderId)
-    //   toast({
-    //     variant: 'default',
-    //     title: "File Uploaded!"
-    //   });
-    //   router.push('/chat/new')
-    //   setUploading(false)
-    // }
+    if (data?.length) {
+      setDocumentSet(data);
+      //await indexingStatus(folderId)
+      toast({
+        variant: 'default',
+        title: "File Uploaded!"
+      });
+      router.push('/chat/new')
+      setUploading(false)
+    }
   };
 
   async function insertDataInConTable(newData) {
@@ -555,7 +533,7 @@ const Upload = () => {
         { 'connect_id': allConn },
       )
       .eq('user_id', session?.user?.id)
-
+      
     // console.log(data)
     // console.log(error)
     // setExistConnector(data[0]?.connect_id);
@@ -678,28 +656,28 @@ const Upload = () => {
               <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>This folder is empty</p>
               <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Upload a document to start</p>
             </div>}
-          {documentSet?.length === 0 ?
-            <div className='w-full text-start space-y-2 '>
-              <div>
-                <Label className='text-start' htmlFor='context'>Name</Label>
-                <Input type='text' placeholder='Write a name to identify your files' id='context' value={context.c_name} onChange={(e) => setContext({ ...context, 'c_name': e.target.value })} />
-              </div>
-              <div>
-                <Label className='text-start' htmlFor='context'>Name of Context</Label>
-                <Input type='text' placeholder='Name Should Be Unique' id='context' value={context.name} onChange={(e) => setContext({ ...context, 'name': e.target.value })} />
-              </div>
-
-              <div>
-                <Label className='text-start' htmlFor='context'>Description</Label>
-                <Input type='text' placeholder='write a short description' id='context' value={context?.description} onChange={(e) => setContext({ ...context, description: e.target.value })} />
-              </div>
-            </div> :
-            <div className='w-full text-start space-y-2 mb-2'>
-
+          {documentSet?.length === 0 ? 
+          <div className='w-full text-start space-y-2 '>
+            <div>
               <Label className='text-start' htmlFor='context'>Name</Label>
               <Input type='text' placeholder='Write a name to identify your files' id='context' value={context.c_name} onChange={(e) => setContext({ ...context, 'c_name': e.target.value })} />
-
             </div>
+            <div>
+              <Label className='text-start' htmlFor='context'>Name of Context</Label>
+              <Input type='text' placeholder='Name Should Be Unique' id='context' value={context.name} onChange={(e) => setContext({ ...context, 'name': e.target.value })} />
+            </div>
+             
+            <div>
+              <Label className='text-start' htmlFor='context'>Description</Label>
+              <Input type='text' placeholder='write a short description' id='context' value={context?.description} onChange={(e) => setContext({ ...context, description: e.target.value })} />
+            </div>
+          </div>:
+          <div className='w-full text-start space-y-2 mb-2'>
+            
+              <Label className='text-start' htmlFor='context'>Name</Label>
+              <Input type='text' placeholder='Write a name to identify your files' id='context' value={context.c_name} onChange={(e) => setContext({ ...context, 'c_name': e.target.value })} />
+            
+          </div>
           }
 
           {files.length === 0 ?
@@ -708,7 +686,7 @@ const Upload = () => {
                 className={`w-full border rounded-md flex flex-col justify-center items-center bg-[#EFF5F5] py-5 ${isDragActive ? 'opacity-50' : ''} shadow-md`}
                 {...getRootProps()}
               >
-                <input {...getInputProps()} multiple accept=".pdf, .zip, .txt, .md, .mdx" required />
+                <input {...getInputProps()} multiple accept=".pdf, .zip, .txt, .md, .mdx" required/>
 
                 <Image src={uploadIcon} alt='upload' />
                 <div className='w-full text-center'>
@@ -728,9 +706,9 @@ const Upload = () => {
               </div>
               {userConnectors?.length > 0 && <div className='w-full text-sm leading-5 text-center space-y-2'>
                 <p className='font-[500]'>OR</p>
-                <Dialog open={d_open} onOpenChange={() => { setSelectedDoc(documentSet[0]?.cc_pair_id?.length > 0 ? documentSet[0]?.cc_pair_id : []); setD_open(!d_open) }} className='fixed max-h-52 overflow-x-scroll no-scrollbar' >
+                <Dialog open={d_open} onOpenChange={() => { setSelectedDoc(documentSet[0]?.cc_pair_id?.length > 0 ? documentSet[0]?.cc_pair_id : []); setD_open(!d_open)}} className='fixed max-h-52 overflow-x-scroll no-scrollbar' >
                   <DialogTrigger asChild>
-                    <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer' onClick={() => setD_open(true)}>Select From Existing Files</p>
+                    <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer' onClick={()=> setD_open(true)}>Select From Existing Files</p>
                   </DialogTrigger>
                   <DialogContent>
                     <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
@@ -752,8 +730,8 @@ const Upload = () => {
             <div className='w-full text-center space-y-4'>
               <div className='w-full border flex justify-center items-center h-20 bg-[#EFF5F5] rounded-md relative'>
 
-                {files?.map(file => <p key={file?.name} className='text-sm leading-6'>{file?.name}</p>)}
-                <XCircle size={'1rem'} className='self-start absolute top-1 right-1 hover:cursor-pointer' onClick={() => setFiles([])} />
+              {files?.map(file => <p className='text-sm leading-6'>{file?.name}</p>)}
+                <X size={'1rem'} className='self-start absolute top-1 right-1 hover:cursor-pointer' onClick={() => setFiles([])} />
               </div>
 
               <Button className={cn('bg-[#14B8A6] hover:bg-[#14B8A6] hover:opacity-80 ml-auto')} onClick={() => uploadFile(files)}>Upload</Button>

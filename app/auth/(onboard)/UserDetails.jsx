@@ -21,7 +21,8 @@ import { getSess } from '../../../lib/helpers'
 
 
 const SelectCard = (props) => {
-  const {id} = props
+  console.log(props)
+  console.log(props?.option?.title)
   const [selectedValue, setSelectedValue] = useState('');
   const [selectValue, setSelectValue] = useAtom(selectOptionAtom);
 
@@ -40,13 +41,18 @@ const SelectCard = (props) => {
 
   return (
     <div className='w-full flex flex-col text-start gap-1 select-none'>
-      <Label htmlFor={props.id} className='text-[14px] leading-[20px] font-[400] opacity-[50%]'>{props.title}</Label>
-      <Select id={props.id}  value={selectedValue} onValueChange={(e)=> handleChange(e)} className='select-none'>
+      <Label htmlFor={props?.id} className='text-[14px] leading-[20px] font-[400] opacity-[50%]'>{props?.option?.title}</Label>
+      <Select id={props?.id}  value={selectedValue} onValueChange={(e)=> handleChange(e)} className='select-none'>
         <SelectTrigger className="w-full text-black flex justify-between select-none">
           <SelectValue placeholder="Select an option"/>
         </SelectTrigger>
         <SelectContent className="w-full select-none max-h-60" >
-          {props?.option?.values?.map(value => <SelectItem key={value.value} value={value.value}>{value.value}</SelectItem>)}
+          {props?.option?.values?.map((value) => 
+
+          <SelectItem key={value.value} value={value.value}>
+            {value.value}
+          </SelectItem>
+          )}
           
         </SelectContent>
       </Select>
