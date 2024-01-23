@@ -6,16 +6,16 @@ import threeDot from '../../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../components/ui/accordion";
 import { Account, NewFolder } from '../(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom, documentSetAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom, userConnectorsAtom } from '../../store';
+import { folderAtom,  showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom } from '../../store';
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
-import { Pencil, Trash2, Check, X, MessageSquare, Loader2 } from 'lucide-react';
+import { Pencil, Trash2, Check, X } from 'lucide-react';
 import { AdvanceMenu } from './index'
 import supabase from '../../../config/supabse';
 import { isUserExist } from '../../../config/lib';
 import { useRouter } from 'next/navigation';
 import { Input } from '../../../components/ui/input';
-import { getSess } from '../../../lib/helpers';
+import fileIcon from '../../../public/assets/Danswer-doc-B.svg';
 import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
 import { Button } from '../../../components/ui/button';
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../../components/ui/alert-dialog'
@@ -30,7 +30,7 @@ const FolderCard = ({ fol, doc, folder }) => {
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
     const [files, setFiles] = useState([])
     const [chatTitle, setChatTitle] = useAtom(chatTitleAtom);
-    const router = useRouter();
+    
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [popOpen, setPopOpen] = useState(false)
     const [isRenamingChat, setIsRenamingChat] = useState(false);
@@ -40,10 +40,9 @@ const FolderCard = ({ fol, doc, folder }) => {
     const [inputChatName, setInputChatName] = useState('');
     const [folNewName, setFolNewName] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
-    const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
-    const [docSet, setDocSet] = useState([]);
-    const [dataById, setDataById] = useState([])
-    const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom)
+    const [documentSet, setDocumentSet] = useState([]);
+    
+    const router = useRouter();
     
     const current_url = window.location.href;
 
@@ -97,10 +96,7 @@ const FolderCard = ({ fol, doc, folder }) => {
             .delete()
             .eq('folder_id', fol_id);
 
-        await supabase
-            .from('document_set')
-            .delete()
-            .eq('folder_id', fol_id);
+        
 
         if (documentSet[0]?.doc_set_id) {
             await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set/${documentSet[0]?.doc_set_id}`, {
@@ -110,6 +106,10 @@ const FolderCard = ({ fol, doc, folder }) => {
                 },
             });
         }
+        await supabase
+            .from('document_set')
+            .delete()
+            .eq('folder_id', fol_id);
 
         const { error } = await supabase
             .from('folders')
@@ -122,28 +122,12 @@ const FolderCard = ({ fol, doc, folder }) => {
 
     };
 
-
     function handleFilessOnclick(data) {
+        
         setChatSessionID(data.session_id)
         setFolderId(data.folder_id)
     };
 
-    //will delete this function
-    async function getFolderId(chatid) {
-        try {
-            const { data, error } = await supabase
-                .from('chats')
-                .select('folder_id')
-                .eq('session_id', chatid);
-            if (data) {
-                // localStorage.setItem('folderId', data[0]?.folder_id)
-            } else {
-                throw error
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    };
 
     async function updateTitle(value, id, originalTitle) {
         if (value === originalTitle) {
@@ -209,73 +193,89 @@ const FolderCard = ({ fol, doc, folder }) => {
         setPopOpen(false);
     };
 
-    async function deleteDocSedFile(docName) {
+    async function deleteDocSetFile(ccID, fol_id) {
+        console.log(ccID, fol_id)
         
-        const allPairIds = docSet[0]?.cc_pair_id
-        const allNames = docSet[0]?.c_name
-        const currentID = userConnectors.filter(conn => conn?.name === docName);
-        const idxOfID = allPairIds.indexOf(currentID[0]?.cc_pair_id);
-        const idxOfName = allPairIds.indexOf(currentID[0]?.cc_pair_id);
+        const allPairIds = [...documentSet[0]?.cc_pair_id]
+        const allNames = [...documentSet[0]?.c_name]
+        const idxOfID = documentSet[0]?.cc_pair_id.indexOf(ccID);
+        // const idxOfName = documentSet[0]?.c_name.indexOf(c_name);
 
         allPairIds.splice(idxOfID, 1)
-        allNames.splice(idxOfName, 1)
+        allNames.splice(idxOfID, 1)
+
         // console.log(allPairIds)
-        // console.log(currentID)
-        // console.log(idxOfID)
-        // console.log(idxOfName, allNames)
+        
+        // console.log(allNames)
+        // return null
         const { data, error } = await supabase
             .from('document_set')
             .update({ 'cc_pair_id': allPairIds, "c_name": allNames })
-            .eq('folder_id', fol.id)
+            .eq('folder_id', fol_id)
             .select()
 
             if(data.length > 0){
-                setDocSet(data)
-            }
+                setDocumentSet(data)
+            }else{
+                setDocumentSet([])
+            };
+        
+        if(allPairIds?.length > 0){
+
+            await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+                method: 'PATCH',
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                  "id": documentSet[0]?.doc_set_id,
+                  "description": '',
+                  "cc_pair_ids": allPairIds
+                })
+              }).then((res) => console.log(res))
+              
+        }else if(allPairIds?.length === 0){
+
+            await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set/${documentSet[0]?.doc_set_id}`, {
+                method: "DELETE",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+            });
+        }
 
 
     }
 
-    
-    async function getDocSet(fol) {
-        // let ID = id === undefined ? props.fol[0].id : id
-        try {
-            const { data, error } = await supabase
-                .from('document_set')
-                .select('*')
-                .eq('folder_id', fol);
-            if (data) {
-                // console.log(data)
-                // setDocSet(data)
-                setDataById(prevData => ({...prevData, [fol]: data[0]?.c_name }));
-                // console.log(dataById)
-                // return data[0]?.c_name
-
-            } else {
-                throw error
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    };
-
-    async function allIds(){
-        for(const ele of folder){
-            await getDocSet(ele?.id)
-        }
-    }
+    async function getDocSetDetails(){
+        
+        let { data: document_set, error } = await supabase
+          .from('document_set')
+          .select("*")
+          .eq('folder_id', fol.id)
+          
+          if(document_set?.length > 0){
+            setDocumentSet(document_set)
+            
+          }else{
+            setDocumentSet([])
+            
+          }
+          
+      }
 
     useEffect(() => {
         getChatFiles();
-        // getDocSet()
+        getDocSetDetails()
 
     }, [chatHistory, chatTitle, id]);
 
-
-    // useEffect(()=> {
-    //     allIds()
-    // }, [fol])
-
+    
+    useEffect(() => {
+        
+        getDocSetDetails()
+    }, [chat_id])
+    
     useEffect(() => {
         setIsSelected(chat_id);
         if (chat_id !== 'new' && chat_id) {
@@ -450,14 +450,15 @@ const FolderCard = ({ fol, doc, folder }) => {
                                 )
                             })
                     }
-                    {/* {
-                        doc?.map((data, idx) => {
+                    {
+                        documentSet[0]?.cc_pair_id?.map((data, idx) => {
                                 
                             return (
 
-                                <div key={idx} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100`}>
+                                <div key={data} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100`}>
                                     <div className='inline-flex gap-1 items-center'>
-                                        <span className={`font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis`} >{data}</span>
+                                        <Image src={fileIcon} alt='file' />
+                                        <span className={`font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis`} >{documentSet[0]?.c_name[idx]}</span>
 
                                     </div>
                                     <Popover>
@@ -479,15 +480,15 @@ const FolderCard = ({ fol, doc, folder }) => {
                                                         <AlertDialogContent>
                                                             <AlertDialogHeader>
                                                                 <AlertDialogTitle>
-                                                                    Are you absolutely sure?
+                                                                    Are you sure?
                                                                 </AlertDialogTitle>
                                                                 <AlertDialogDescription>
-                                                                    This action cannot be undone. This will delete all chat files inside this folder.
+                                                                    This action cannot be undone.
                                                                 </AlertDialogDescription>
                                                             </AlertDialogHeader>
                                                             <AlertDialogFooter>
                                                                 <AlertDialogCancel>Cancel</AlertDialogCancel>
-                                                                <AlertDialogAction className='bg-[#14B8A6] hover:bg-[#14B8A6] hover:opacity-75' onClick={() => deleteDocSedFile(data)}>Continue</AlertDialogAction>
+                                                                <AlertDialogAction className='bg-[#14B8A6] hover:bg-[#14B8A6] hover:opacity-75' onClick={() => deleteDocSetFile(data, documentSet[0]?.folder_id)}>Continue</AlertDialogAction>
                                                             </AlertDialogFooter>
 
                                                         </AlertDialogContent>
@@ -501,7 +502,7 @@ const FolderCard = ({ fol, doc, folder }) => {
                                 </div>
                             )
                         })
-                    } */}
+                    }
                 </AccordionContent>
             </AccordionItem>
         </Accordion>
@@ -539,7 +540,7 @@ const SideBar = () => {
                 }
                 // console.log(folders)
                 setFolder(folders);
-                return
+                return null
             } else {
                 setFolder([])
                 localStorage.removeItem('lastFolderId')

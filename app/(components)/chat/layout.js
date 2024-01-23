@@ -1,13 +1,13 @@
 'use client'
 
 import { useEffect } from "react"
-import { documentSetAtom, folderIdAtom, existConnectorDetailsAtom, allIndexingConnectorAtom } from "../../store"
+import { folderIdAtom, existConnectorDetailsAtom, allIndexingConnectorAtom } from "../../store"
 import { useAtom } from "jotai"
 import supabase from "../../../config/supabse"
 
 export default function RootLayout({ children }) {
     const [folderId, setFolderId] = useAtom(folderIdAtom);
-    const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
+
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
     const [allConnectorFromServer, setAllConnectorFromServer] = useAtom(allIndexingConnectorAtom);
 
@@ -40,10 +40,10 @@ export default function RootLayout({ children }) {
         
         if(data?.length > 0){
           
-          setDocumentSet(data)
+          
           return data[0].cc_pair_id
         }else{
-          setDocumentSet([])
+          
         }
     };
 

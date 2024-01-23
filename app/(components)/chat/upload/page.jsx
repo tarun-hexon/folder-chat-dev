@@ -6,7 +6,7 @@ import { Label } from '../../../../components/ui/label';
 import { Input } from '../../../../components/ui/input';
 import Image from 'next/image';
 import { useDropzone } from 'react-dropzone';
-import { existConnectorDetailsAtom, folderAtom, folderIdAtom, sessionAtom, documentSetAtom, userConnectorsAtom, allIndexingConnectorAtom } from '../../../store';
+import { folderAtom, folderIdAtom, sessionAtom, userConnectorsAtom } from '../../../store';
 import { useToast } from '../../../../components/ui/use-toast';
 import { useRouter } from 'next/navigation';
 import supabase from '../../../../config/supabse';
@@ -25,9 +25,9 @@ const Upload = () => {
   const [files, setFiles] = useState([]);
   const [folder, setFolder] = useAtom(folderAtom);
   const [folderId, setFolderId] = useAtom(folderIdAtom);
-  const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
-  const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
-  const [allConnectorFromServer, setAllConnectorFromServer] = useAtom(allIndexingConnectorAtom);
+  const [documentSet, setDocumentSet] = useState([]);
+
+
   const [currentDOC, setCurrentDoc] = useState([]);
   const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom);
   const [existConnector, setExistConnector] = useState([]);
@@ -35,7 +35,7 @@ const Upload = () => {
   const router = useRouter()
   const [context, setContext] = useState({
     name: '',
-    c_name:'',
+    c_name: '',
     description: ''
   })
   const { toast } = useToast();
@@ -43,7 +43,7 @@ const Upload = () => {
   const onDrop = (acceptedFiles) => {
 
     if (acceptedFiles && acceptedFiles.length > 0) {
-      
+
       acceptedFiles?.map((file, index) => {
 
         const fileType = file?.name?.split('.')[1]
@@ -56,18 +56,18 @@ const Upload = () => {
 
         //   return null
         // }
-      // const maxSize = 1024 * 1024
-      // if (file.size > maxSize) {
-      //   toast({
-      //     variant: 'destructive',
-      //     title: "File size exceeded!"
-      //   });
-      // };
-      // const file = acceptedFiles[index];
+        // const maxSize = 1024 * 1024
+        // if (file.size > maxSize) {
+        //   toast({
+        //     variant: 'destructive',
+        //     title: "File size exceeded!"
+        //   });
+        // };
+        // const file = acceptedFiles[index];
 
         setFiles((prev) => [...prev, file])
       })
-      
+
         ;
     } else {
       // console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
@@ -91,7 +91,7 @@ const Upload = () => {
         variant: 'destructive',
         title: "Write a valid name for files identification!"
       });
-    } 
+    }
     if (context.name.split('-').length > 1) {
       return toast({
         variant: 'destructive',
@@ -115,11 +115,11 @@ const Upload = () => {
     setUploading(true)
     try {
       const formData = new FormData();
-      
+
       files?.forEach((file) => {
         formData.append("files", file);
       });
-      
+
       // console.log(formData)
       const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/file/upload`, {
         method: "POST",
@@ -270,12 +270,14 @@ const Upload = () => {
     const json = await data.json();
 
     const docSetid = []
+    
     for (const pair_id of json) {
       if (pair_id?.connector?.id === ccID) {
         docSetid.push(pair_id?.cc_pair_id);
+        
       }
     };
-    console.log(docSetid)
+    // console.log(docSetid)
     if (docSetid.length === 0) {
       return null
     }
@@ -297,9 +299,9 @@ const Upload = () => {
       const id = await res.json();
 
       if (id) {
-        
+
         await insertDataInDB(docSetid, `${set_name}-${session?.user?.email.split('@')[0]}`, id, context.c_name)
-        setContext({ name: '', c_name: '', description: '' })
+        
       } else {
         return toast({
           variant: 'destructive',
@@ -327,7 +329,7 @@ const Upload = () => {
         docSetid.push(pair_id?.cc_pair_id);
       }
     };
-    
+
     try {
       const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
         method: 'PATCH',
@@ -340,43 +342,43 @@ const Upload = () => {
           "cc_pair_ids": docSetid
         })
       });
-      
-      await updatetDataInDB(docSetid, context.c_name)
-      setContext({ name: '', description: '', c_name:'' })
+
+      await updatetDataInDB(docSetid, context.c_name, db_id)
+      setContext({ name: '', description: '', c_name: '' })
     } catch (error) {
       console.log(error)
     }
   }
 
-  async function setDocumentSetInServer2(ccID, set_name, des) {
+  async function setDocumentSetInServer2(ccID, context) {
+
+    const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    const json = await data.json();
+
 
     let newArr = []
-
+    const docSetName = []
     for (let i = 0; i < ccID?.length; i++) {
       if (newArr.indexOf(ccID[i]) < 0) {
         newArr.push(ccID[i])
+        
       }
     };
 
-    // console.log(newArr);
-    // console.log(ccID);
+    for (let i = 0; i < newArr?.length; i++) {
+      for(const item of json){
+        if (item?.cc_pair_id === newArr[i]){
+          console.log(item?.name)
+          docSetName.push(item?.name)
+        }
+      }
+    };
 
-    // return null
-
-    // const docSetid = []
-    // for (const pair_id of json) {
-    //   if (pair_id?.connector?.id === ccID) {
-    //     docSetid.push(pair_id?.cc_pair_id);
-    //   }
-    // };
-    console.log(newArr)
-    // if (docSetid.length === 0) {
-    //   return null
-    // }
     if (newArr.length === 0) {
       return null
     }
-
+    console.log(docSetName);
+    
     try {
 
       const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
@@ -385,8 +387,8 @@ const Upload = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          "name": `${set_name}-${session?.user?.email.split('@')[0]}`,
-          "description": des,
+          "name": `${context.name}-${session?.user?.email.split('@')[0]}`,
+          "description": context.description,
           "cc_pair_ids": newArr
         })
       });
@@ -394,9 +396,32 @@ const Upload = () => {
       const id = await res.json();
 
       if (id) {
-        
-        await insertDataInDB(newArr, `${set_name}-${session?.user?.email.split('@')[0]}`, id, context.c_name)
+
+        //await insertDataInDB(newArr, `${context.name}-${session?.user?.email.split('@')[0]}`, id, context.c_name)
+        const { data, error } = await supabase
+          .from('document_set')
+          .insert(
+            {
+              'cc_pair_id': newArr,
+              'user_id': session?.user?.id,
+              'folder_id': folderId,
+              'doc_set_name': `${context.name}-${session?.user?.email.split('@')[0]}`,
+              'doc_set_id': id,
+              'c_name': docSetName
+            },
+          )
+          .select()
+
+        if (data?.length > 0) {
+          setDocumentSet(data)
+          toast({
+            variant: 'default',
+            title: "File Uploaded!"
+          });
+          router.push('/chat/new')
+        }
         setContext({ name: '', c_name: '', description: '' })
+        
         setD_open(false)
       } else {
         return toast({
@@ -414,10 +439,10 @@ const Upload = () => {
     }
   }
 
-  async function updateDocumentSetInServer2(db_id, ccID, des) {
+  async function updateDocumentSetInServer2(db_id, ccID, c_name) {
 
-    let newArr = documentSet[0]?.cc_pair_id
-    
+    let newArr = [...documentSet[0]?.cc_pair_id]
+
     for (let i = 0; i < ccID?.length; i++) {
       if (newArr.indexOf(ccID[i]) < 0) {
         newArr.push(ccID[i])
@@ -435,13 +460,13 @@ const Upload = () => {
         },
         body: JSON.stringify({
           "id": db_id,
-          "description": des,
+          "description": '',
           "cc_pair_ids": newArr
         })
       });
-      
-      await updatetDataInDB(newArr, context.c_name);
-      setContext({ name: '', description: '', c_name:'' })
+
+      await updatetDataInDB(newArr, c_name);
+      setContext({ name: '', description: '', c_name: '' })
       setD_open(false)
     } catch (error) {
       console.log(error)
@@ -459,48 +484,42 @@ const Upload = () => {
           'folder_id': folderId,
           'doc_set_name': doc_name,
           'doc_set_id': doc_id,
-          'c_name':[c_name]
+          'c_name': [c_name]
         },
       )
       .select()
-    // console.log(data)
-    // console.log(error)
+
     if (data?.length > 0) {
       setDocumentSet(data)
-      // setFileName('chat')
       toast({
         variant: 'default',
         title: "File Uploaded!"
       });
       router.push('/chat/new')
-      setUploading(false)
     }
   };
 
   async function updatetDataInDB(newData, name) {
-    // console.log(exConn, newData, folderId)
+
     let names = []
-    if(documentSet[0]?.c_name?.length > 0){
+    if (documentSet[0]?.c_name?.length > 0) {
+      names = [...documentSet[0]?.c_name, name]
+    } else {
       names = [...documentSet[0]?.c_name, name]
 
-      // names.push(name)
-    }else{
-      names = [...documentSet[0]?.c_name, name]
-      // names.push(documentSet[0]?.c_name)
-      // names.push(name)
     }
     // console.log(names)
     const { data, error } = await supabase
       .from('document_set')
       .update(
-        { 'cc_pair_id': newData, 'c_name':names},
+        { 'cc_pair_id': newData, 'c_name': names },
       )
       .eq('folder_id', folderId)
       .select()
 
     if (data?.length) {
       setDocumentSet(data);
-      //await indexingStatus(folderId)
+
       toast({
         variant: 'default',
         title: "File Uploaded!"
@@ -533,53 +552,13 @@ const Upload = () => {
         { 'connect_id': allConn },
       )
       .eq('user_id', session?.user?.id)
-      
+
     // console.log(data)
     // console.log(error)
     // setExistConnector(data[0]?.connect_id);
     //setUploading(false)
   };
 
-  async function indexingStatus(f_id) {
-    try {
-      // const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
-      // const json = await data.json();
-      // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
-
-      const allConID = await getDocSetData(f_id);
-
-      var cc_p_id = []
-      for (const cc_id of allConnectorFromServer) {
-        if (allConID?.includes(cc_id?.cc_pair_id)) {
-          cc_p_id.push(cc_id)
-        }
-      };
-      setExistConnectorDetails(cc_p_id)
-      return cc_p_id
-    } catch (error) {
-      console.log(error)
-
-    }
-
-  };
-
-  async function getDocSetData(f_id) {
-
-    const { data, error } = await supabase
-      .from('document_set')
-      .select('*')
-      .eq('folder_id', f_id);
-
-    if (data?.length > 0) {
-
-      setDocumentSet(data);
-      setSelectedDoc(data[0]?.cc_pair_id)
-      return data[0].cc_pair_id
-    } else {
-      setDocumentSet([])
-    }
-    console.log(data, error)
-  };
 
   function handleDocSetID(id) {
     //console.log(id)
@@ -595,18 +574,31 @@ const Upload = () => {
   }
 
   async function uploadDocSetFiles() {
+
     if (selectedDoc?.length === 0) {
       return toast({
         variant: 'destructive',
         title: "Please Select Atleast One File!"
-      });
-    };
-    // console.log(selectedDoc);
-    // return null
+      })
+    }
+    console.log(selectedDoc);
+
     if (documentSet?.length === 0) {
-      await setDocumentSetInServer2(selectedDoc, context.name, context.description);
+      await setDocumentSetInServer2(selectedDoc, context);
     } else {
-      await updateDocumentSetInServer2(documentSet[0]?.doc_set_id, selectedDoc, context.description)
+      await updateDocumentSetInServer2(documentSet[0]?.doc_set_id, selectedDoc, context.c_name)
+    }
+  };
+
+  async function getDocSetDetails(folder_id) {
+    let { data: document_set, error } = await supabase
+      .from('document_set')
+      .select("*")
+      .eq('folder_id', folder_id)
+    if (document_set.length > 0) {
+      setDocumentSet(document_set)
+    } else {
+      setDocumentSet([])
     }
   }
 
@@ -621,6 +613,13 @@ const Upload = () => {
     }
 
   }, [folder]);
+
+  useEffect(() => {
+    if (folderId) {
+      getDocSetDetails(folderId)
+    }
+
+  }, [folderId]);
 
 
   useEffect(() => {
@@ -656,28 +655,28 @@ const Upload = () => {
               <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>This folder is empty</p>
               <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Upload a document to start</p>
             </div>}
-          {documentSet?.length === 0 ? 
-          <div className='w-full text-start space-y-2 '>
-            <div>
+          {documentSet?.length === 0 ?
+            <div className='w-full text-start space-y-2 '>
+              <div>
+                <Label className='text-start' htmlFor='context'>Name</Label>
+                <Input type='text' placeholder='Write a name to identify your files' id='context' value={context.c_name} onChange={(e) => setContext({ ...context, 'c_name': e.target.value })} />
+              </div>
+              <div>
+                <Label className='text-start' htmlFor='context'>Name of Context</Label>
+                <Input type='text' placeholder='Name Should Be Unique' id='context' value={context.name} onChange={(e) => setContext({ ...context, 'name': e.target.value })} />
+              </div>
+
+              <div>
+                <Label className='text-start' htmlFor='context'>Description</Label>
+                <Input type='text' placeholder='write a short description' id='context' value={context?.description} onChange={(e) => setContext({ ...context, description: e.target.value })} />
+              </div>
+            </div> :
+            <div className='w-full text-start space-y-2 mb-2'>
+
               <Label className='text-start' htmlFor='context'>Name</Label>
               <Input type='text' placeholder='Write a name to identify your files' id='context' value={context.c_name} onChange={(e) => setContext({ ...context, 'c_name': e.target.value })} />
+
             </div>
-            <div>
-              <Label className='text-start' htmlFor='context'>Name of Context</Label>
-              <Input type='text' placeholder='Name Should Be Unique' id='context' value={context.name} onChange={(e) => setContext({ ...context, 'name': e.target.value })} />
-            </div>
-             
-            <div>
-              <Label className='text-start' htmlFor='context'>Description</Label>
-              <Input type='text' placeholder='write a short description' id='context' value={context?.description} onChange={(e) => setContext({ ...context, description: e.target.value })} />
-            </div>
-          </div>:
-          <div className='w-full text-start space-y-2 mb-2'>
-            
-              <Label className='text-start' htmlFor='context'>Name</Label>
-              <Input type='text' placeholder='Write a name to identify your files' id='context' value={context.c_name} onChange={(e) => setContext({ ...context, 'c_name': e.target.value })} />
-            
-          </div>
           }
 
           {files.length === 0 ?
@@ -686,7 +685,7 @@ const Upload = () => {
                 className={`w-full border rounded-md flex flex-col justify-center items-center bg-[#EFF5F5] py-5 ${isDragActive ? 'opacity-50' : ''} shadow-md`}
                 {...getRootProps()}
               >
-                <input {...getInputProps()} multiple accept=".pdf, .zip, .txt, .md, .mdx" required/>
+                <input {...getInputProps()} multiple accept=".pdf, .zip, .txt, .md, .mdx" required />
 
                 <Image src={uploadIcon} alt='upload' />
                 <div className='w-full text-center'>
@@ -706,9 +705,12 @@ const Upload = () => {
               </div>
               {userConnectors?.length > 0 && <div className='w-full text-sm leading-5 text-center space-y-2'>
                 <p className='font-[500]'>OR</p>
-                <Dialog open={d_open} onOpenChange={() => { setSelectedDoc(documentSet[0]?.cc_pair_id?.length > 0 ? documentSet[0]?.cc_pair_id : []); setD_open(!d_open)}} className='fixed max-h-52 overflow-x-scroll no-scrollbar' >
+                <Dialog open={d_open} onOpenChange={() => { setSelectedDoc(documentSet[0]?.cc_pair_id?.length > 0 ? documentSet[0]?.cc_pair_id : []); context.c_name && setD_open(!d_open) }} className='fixed max-h-52 overflow-x-scroll no-scrollbar' >
                   <DialogTrigger asChild>
-                    <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer' onClick={()=> setD_open(true)}>Select From Existing Files</p>
+                    <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer' onClick={() => context.c_name !== '' ? setD_open(true) : toast({
+                      variant: 'destructive',
+                      title: "Write a name first"
+                    })}>Select From Existing Files</p>
                   </DialogTrigger>
                   <DialogContent>
                     <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
@@ -728,9 +730,9 @@ const Upload = () => {
             </>
             :
             <div className='w-full text-center space-y-4'>
-              <div className='w-full border flex justify-center items-center h-20 bg-[#EFF5F5] rounded-md relative'>
+              <div className='w-full border flex flex-col gap-1 justify-center items-center h-20 bg-[#EFF5F5] rounded-md relative'>
 
-              {files?.map(file => <p className='text-sm leading-6'>{file?.name}</p>)}
+                {files?.map(file => <p key={file?.name} className='text-sm leading-6'>{file?.name}</p>)}
                 <X size={'1rem'} className='self-start absolute top-1 right-1 hover:cursor-pointer' onClick={() => setFiles([])} />
               </div>
 

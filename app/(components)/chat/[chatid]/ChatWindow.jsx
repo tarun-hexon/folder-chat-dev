@@ -9,7 +9,7 @@ import Image from 'next/image'
 import { iconSelector } from '../../../../config/constants'
 import { Folder, Loader2, Plus, MoreHorizontal } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { chatHistoryAtom, chatTitleAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, allowSessionAtom, showAdvanceAtom, documentSetAtom, existConnectorDetailsAtom, userConnectorsAtom, sessionAtom } from '../../../store'
+import { chatHistoryAtom, chatTitleAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, allowSessionAtom, showAdvanceAtom, existConnectorDetailsAtom, userConnectorsAtom, sessionAtom } from '../../../store'
 import ReactMarkdown from "react-markdown";
 import supabase from '../../../../config/supabse'
 import { useToast } from '../../../../components/ui/use-toast'
@@ -51,11 +51,11 @@ const ChatWindow = () => {
     const [textFieldDisabled, setTextFieldDisabled] = useState(false);
     const [chatSessionID, setChatSessionID] = useAtom(chatSessionIDAtom);
     const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
-    const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
+    const [documentSet, setDocumentSet] = useState([]);
     const [inputDocDes, setInputDocDes] = useState('');
     const [selectedDoc, setSelectedDoc] = useState([]);
     const [docSetOpen, setDocSetOpen] = useState(false);
-    const [entireMsg, setEntireMsg] = useState([])
+    
 
     const botResponse = useRef('');
 
@@ -65,17 +65,6 @@ const ChatWindow = () => {
 
     const router = useRouter();
     const { toast } = useToast();
-
-    function getCitedDocumentsFromMessage(message) {
-        
-        message.forEach( msg => {
-            const filData = userConnectors?.filter((item)=> { if(allConID?.includes(item?.connector?.id)) return item })
-            console.log(msg)
-        }
-            )
-        
-        
-    }
 
     async function createChatSessionId(userMsgdata) {
         setRcvdMsg('')
@@ -510,7 +499,7 @@ const ChatWindow = () => {
                 if (folderId === '') {
                     setFolderId(data[0]?.folder_id)
                 }
-                await indexingStatus(data[0]?.folder_id)
+                await getDocSetDetails(data[0]?.folder_id)
                 const msgs = JSON.parse(data[0]?.chats)
                 setChatMsg(msgs);
                 setChatHistory(data[0])
@@ -566,7 +555,7 @@ const ChatWindow = () => {
                     title: "Document Update!"
                 });
             }
-            await indexingStatus(folderId)
+            // await indexingStatus(folderId)
             setInputDocDes('')
             setDocSetOpen(false)
         } catch (error) {
@@ -586,6 +575,7 @@ const ChatWindow = () => {
 
         if (data?.length) {
             setDocumentSet(data)
+            
         }
         if (error) {
             console.log(error)
@@ -605,80 +595,97 @@ const ChatWindow = () => {
 
     }
 
-    async function isDocSetExist(folder_id) {
-        if (!folder_id || folder_id === 'undefined') {
-            setLoading(false);
-            return null
-        }
-        // console.log(folder_id)
-        try {
-            let { data: document_set, error } = await supabase
-                .from('document_set')
-                .select('*')
-                .eq('folder_id', folder_id);
-            if (error) {
-                console.log(error)
-                return toast({
-                    variant: 'destructive',
-                    title: "Some Error Occured While Fetching Context List"
-                });
-            }
+    // async function isDocSetExist(folder_id) {
+    //     if (!folder_id || folder_id === 'undefined') {
+    //         setLoading(false);
+    //         return null
+    //     }
+    //     // console.log(folder_id)
+    //     try {
+    //         let { data: document_set, error } = await supabase
+    //             .from('document_set')
+    //             .select('*')
+    //             .eq('folder_id', folder_id);
+    //         if (error) {
+    //             console.log(error)
+    //             return toast({
+    //                 variant: 'destructive',
+    //                 title: "Some Error Occured While Fetching Context List"
+    //             });
+    //         }
 
-            if (document_set.length === 0) {
-                // console.log(document_set);
-                if (!folderId) {
-                    setFolderId(folder_id)
-                }
-                setDocumentSet([])
-                router.push('/chat/upload');
+    //         if (document_set.length === 0) {
+    //             // console.log(document_set);
+    //             if (!folderId) {
+    //                 setFolderId(folder_id)
+    //             }
+    //             setDocumentSet([])
+    //             router.push('/chat/upload');
 
-            } else {
-                setLoading(false);
-                setDocumentSet(document_set);
-                setSelectedDoc(document_set[0]?.cc_pair_id)
-                return document_set[0]?.cc_pair_id
+    //         } else {
+    //             setLoading(false);
+    //             setDocumentSet(document_set);
+    //             setSelectedDoc(document_set[0]?.cc_pair_id)
+    //             return document_set[0]?.cc_pair_id
 
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    };
+    //         }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // };
 
-    async function indexingStatus(f_id) {
-        if(folder?.length === 0){
-            setLoading(false)
-            return null
-        }
-        try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
-            const json = await data.json();
-            // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
-            // const dbData = await readDataFromDB();
-            let allConID = await isDocSetExist(f_id);
-            if (!allConID) {
-                allConID = []
-            }
+    // async function indexingStatus(f_id) {
+    //     if(folder?.length === 0){
+    //         setLoading(false)
+    //         return null
+    //     }
+    //     try {
+    //         const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    //         const json = await data.json();
+    //         // const isId = json.filter(da => da.credential.credential_json.id.includes(12));
+    //         // const dbData = await readDataFromDB();
+    //         let allConID = await isDocSetExist(f_id);
+    //         if (!allConID) {
+    //             allConID = []
+    //         }
 
-            // console.log(allCC)
-            if (allConID?.length) {
-                // console.log(json)
-                let cc_p_id = []
-                for (const cc_id of json) {
-                    if (allConID?.includes(cc_id?.cc_pair_id)) {
-                        cc_p_id.push(cc_id)
-                    };
+    //         // console.log(allCC)
+    //         if (allConID?.length) {
+    //             // console.log(json)
+    //             let cc_p_id = []
+    //             for (const cc_id of json) {
+    //                 if (allConID?.includes(cc_id?.cc_pair_id)) {
+    //                     cc_p_id.push(cc_id)
+    //                 };
 
-                };
-                // console.log(cc_p_id, '549')
-                setExistConnectorDetails(cc_p_id)
-                return cc_p_id
-            }
-        } catch (error) {
-            console.log(error)
+    //             };
+    //             // console.log(cc_p_id, '549')
+    //             setExistConnectorDetails(cc_p_id)
+    //             return cc_p_id
+    //         }
+    //     } catch (error) {
+    //         console.log(error)
 
-        }
+    //     }
 
-    };
+    // };
+
+    async function getDocSetDetails(folder_id){
+        
+        let { data: document_set, error } = await supabase
+          .from('document_set')
+          .select("*")
+          .eq('folder_id', folder_id)
+          
+          if(document_set?.length > 0){
+            setDocumentSet(document_set)
+            setSelectedDoc(document_set[0]?.cc_pair_id)
+          }else{
+            setDocumentSet([])
+            router.push('/chat/upload')
+          }
+          setLoading(false)
+      }
 
     // async function readDataFromDB(){
 
@@ -716,9 +723,9 @@ const ChatWindow = () => {
             setChatMsg([])
 
             if (!folderId) {
-                indexingStatus(localStorage.getItem('lastFolderId'))
+                getDocSetDetails(localStorage.getItem('lastFolderId'))
             } else {
-                indexingStatus(folderId)
+                getDocSetDetails(folderId)
             }
             setParentMessageId(null)
             setChatSessionID('new');
@@ -749,7 +756,7 @@ const ChatWindow = () => {
                         
                         <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen)}}>
                             <DialogTrigger asChild>
-                                <Image src={editIcon} alt='edit' title='edit' onClick={() => setDocSetOpen(true)} />
+                                <Image src={editIcon} alt='edit' title='edit' onClick={() => {getDocSetDetails(folderId);setDocSetOpen(true)}} />
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader className='mb-2'>
@@ -760,10 +767,10 @@ const ChatWindow = () => {
                                 <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
                                 <div className='flex w-full flex-wrap gap-1'>
 
-                                    {existConnectorDetails?.length > 0 &&
-                                        existConnectorDetails?.map((connector) =>
-                                            <div key={connector.cc_pair_id} className='flex items-center gap-2 justify-center px-2'>
-                                                <input type="checkbox" value={connector.cc_pair_id} id={connector.cc_pair_id} checked={selectedDoc.includes(connector.cc_pair_id)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector.cc_pair_id} >{connector.name}</label>
+                                    {documentSet[0]?.cc_pair_id?.length > 0 &&
+                                        documentSet[0]?.cc_pair_id?.map((connector, idx) =>
+                                            <div key={connector} className='flex items-center gap-2 justify-center px-2'>
+                                                <input type="checkbox" value={connector} id={connector} checked={selectedDoc.includes(connector)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector} >{documentSet[0]?.c_name[idx]}</label>
                                             </div>)
                                     }
                                 </div>
