@@ -3,6 +3,8 @@ import creditCardIcon from '../public/assets/credit-card.svg';
 import settingsIcon from '../public/assets/settings.svg';
 import {CreditCard, Keyboard, Settings, Upload, User, Edit, Trash2, MessagesSquare } from "lucide-react";
 import showAllIcon from '../public/assets/Danswer-All.svg';
+import threeLines from '../public/assets/Danswer-All-B.svg'
+
 import gDriveIcon from '../public/assets/Danswer-google.svg';
 import slackIcon from '../public/assets/Danswer-slack.svg';
 import confluenceIcon from '../public/assets/Danswer-confluence.svg';
@@ -231,11 +233,11 @@ export const docsOptions = [
 
 
 export const advanceOption = [
-  // {
-  //   id:'advance',
-  //   title:'Show All',
-  //   icon: showAllIcon
-  // },
+  {
+    id:'indexing',
+    title:'Indexing',
+    icon: showAllIcon
+  },
   {
     id:'drive',
     title:'Google Drive',
@@ -283,7 +285,7 @@ export function iconSelector(icon){
     return pdfIcon
   }else if(icon === "xls"){
       return xlsIcon
-  }else if(icon === "doc"){
+  }else if(icon === "docx" || icon === "doc"){
       return docIcon
   }else if(icon === "drive"){
       return gDriveIconB

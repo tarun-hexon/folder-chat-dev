@@ -26,7 +26,7 @@ const Upload = () => {
   const [folder, setFolder] = useAtom(folderAtom);
   const [folderId, setFolderId] = useAtom(folderIdAtom);
   const [documentSet, setDocumentSet] = useState([]);
-
+  const [dialogLoader, setDialogLoader] = useState(false);
 
   const [currentDOC, setCurrentDoc] = useState([]);
   const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom);
@@ -128,7 +128,7 @@ const Upload = () => {
       const json = await data.json();
       // console.log('upload done', json)
       // setFilePath(json.file_paths[0]);
-      connectorRequest(json.file_paths)
+      await connectorRequest(json.file_paths)
     } catch (error) {
       console.log('error in upload', error)
       setUploading(false)
@@ -168,7 +168,7 @@ const Upload = () => {
         await updatetDataInConTable(existConnector, json?.id)
       }
 
-      getCredentials(json?.id)
+      await getCredentials(json?.id)
     } catch (error) {
       console.log('error while connectorRequest :', error)
       setUploading(false)
@@ -194,7 +194,7 @@ const Upload = () => {
       });
       const json = await data?.json();
       // console.log('getCredentials done', json)
-      sendURL(connectID, json?.id)
+      await sendURL(connectID, json?.id)
     } catch (error) {
       console.log('error while getCredentials:', error)
       setUploading(false)
@@ -343,7 +343,7 @@ const Upload = () => {
         })
       });
 
-      await updatetDataInDB(docSetid, context.c_name, db_id)
+      await updatetDataInDB(docSetid, context.c_name)
       setContext({ name: '', description: '', c_name: '' })
     } catch (error) {
       console.log(error)
@@ -423,6 +423,7 @@ const Upload = () => {
         setContext({ name: '', c_name: '', description: '' })
         
         setD_open(false)
+        setDialogLoader(false)
       } else {
         return toast({
           variant: 'destructive',
@@ -468,6 +469,7 @@ const Upload = () => {
       await updatetDataInDB(newArr, c_name);
       setContext({ name: '', description: '', c_name: '' })
       setD_open(false)
+      setDialogLoader(false)
     } catch (error) {
       console.log(error)
     }
@@ -525,7 +527,7 @@ const Upload = () => {
         title: "File Uploaded!"
       });
       router.push('/chat/new')
-      setUploading(false)
+      
     }
   };
 
@@ -534,7 +536,7 @@ const Upload = () => {
     const { data, error } = await supabase
       .from('connectors')
       .insert(
-        { 'connect_id': newData, 'user_id': session?.user?.id, 'folder_id': folderId },
+        { 'connect_id': newData, 'user_id': session?.user?.id},
       )
       .select()
     // console.log(data)
@@ -552,11 +554,14 @@ const Upload = () => {
         { 'connect_id': allConn },
       )
       .eq('user_id', session?.user?.id)
-
+      
     // console.log(data)
     // console.log(error)
     // setExistConnector(data[0]?.connect_id);
     //setUploading(false)
+    // if(data?.length > 0){
+    //   setExistConnector(data[0]?.connect_id)
+    // }
   };
 
 
@@ -582,7 +587,7 @@ const Upload = () => {
       })
     }
     console.log(selectedDoc);
-
+    setDialogLoader(true)
     if (documentSet?.length === 0) {
       await setDocumentSetInServer2(selectedDoc, context);
     } else {
@@ -601,7 +606,22 @@ const Upload = () => {
       setDocumentSet([])
     }
     setLoading(false)
-  }
+  };
+
+  // async function getConnectorsID(folderId){
+    
+  //   const { data, error } = await supabase
+  //   .from('connectors')
+  //   .select('connect_id')
+  //   .eq('user_id', session?.user?.id);
+    
+  //   if(data?.length > 0){
+  //       // console.log(data)
+  //       setExistConnector(data[0]?.connect_id)
+  //   }
+  //   return []
+  // };
+
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
@@ -618,7 +638,8 @@ const Upload = () => {
 
   useEffect(() => {
     if (folderId) {
-      getDocSetDetails(folderId)
+      getDocSetDetails(folderId);
+      // getConnectorsID(folderId);
     }
 
   }, [folderId]);
@@ -627,11 +648,13 @@ const Upload = () => {
   useEffect(() => {
 
     if (userConnectors !== null) {
-      const filData = userConnectors?.filter((item) => item?.connector?.source === 'file');
-      if (filData?.length > 0) {
-        const conn_ids = userConnectors?.map(conn => { return conn?.connector?.id });
-        setExistConnector(conn_ids);
-      };
+      const fileData = userConnectors?.filter((item) => item?.connector?.source === 'file');
+      const conn_ids = userConnectors?.map(conn => { return conn?.connector?.id });
+      setExistConnector(conn_ids);
+      // if (fileData?.length > 0) {
+      //   const conn_ids = userConnectors?.map(conn => { return conn?.connector?.id });
+      //   setExistConnector(conn_ids);
+      // };
     }
   }, [userConnectors]);
 
@@ -647,9 +670,9 @@ const Upload = () => {
   return (
     <div className='w-full flex flex-col justify-center items-center rounded-[6px] gap-5 sticky top-0 self-start p-10 min-h-screen'>
       {uploading ?
-        <div className={`w-[70%] border flex justify-center items-center bg-[#EFF5F5] p-32 gap-2`}>
+        <div className={`w-[70%] border flex flex-col justify-center items-center bg-[#EFF5F5] h-48 gap-4`}>
           <Loader className='animate-spin' />
-          <p className='font-[500] text-sm leading-5'>Please wait... We are processing your document it will take some time.</p>
+          <p className='font-[500] text-sm leading-5 animate-pulse'>Please wait... We are processing your document.</p>
         </div>
         :
         <div className='w-[70%] p-5 flex flex-col justify-center items-center gap-2 rounded-md shadow-black shadow-sm'>
@@ -708,14 +731,16 @@ const Upload = () => {
               </div>
               {userConnectors?.length > 0 && <div className='w-full text-sm leading-5 text-center space-y-2'>
                 <p className='font-[500]'>OR</p>
-                <Dialog open={d_open} onOpenChange={() => { setSelectedDoc(documentSet[0]?.cc_pair_id?.length > 0 ? documentSet[0]?.cc_pair_id : []); context.c_name && setD_open(!d_open) }} className='fixed max-h-52 overflow-x-scroll no-scrollbar' >
+                <Dialog open={d_open} onOpenChange={() => { setSelectedDoc(documentSet[0]?.cc_pair_id?.length > 0 ? documentSet[0]?.cc_pair_id : []); (context.c_name && context.name) && setD_open(!d_open) }} className='fixed max-h-52 overflow-x-scroll no-scrollbar' >
                   <DialogTrigger asChild>
-                    <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer' onClick={() => context.c_name !== '' ? setD_open(true) : toast({
+                    <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer' onClick={() => (context.c_name !== '' && context.name !== '') ? setD_open(true) : toast({
                       variant: 'destructive',
-                      title: "Write a name first"
+                      title: "Name and Content Name both are required!"
                     })}>Select From Existing Files</p>
                   </DialogTrigger>
                   <DialogContent>
+                    {!dialogLoader ? 
+                    <>
                     <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
                     <div className='flex gap-2 flex-wrap'>
                       {userConnectors?.map((connector) =>
@@ -726,6 +751,12 @@ const Upload = () => {
                     <DialogFooter className={cn('w-full')}>
                       <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => uploadDocSetFiles()}>Update</Button>
                     </DialogFooter>
+                    </>
+                    :
+                    <div className='w-full'>
+                      <Loader2 className='animate-spin m-auto'/>
+                    </div>
+                    }
 
                   </DialogContent>
                 </Dialog>
@@ -733,7 +764,7 @@ const Upload = () => {
             </>
             :
             <div className='w-full text-center space-y-4'>
-              <div className='w-full border flex flex-col gap-1 justify-center items-center h-20 bg-[#EFF5F5] rounded-md relative'>
+              <div className='w-full border flex flex-col gap-1 justify-center items-center min-h-[20vh] bg-[#EFF5F5] rounded-md relative py-4'>
 
                 {files?.map(file => <p key={file?.name} className='text-sm leading-6'>{file?.name}</p>)}
                 <X size={'1rem'} className='self-start absolute top-1 right-1 hover:cursor-pointer' onClick={() => setFiles([])} />

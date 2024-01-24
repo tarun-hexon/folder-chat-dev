@@ -237,7 +237,7 @@ const Web = () => {
                             {/* <TableHead className="text-center">Remove</TableHead> */}
                         </TableRow>
                     </TableHeader>
-                    {loading && <div className='w-full text-start p-2'>Loading...</div>}
+                    {loading && <TableRow><TableCell colSpan={3} className='w-full text-start p-2'>Loading...</TableCell></TableRow>}
                     <TableBody className='w-full'>
                         { 
                         webList?.map((item, idx) => {

@@ -20,6 +20,7 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
     const { toast } = useToast();
     const [session, setSession] = useAtom(sessionAtom)
     const [connectorDetails, setConnectorDetails] = useState(null);
+    const [loading, setLoading] = useState(false);
     const [userConnectorId, setUserConnectorId] = useState([]);
     const body = useRef(null)
 
@@ -34,7 +35,7 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
         }
     };
 
-    async function getConnectotsID(){
+    async function getConnectorsID(){
     
         const { data, error } = await supabase
         .from('connectors')
@@ -69,7 +70,7 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
               setConnectorDetails(updatedData);
               if(bodyData.current.connector.disabled){
                 return toast({
-                    variant:'destructive',
+                    variant:'default',
                     description:'Connector Disabled Successfully!'
                   })
               }else{
@@ -84,7 +85,7 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
         }
     }
     async function deleteConnector(bodyData){
-
+        setLoading(true)
         if(!bodyData.current.connector.disabled) return null
         try {
             const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/deletion-attempt`, {
@@ -103,17 +104,25 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
             const index = exConn.indexOf(bodyData?.current?.connector?.id);
             exConn.splice(index, 1)
             
-            await supabase
-            .from('connectors')
-            .update({ 'connect_id': exConn })
-            .eq('user_id', session?.user?.id);
-            
+            if(exConn?.length > 0){
+                await supabase
+                .from('connectors')
+                .update({ 'connect_id': exConn })
+                .eq('user_id', session?.user?.id);
+            }else{
+                await supabase
+                .from('connectors')
+                .delete()
+                .eq('user_id', session?.user?.id);
+            }
 
             toast({
                 variant:'default',
                 description:'Connector Deleted Successfully!'
             })
+            
             setOpen(false);
+            setLoading(false)
             return null
             
         } catch (error) {
@@ -123,16 +132,16 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
     
     useEffect(() => {
         connectorStatus(cc_pair_id)
-        getConnectotsID()
+        getConnectorsID()
     }, []);
 
-    if (connectorDetails === null) {
+    if (connectorDetails === null || loading) {
         return <Loader2 className='animate-spin m-auto' />
     }
     return (
 
-        <div className='w-full space-y-10 break-words'>
-            <h1 className='text-lg font-[600]'>{connectorDetails?.name}</h1>
+        <div className='w-full space-y-10 break-all flex flex-col'>
+            <h1 className='text-lg font-[600] px-2 text-start'>{connectorDetails?.name}</h1>
             <div className='w-full flex justify-around'>
                 <Button className={cn(`${body?.current?.connector?.disabled ? 'bg-[#14B8A6] hover:bg-[#14B8A6]' : 'bg-red-500 hover:bg-red-500'} hover:opacity-75`)} onClick={()=> disableConnector(body)}>{body.current.connector.disabled ? 'Re-Enable' : 'Disable'}</Button>
                 <TooltipProvider >

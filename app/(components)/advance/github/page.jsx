@@ -14,6 +14,16 @@ import supabase from '../../../../config/supabse';
 import { useAtom } from 'jotai';
 import { sessionAtom, userConnectorsAtom } from '../../../store';
 import { Loader2 } from 'lucide-react';
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "../../../../components/ui/table";
+
+
 
 const GitPrs = () => {
     const [session, setSession] = useAtom(sessionAtom)
@@ -341,29 +351,29 @@ const GitPrs = () => {
                 </>
                 }
 
-                <table className='w-full text-sm'>
-                    <thead className='p-2 w-full'>
-                        <tr className='border-b p-2'>
-                            <th className="text-left p-2">Repository</th>
-                            <th className='text-center'>Status</th>
-                            <th className='text-center'>Credential</th>
-                            <th className="text-center">Remove</th>
-                        </tr>
-                    </thead>
-                    {loading && <div className='w-full text-start p-2'>Loading...</div>}
-                    <tbody className='w-full'>
+                <Table className='w-full text-sm'>
+                    <TableHeader className='p-2 w-full'>
+                        <TableRow className='border-b p-2'>
+                            <TableHead className="text-left p-2">Repository</TableHead>
+                            <TableHead className='text-center'>Status</TableHead>
+                            <TableHead className='text-center'>Credential</TableHead>
+                            <TableHead className="text-center">Remove</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    {loading && <TableRow><TableCell colSpan={3} className='w-full text-start p-2'>Loading...</TableCell></TableRow>}
+                    <TableBody className='w-full'>
                         {repos.map((item, idx) => {
                             
                             return (
-                                <tr className='border-b hover:cursor-pointer w-full' key={item.id} onClick={()=> setCCPairId(item.id)}>
-                                    <td className="font-medium text-left justify-start p-2 py-3 text-ellipsis break-all line-clamp-1 text-emphasis">{item?.connector_specific_config?.repo_owner}/{item?.connector_specific_config?.repo_name}</td>
-                                    <td className=''>
+                                <TableRow className='border-b hover:cursor-pointer w-full' key={item.id} onClick={()=> setCCPairId(item.id)}>
+                                    <TableCell className="font-medium text-left justify-start p-2 py-3 text-ellipsis break-all line-clamp-1 text-emphasis">{item?.connector_specific_config?.repo_owner}/{item?.connector_specific_config?.repo_name}</TableCell>
+                                    <TableCell className=''>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Enabled
                                         </div>
-                                    </td>
-                                    <td className=''>{adminCredential?.credential_json?.github_access_token}</td>
-                                    <td>
+                                    </TableCell>
+                                    <TableCell className=''>{adminCredential?.credential_json?.github_access_token}</TableCell>
+                                    <TableCell>
                                         <Dialog>
                                             <DialogTrigger asChild>
                                                 <Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' />
@@ -372,12 +382,12 @@ const GitPrs = () => {
                                                 <EditIndex cc_pair_id={ccPairId}/>
                                             </DialogContent>
                                         </Dialog>
-                                    </td>
-                                </tr>
+                                    </TableCell>
+                                </TableRow>
                             )
                         })}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
                 
 
             </div>

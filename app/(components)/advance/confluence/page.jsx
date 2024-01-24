@@ -4,7 +4,14 @@ import Image from 'next/image';
 import supabase from '../../../../config/supabse';
 import { Input } from '../../../../components/ui/input';
 import { Button } from '../../../../components/ui/button';
-
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+  } from "../../../../components/ui/table";
 import conIcon from '../../../../public/assets/Danswer-confluence-B.svg';
 
 import check from '../../../../public/assets/check-circle.svg';
@@ -325,33 +332,33 @@ const Confluence = () => {
                     </div>
                 </>
 
-                <table className='w-full text-sm'>
-                    <thead className='p-2 w-full'>
-                        <tr className='border-b p-2'>
-                            <th className="text-left p-2">Connected URLs</th>
-                            <th className='text-center'>Status</th>
-                            <th className='text-center'>Credential</th>
-                            <th className="text-center">Remove</th>
-                        </tr>
-                    </thead>
-                    {loading && <div className='w-full text-start p-2'>Loading...</div>}
-                    <tbody className='w-full'>
+                <Table className='w-full text-sm'>
+                    <TableHeader className='p-2 w-full'>
+                        <TableRow className='border-b p-2'>
+                            <TableHead className="text-left p-2">Connected URLs</TableHead>
+                            <TableHead className='text-center'>Status</TableHead>
+                            <TableHead className='text-center'>Credential</TableHead>
+                            <TableHead className="text-center">Remove</TableHead>
+                        </TableRow>
+                    </TableHeader>
+                    {loading && <TableRow><TableCell colSpan={3} className='w-full text-start p-2'>Loading...</TableCell></TableRow>}
+                    <TableBody className='w-full'>
                         {conUrlList.map((item, idx) => {
                             return (
-                                <tr className='border-b hover:cursor-pointer w-full' key={idx}>
-                                    <td className="font-medium text-left justify-start p-2 py-3 text-ellipsis break-all line-clamp-1 text-emphasis">{item?.connector_specific_config?.wiki_page_url}</td>
-                                    <td className=''>
+                                <TableRow className='border-b hover:cursor-pointer w-full' key={idx}>
+                                    <TableCell className="font-medium text-left justify-start p-2 py-3 text-ellipsis break-all line-clamp-1 text-emphasis">{item?.connector_specific_config?.wiki_page_url}</TableCell>
+                                    <TableCell className=''>
                                         <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
                                             <Image src={check} alt='checked' className='w-4 h-4' />Enabled
                                         </div>
-                                    </td>
-                                    <td className=''>{conJson?.credential_json?.confluence_access_token}</td>
-                                    <td><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' /></td>
-                                </tr>
+                                    </TableCell>
+                                    <TableCell className=''>{conJson?.credential_json?.confluence_access_token}</TableCell>
+                                    <TableCell><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' /></TableCell>
+                                </TableRow>
                             )
                         })}
-                    </tbody>
-                </table>
+                    </TableBody>
+                </Table>
             </div>
 
         </div>

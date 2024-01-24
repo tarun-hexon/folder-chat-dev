@@ -115,8 +115,10 @@ const FolderCard = ({ fol, doc, folder }) => {
         const { error } = await supabase
             .from('folders')
             .delete()
-            .eq('id', fol_id);
+            .eq('id', fol_id)
+           
         if (!error) {
+            
             setFolderAdded(!folderAdded)
             setPopOpen(false)
         }
@@ -252,6 +254,7 @@ const FolderCard = ({ fol, doc, folder }) => {
                     "Content-Type": "application/json",
                 },
             });
+            router.push('/chat')
         }
 
 
@@ -387,7 +390,7 @@ const FolderCard = ({ fol, doc, folder }) => {
                             files?.map((data, idx) => {
 
                                 return (
-                                    <Link href={`/chat/${data.session_id}`} key={data.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100 ${chat_id === data.session_id ? 'bg-slate-200' : ''}`} onClick={() => handleFilessOnclick(data)}>
+                                    <Link href={`/chat/${data?.session_id}`} key={data?.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100 ${chat_id === data.session_id ? 'bg-slate-200' : ''}`} onClick={() => handleFilessOnclick(data)}>
                                         <div className='inline-flex gap-1 items-center'>
                                             <div>
                                             <MessageSquare color='#14B8A6' size={'1rem'} className='hover:cursor-pointer' />
@@ -551,6 +554,7 @@ const SideBar = () => {
                 setFolder(folders);
                 return null
             } else {
+                setFolderId(null)
                 setFolder([])
                 localStorage.removeItem('lastFolderId')
             }

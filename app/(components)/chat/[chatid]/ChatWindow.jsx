@@ -135,7 +135,7 @@ const ChatWindow = () => {
     async function createChatTitle(session_id, name, userMessage) {
         // console.log(session_id, name, userMessage)
         try {
-            const data = await fetch('https://danswer.folder.chat/api/chat/rename-chat-session', {
+            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/rename-chat-session`, {
                 method: 'PUT',
                 headers: {
                     "Content-Type": "application/json"
@@ -215,7 +215,7 @@ const ChatWindow = () => {
                 })
                 .eq('session_id', localStorage.getItem('chatSessionID'))
                 .select()
-            if (data.length) {
+            if (data?.length) {
                 if (data[0].chats) {
                     setParentMessageId(data[0]?.message_id)
                     const msgs = JSON.parse(data[0]?.chats)
@@ -399,8 +399,9 @@ const ChatWindow = () => {
             if (response.length > 0) {
                 for (const obj of response) {
                     if(obj.citations){
-                        console.log(obj.citations)
-                        // getCitedDocumentsFromMessage(obj.citations)
+                        
+                        const key = Object.keys(obj.citations);
+                        console.log(obj.citations[key[0]])
                     }
                     if (obj.answer_piece) {
                         botResponse.current += obj.answer_piece;
@@ -410,12 +411,14 @@ const ChatWindow = () => {
                         setResponseObj(obj);
                         
                         if (obj?.context_docs?.top_documents.length > 0 && Object.keys(obj.citations).length !== 0) {
-                            
-
+                            const key = Object.keys(obj.citations);
+                            // console.log(obj.citations[key[0]])
+                            const relatedDoc = obj?.context_docs?.top_documents.filter(doc => doc?.db_doc_id === obj?.citations[key[0]])
+                            console.log(relatedDoc)
                             await updateChats(
                                 {
                                     bot: botResponse.current,
-                                    source: obj?.context_docs?.top_documents[0],
+                                    source: relatedDoc[0],
                                 },
                                 { user: userMsg },
                                 chatMsg,
@@ -425,7 +428,8 @@ const ChatWindow = () => {
                             await updateChats(
                                 { bot: botResponse.current },
                                 { user: userMsg },
-                                chatMsg
+                                chatMsg,
+                                obj.message_id
                             );
                         }
     
@@ -495,7 +499,8 @@ const ChatWindow = () => {
                 .select('*')
                 .eq('session_id', id);
             if (data[0]?.chats) {
-
+                setParentMessageId(data[0]?.message_id)
+                // console.log(data[0]?.message_id)
                 if (folderId === '') {
                     setFolderId(data[0]?.folder_id)
                 }
@@ -519,7 +524,7 @@ const ChatWindow = () => {
             // setLoading(false)
             console.log(error)
         }
-        setLoading(false)
+        // setLoading(false)
     };
 
     async function updateDocumentSet(ccID, des) {
@@ -599,6 +604,11 @@ const ChatWindow = () => {
 
     async function getDocSetDetails(folder_id){
         
+        if(!folder_id){
+            setLoading(false);
+            return null
+        }
+        console.log(folder_id)
         let { data: document_set, error } = await supabase
           .from('document_set')
           .select("*")
@@ -607,11 +617,16 @@ const ChatWindow = () => {
           if(document_set?.length > 0){
             setDocumentSet(document_set)
             setSelectedDoc(document_set[0]?.cc_pair_id)
+            setLoading(false)
           }else{
             setDocumentSet([])
-            router.push('/chat/upload')
+            // router.push('/chat/upload')
+            if(folder_id !== null){
+                router.push('/chat/upload')
+            }
           }
-          setLoading(false)
+          
+          
       }
 
     
@@ -709,7 +724,11 @@ const ChatWindow = () => {
                     </div>
                 </div>}
             </div>
-            {folder?.length === 0 ?
+            {loading ? <div className='w-full p-2 h-full items-center justify-center '>
+                        <Loader2 className='m-auto animate-spin' />
+                    </div>:
+
+                    (folder?.length === 0 ?
                 <div className='w-full h-full flex flex-col justify-center items-center gap-4'>
                     <Folder color='#14B8A6' size={'3rem'} className='block animate-pulse' />
                     <p className='text-[16px] leading-5 font-[400]'><strong className='hover:underline hover:cursor-pointer' onClick={() => setOpen(true)}>Create</strong> a Folder and start chating with folder.chat</p>
@@ -717,11 +736,8 @@ const ChatWindow = () => {
                 </div>
                 :
                 <div className='w-[70%] h-[88%] rounded-[6px] flex flex-col justify-between box-border'>
-                    {loading && <div className='w-full p-2 h-full items-center justify-center '>
-                        <Loader2 className='m-auto animate-spin' />
-                    </div>}
-                    {
-                        chatMsg?.length == 0 && loading === false ?
+                    
+                    {chatMsg?.length == 0?
                             <div>
                                 <p className='font-[600] text-[20px] tracking-[.25%] text-[#0F172A] opacity-[50%] leading-7'>The chat is empty</p>
                                 <p className='font-[400] text-sm tracking-[.25%] text-[#0F172A] opacity-[50%] leading-8'>Ask your document a question using message panel ...</p>
@@ -819,10 +835,9 @@ const ChatWindow = () => {
                                     </div>
                                 )}
 
-                            </div>
-                    }
+                            </div>}
 
-                    {!loading && 
+                     
                     <div className="w-full flex justify-center sm:bg-transparent p-2 pt-0 bg-white">
                         <div className="flex bg-[#F7F7F7] w-full justify-around rounded-xl border-2 border-transparent "
                             style={{ boxShadow: '0 0 2px 0 rgb(18, 18, 18, 0.5)' }}>
@@ -858,8 +873,8 @@ const ChatWindow = () => {
                             </span>
 
                         </div>
-                    </div>}
-                </div>}
+                    </div>
+                </div>)}
         </div>
     )
 }

@@ -102,7 +102,7 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
             setOpenMenu && setOpenMenu(false)
         }}>
             <DialogTrigger className='w-full'>
-                {!openMenu && <div variant={'outline'} className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-between p-2 px-4 rounded-md hover:bg-[#DEEAEA] hover:text-black'>
+                {!openMenu && <div variant={'outline'} className='w-full text-sm font-[400] text-white bg-[#14B8A6] border-[#14B8A6] leading-[24px] flex items-center justify-between p-2 px-4 rounded-md hover:bg-[#DEEAEA] hover:text-black shadow-md'>
                     New Folder
                     <Image src={plus} alt={'add'} className='w-4 h-4' />
                 </div>}
