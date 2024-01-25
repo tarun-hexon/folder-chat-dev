@@ -200,9 +200,9 @@ const FolderCard = ({ fol, doc, folder }) => {
         // console.log(ccID, fol_id)
         
         const allPairIds = [...documentSet[0]?.cc_pair_id]
-        const allNames = [...documentSet[0]?.c_name]
+        const allNames = [...documentSet[0]?.files_name]
         const idxOfID = documentSet[0]?.cc_pair_id.indexOf(ccID);
-        // const idxOfName = documentSet[0]?.c_name.indexOf(c_name);
+        // const idxOfName = documentSet[0]?.files_name.indexOf(c_name);
 
         allPairIds.splice(idxOfID, 1)
         allNames.splice(idxOfID, 1)
@@ -217,7 +217,7 @@ const FolderCard = ({ fol, doc, folder }) => {
 
             const { data, error } = await supabase
             .from('document_set')
-            .update({ 'cc_pair_id': allPairIds, "c_name": allNames })
+            .update({ 'cc_pair_id': allPairIds, "files_name": allNames })
             .eq('folder_id', fol_id)
             .select()
 
@@ -261,7 +261,9 @@ const FolderCard = ({ fol, doc, folder }) => {
     }
 
     async function getDocSetDetails(){
-        
+        if(!fol.id){
+            return null
+        }
         let { data: document_set, error } = await supabase
           .from('document_set')
           .select("*")
@@ -470,7 +472,7 @@ const FolderCard = ({ fol, doc, folder }) => {
                                 <div key={data} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100`}>
                                     <div className='inline-flex gap-1 items-center'>
                                         <Image src={fileIcon} alt='file' />
-                                        <span className={`font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis`} >{documentSet[0]?.c_name[idx]}</span>
+                                        <span className={`font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis`} >{documentSet[0]?.files_name[idx]}</span>
 
                                     </div>
                                     <Popover>
@@ -565,9 +567,6 @@ const SideBar = () => {
             console.log(error)
         }
     };
-
-
-    
 
 
     useEffect(() => {

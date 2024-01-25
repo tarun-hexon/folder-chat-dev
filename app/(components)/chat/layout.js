@@ -1,14 +1,14 @@
 'use client'
 
 import { useEffect } from "react"
-import { folderIdAtom, existConnectorDetailsAtom, allIndexingConnectorAtom } from "../../store"
+import { folderIdAtom, allIndexingConnectorAtom } from "../../store"
 import { useAtom } from "jotai"
 import supabase from "../../../config/supabse"
 
 export default function RootLayout({ children }) {
     const [folderId, setFolderId] = useAtom(folderIdAtom);
 
-    const [existConnectorDetails, setExistConnectorDetails] = useAtom(existConnectorDetailsAtom);
+
     const [allConnectorFromServer, setAllConnectorFromServer] = useAtom(allIndexingConnectorAtom);
 
     async function indexingStatus(){
@@ -23,7 +23,7 @@ export default function RootLayout({ children }) {
                 cc_p_id.push(cc_id)
               }
             };
-            setExistConnectorDetails(cc_p_id)
+            
             return cc_p_id
         } catch (error) {
             console.log(error)
@@ -33,6 +33,9 @@ export default function RootLayout({ children }) {
     };
     
     async function readData(){
+      if(!folderId){
+        return null
+      }
         const { data, error } = await supabase
         .from('document_set')
         .select('*')
@@ -48,7 +51,7 @@ export default function RootLayout({ children }) {
     };
 
     useEffect(()=> {
-      indexingStatus()
+      //indexingStatus()
       
     }, [folderId])
 

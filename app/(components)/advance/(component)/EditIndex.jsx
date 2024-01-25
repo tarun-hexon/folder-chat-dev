@@ -12,7 +12,7 @@ import {
 } from "../../../../components/ui/tooltip"
 import { fetchConnectorStatus } from '../../../../lib/helpers';
 import { useToast } from '../../../../components/ui/use-toast';
-import { sessionAtom } from '../../../store';
+import { sessionAtom, userConnectorsAtom } from '../../../store';
 import { useAtom } from 'jotai';
 
 
@@ -22,6 +22,8 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
     const [connectorDetails, setConnectorDetails] = useState(null);
     const [loading, setLoading] = useState(false);
     const [userConnectorId, setUserConnectorId] = useState([]);
+    const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom);
+
     const body = useRef(null)
 
     async function connectorStatus(id) {
@@ -48,6 +50,7 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
         }
         return []
     };
+
     async function disableConnector(bodyData){
         bodyData.current.connector.disabled = !bodyData.current.connector.disabled
         

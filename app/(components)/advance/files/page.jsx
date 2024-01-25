@@ -280,7 +280,7 @@ const Files = () => {
                         </TableRow>
                     </TableHeader>    
                     <TableBody>
-                    {loading && <div className='w-full text-start p-2'>Loading...</div>}
+                    {loading && <TableRow><TableCell colSpan={3} className='w-full text-start p-2'>Loading...</TableCell></TableRow>}
                         {files.map((item, idx) => {
                             // console.log(item)
                             return (

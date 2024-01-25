@@ -14,9 +14,9 @@ export const showAdvanceAtom = atom(false);
 export const chatHistoryAtom = atom({});
 export const chatSessionIDAtom = atom('new')
 export const userConnectorsAtom = atom(null);
-export const existConnectorDetailsAtom = atom([])
 export const chatTitleAtom = atom('')
-export const allIndexingConnectorAtom = atom(null)
+export const allIndexingConnectorAtom = atom(null);
+export const documentSetAtom = atom([])
 export const selectOptionAtom = atom([
     {
         name:'option_1',
