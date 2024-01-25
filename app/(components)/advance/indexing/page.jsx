@@ -39,12 +39,16 @@ const Indexing = () => {
 
 
     function statusBackGround(status){
-        if(status === "success"){
-            return ('text-[#22C55E]')
-        }else if(status === "failed"){
-            return ('text-[#eb3838]')
-        }else if(status === "in_progress"){
-            return ('text-[#FF5737]')
+        if(status?.connector?.disabled){
+            return ('text-yellow-500 border-yellow-500 bg-yellow-100')
+        }else if(status?.latest_index_attempt?.status === "success"){
+            return ('text-[#22C55E] border-[#22C55E] bg-[#d7fae4]')
+        }else if(status?.latest_index_attempt?.status === "failed"){
+            return ('text-[#eb3838] border-[#eb3838] bg-[#fdc7c7]')
+        }else if(status?.latest_index_attempt?.status === "not_started"){
+            return ('text-[#FF5737] border-[#FF5737] bg-[#f5d2ca]')
+        }else{
+            return ('text-yellow-500 border-yellow-500 bg-yellow-100')
         }
     }
     
@@ -84,14 +88,17 @@ const Indexing = () => {
                         {tableData?.map((item) => {
                             return (
                                 
-                                    <TableRow key={item?.cc_pair_id} className='border-b hover:cursor-pointer hover:bg-[#eaeaea]' onClick={()=> dialogTrgr(item?.cc_pair_id)}>
+                                    <TableRow key={item?.cc_pair_id} className='border-b hover:cursor-pointer hover:bg-[#eaeaea] ' onClick={()=> dialogTrgr(item?.cc_pair_id)}>
                                         
-                                            <TableCell className="font-medium flex text-left justify-start p-2 py-3 gap-2 overflow-hidden pr-1">
-                                                <Image src={iconSelector(item?.connector?.source)} alt={item?.connector?.source} /><span className='text-ellipsis break-all line-clamp-1 text-emphasis'>{item?.name}</span>
+                                            <TableCell >
+                                                <div className="font-medium flex items-center justify-start gap-2 overflow-hidden pr-1">
+                                                <Image src={iconSelector(item?.connector?.source)} alt={item?.connector?.source} />
+                                                <span className='text-ellipsis break-all line-clamp-1 text-emphasis'>{item?.name}</span>
+                                                </div>
                                             </TableCell>
                                             <TableCell className='text-center'>
-                                                <div className={`flex justify-center items-center gap-1 ${statusBackGround(item?.latest_index_attempt?.status)}`}>
-                                                    {`${item?.latest_index_attempt?.status || 'Processsing'}`}
+                                                <div className={`flex justify-center items-center gap-1 ${statusBackGround(item)} border-2 p-1 rounded-full `}>
+                                                    {`${!item?.connector?.disabled ? item?.latest_index_attempt?.status || 'Processsing' : 'Disabled'}`}
                                                 </div>
                                             </TableCell>
                                             <TableCell className='text-center'>{timeAgo(item?.latest_index_attempt?.time_updated)}</TableCell>

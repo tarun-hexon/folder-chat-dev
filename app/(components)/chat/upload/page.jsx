@@ -175,12 +175,13 @@ const Upload = () => {
 
       );
       const json = await data?.json();
-      console.log(existConnector, '164')
+      // console.log(existConnector, '164')
+
       if (existConnector?.length === 0) {
-        console.log(existConnector, '166')
+        // console.log(existConnector, '166')
         await insertDataInConTable([json?.id])
       } else {
-        console.log(existConnector, '169')
+        // console.log(existConnector, '169')
         await updatetDataInConTable(existConnector, json?.id)
       }
 
@@ -384,7 +385,7 @@ const Upload = () => {
     for (let i = 0; i < newArr?.length; i++) {
       for(const item of json){
         if (item?.cc_pair_id === newArr[i]){
-          console.log(item?.name)
+          // console.log(item?.name)
           docSetName.push(item?.name)
         }
       }
@@ -393,7 +394,7 @@ const Upload = () => {
     if (newArr.length === 0) {
       return null
     }
-    console.log(docSetName);
+    // console.log(docSetName);
     
     try {
 
@@ -466,7 +467,7 @@ const Upload = () => {
       }
     };
 
-    console.log(newArr);
+    // console.log(newArr);
     // return null
 
     try {
@@ -590,7 +591,7 @@ const Upload = () => {
       setSelectedDoc((prev) => [...prev, parseInt(id)])
 
     }
-    console.log(selectedDoc)
+    // console.log(selectedDoc)
 
   }
 
@@ -602,7 +603,7 @@ const Upload = () => {
         title: "Please Select Atleast One File!"
       })
     }
-    console.log(selectedDoc);
+    // console.log(selectedDoc);
     setDialogLoader(true)
     if (documentSet?.length === 0) {
       await setDocumentSetInServer2(selectedDoc, context);
@@ -664,10 +665,12 @@ const Upload = () => {
   useEffect(() => {
 
     if (userConnectors !== null) {
-      const fileData = userConnectors?.filter((item) => item?.connector?.source === 'file');
+      // const fileData = userConnectors?.filter((item) => item?.connector?.source === 'file');
       const conn_ids = userConnectors?.map(conn => { return conn?.connector?.id });
-      console.log(conn_ids)
+      // console.log(conn_ids)
       setExistConnector(conn_ids);
+
+
       // if (fileData?.length > 0) {
       //   const conn_ids = userConnectors?.map(conn => { return conn?.connector?.id });
       //   setExistConnector(conn_ids);

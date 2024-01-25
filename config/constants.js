@@ -20,6 +20,7 @@ import gitIconB from '../public/assets/Danswer-github-B.svg';
 import pdfIcon from '../public/assets/pdf.svg'
 import docIcon from '../public/assets/doc.svg'
 import xlsIcon from '../public/assets/xls.svg'
+import txtIcon from '../public/assets/txt-file.svg'
 
 
 export const selectOptions = [
@@ -289,7 +290,10 @@ export function iconSelector(icon){
       return docIcon
   }else if(icon === "drive"){
       return gDriveIconB
-  }
+  }else if(icon === "txt"){
+    return txtIcon
+}
+  
 };
 
 

@@ -398,8 +398,8 @@ const ChatWindow = () => {
                 for (const obj of response) {
                     if (obj.citations) {
 
-                        const key = Object.keys(obj.citations);
-                        console.log(obj.citations[key[0]])
+                        // const key = Object.keys(obj.citations);
+                        // console.log(obj.citations[key[0]])
                     }
                     if (obj.answer_piece) {
                         botResponse.current += obj.answer_piece;
@@ -412,7 +412,7 @@ const ChatWindow = () => {
                             const key = Object.keys(obj.citations);
                             // console.log(obj.citations[key[0]])
                             const relatedDoc = obj?.context_docs?.top_documents.filter(doc => doc?.db_doc_id === obj?.citations[key[0]])
-                            console.log(relatedDoc)
+                            // console.log(relatedDoc)
                             await updateChats(
                                 {
                                     bot: botResponse.current,
@@ -526,7 +526,9 @@ const ChatWindow = () => {
     };
 
     async function updateDocumentSet(ccID, des) {
-
+        console.log(ccID, 'remove return from line no 530 for updating data in server')
+        //need to fetch files names without replacing previous name
+        return null
         if (!documentSet[0]?.doc_set_id) {
             return null
         }
@@ -549,13 +551,14 @@ const ChatWindow = () => {
                     "cc_pair_ids": ccID
                 })
             });
-
+            
+            //for updating data n supabase we need to implement a logic inside this function to fetch files name without replacing previous name
             await updateDataInDB(ccID);
 
             if (res?.ok === null) {
                 return toast({
                     variant: 'default',
-                    title: "Document Update!"
+                    title: "Document Update Successfully!"
                 });
             }
             // await indexingStatus(folderId)
@@ -568,10 +571,19 @@ const ChatWindow = () => {
 
     async function updateDataInDB(ccID) {
 
+        //logic for fetching files name from exising connectors but it will replacing previous names if any
+        const names = []
+        for(const obj of userConnectors){
+            for(let i = 0; i < ccID.length; i++){
+                if(obj?.cc_pair_id === ccID[i]){
+                    names.push(obj?.name)
+                }
+            }
+        }
         const { data, error } = await supabase
             .from('document_set')
             .update(
-                { 'cc_pair_id': ccID },
+                { 'cc_pair_id': ccID, 'files_name': names },
             )
             .eq('folder_id', folderId)
             .select()
@@ -594,7 +606,7 @@ const ChatWindow = () => {
             setSelectedDoc((prev) => [...prev, parseInt(id)])
 
         }
-        console.log(selectedDoc)
+        // console.log(selectedDoc)
 
     }
 
@@ -606,7 +618,7 @@ const ChatWindow = () => {
             setLoading(false);
             return null
         }
-        console.log(folder_id)
+        // console.log(folder_id)
         let { data: document_set, error } = await supabase
             .from('document_set')
             .select("*")
@@ -678,37 +690,37 @@ const ChatWindow = () => {
                             <Image src={plus} alt='add' title='Add Documents' />
                         </Link>
                         :
-                        null
-                        // <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen) }}>
-                        //     <DialogTrigger asChild>
-                        //         <Image src={editIcon} alt='edit' title='edit' onClick={() => { getDocSetDetails(folderId); setDocSetOpen(true) }} />
-                        //     </DialogTrigger>
-                        //     <DialogContent>
-                        //         <DialogHeader className='mb-2'>
-                        //             <DialogTitle>
-                        //                 Remove Documents from {documentSet[0]?.doc_set_name?.split('-')[0]}
-                        //             </DialogTitle>
-                        //         </DialogHeader>
-                        //         <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
-                        //         <div className='flex w-full flex-wrap gap-1'>
+                        
+                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen) }}>
+                            <DialogTrigger asChild>
+                                <Image src={editIcon} alt='edit' title='edit' onClick={() => { getDocSetDetails(folderId); setDocSetOpen(true) }} />
+                            </DialogTrigger>
+                            <DialogContent>
+                                <DialogHeader className='mb-2'>
+                                    <DialogTitle>
+                                        Update Documents
+                                    </DialogTitle>
+                                </DialogHeader>
+                                <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
+                                <div className='flex w-full flex-wrap gap-1'>
 
-                        //             {/* {documentSet[0]?.cc_pair_id?.length > 0 &&
-                        //                 documentSet[0]?.cc_pair_id?.map((connector, idx) =>
-                        //                     <div key={connector} className='flex items-center gap-2 justify-center px-2'>
-                        //                         <input type="checkbox" value={connector} id={connector} checked={selectedDoc.includes(connector)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector} >{documentSet[0]?.files_name[idx]}</label>
-                        //                     </div>)
-                        //             } */}
-                        //             {userConnectors?.map((connector) =>
-                        //                 <div className='space-x-2 p-1 border flex items-center rounded-sm hover:bg-slate-100 w-fit break-all' key={connector?.cc_pair_id}>
-                        //                     <input type="checkbox" value={connector?.cc_pair_id} checked={selectedDoc?.includes(connector?.cc_pair_id)} id={connector?.cc_pair_id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 `} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector?.cc_pair_id} >{connector?.name}</label></div>)
-                        //             }
-                        //         </div>
-                        //         <DialogFooter className={cn('w-full')}>
-                        //             <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet(selectedDoc, inputDocDes)}>Remove</Button>
-                        //         </DialogFooter>
+                                    {/* {documentSet[0]?.cc_pair_id?.length > 0 &&
+                                        documentSet[0]?.cc_pair_id?.map((connector, idx) =>
+                                            <div key={connector} className='flex items-center gap-2 justify-center px-2'>
+                                                <input type="checkbox" value={connector} id={connector} checked={selectedDoc.includes(connector)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector} >{documentSet[0]?.files_name[idx]}</label>
+                                            </div>)
+                                    } */}
+                                    {userConnectors?.map((connector) =>
+                                        <div className='space-x-2 p-1 border flex items-center rounded-sm hover:bg-slate-100 w-fit break-all' key={connector?.cc_pair_id}>
+                                            <input type="checkbox" value={connector?.cc_pair_id} checked={selectedDoc?.includes(connector?.cc_pair_id)} id={connector?.cc_pair_id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 `} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector?.cc_pair_id} >{connector?.name}</label></div>)
+                                    }
+                                </div>
+                                <DialogFooter className={cn('w-full')}>
+                                    <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet(selectedDoc, inputDocDes)}>Update</Button>
+                                </DialogFooter>
 
-                        //     </DialogContent>
-                        // </Dialog>
+                            </DialogContent>
+                        </Dialog>
                     )
                     }
                 </div>
