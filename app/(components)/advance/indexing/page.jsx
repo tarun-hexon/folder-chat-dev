@@ -24,7 +24,7 @@ import {
 import { cn } from '../../../../lib/utils';
 import EditIndex from '../(component)/EditIndex';
 import { useAtom } from 'jotai';
-import { sessionAtom, userConnectorsAtom } from '../../../store';
+import { sessionAtom, userConnectorsAtom, tempAtom } from '../../../store';
 
   
 
@@ -36,7 +36,7 @@ const Indexing = () => {
     const [open, setOpen] = useState(ccPairId !== null);
     const [session, setSession] = useAtom(sessionAtom);
     const [allConnectors, setAllConnectors] = useAtom(userConnectorsAtom);
-
+   
 
     function statusBackGround(status){
         if(status?.connector?.disabled){

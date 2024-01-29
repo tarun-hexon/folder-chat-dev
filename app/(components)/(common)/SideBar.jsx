@@ -6,7 +6,7 @@ import threeDot from '../../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../components/ui/accordion";
 import { Account, NewFolder } from '../(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom,  showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom, documentSetAtom } from '../../store';
+import { folderAtom,  showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom, tempAtom } from '../../store';
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
 import { Pencil, Trash2, Check, X, MessageSquare } from 'lucide-react';
@@ -41,6 +41,8 @@ const FolderCard = ({ fol, doc, folder }) => {
     const [folNewName, setFolNewName] = useState('');
     const [dialogOpen, setDialogOpen] = useState(false);
     const [documentSet, setDocumentSet] = useState([]);
+    const [temp, setTemp] = useAtom(tempAtom)
+
     // const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
     
     const router = useRouter();
@@ -283,7 +285,7 @@ const FolderCard = ({ fol, doc, folder }) => {
     useEffect(() => {
         
         getDocSetDetails()
-    }, [chat_id])
+    }, [chat_id, temp])
     
     useEffect(() => {
         setIsSelected(chat_id);

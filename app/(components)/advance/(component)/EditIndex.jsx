@@ -12,7 +12,7 @@ import {
 } from "../../../../components/ui/tooltip"
 import { fetchConnectorStatus } from '../../../../lib/helpers';
 import { useToast } from '../../../../components/ui/use-toast';
-import { sessionAtom, userConnectorsAtom, documentSetAtom } from '../../../store';
+import { sessionAtom, userConnectorsAtom, folderIdAtom, tempAtom } from '../../../store';
 import { useAtom } from 'jotai';
 
 
@@ -23,8 +23,9 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
     const [loading, setLoading] = useState(false);
     const [userConnectorId, setUserConnectorId] = useState([]);
     const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom);
-    const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
-
+    const [documentSet, setDocumentSet] = useState([]);
+    const [folderId, setFolderId] = useAtom(folderIdAtom);
+    const [temp, setTemp] = useAtom(tempAtom)
     const body = useRef(null)
 
     async function connectorStatus(id) {
@@ -37,7 +38,24 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
             console.log(error)
         }
     };
+    async function getDocSetDetails(folID){
+        if(!folID){
+            return null
+        }
+        let { data: document_set, error } = await supabase
+          .from('document_set')
+          .select("*")
+          .eq('folder_id', folID)
 
+          if(document_set?.length > 0){
+            setDocumentSet(document_set)
+            
+          }else{
+            setDocumentSet([])
+            
+          }
+          
+      }
     //will delete this api call we already storing data in atom 
     async function getConnectorsID(){
         // console.log(documentSet)
@@ -107,7 +125,7 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
 
             let exConn = [...userConnectorId]
             const index = exConn.indexOf(bodyData?.current?.connector?.id);
-            
+            //logic to delete cc id from doc set, need to identify folder id 
             if(documentSet !== null && documentSet.length > 0){
                 let idxOfID = documentSet[0]?.cc_pair_id.indexOf(bodyData?.current?.cc_pair_id)
 
@@ -117,7 +135,6 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
                 
                 ccIDs.splice(idxOfID, 1)
                 names.splice(idxOfID, 1)
-
                 
                 if(ccIDs.length > 0){
 
@@ -176,7 +193,7 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
                 variant:'default',
                 description:'Connector Deleted Successfully!'
             })
-            
+            setTemp(!temp)
             setOpen(false);
             setLoading(false)
             return null

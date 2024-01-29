@@ -784,9 +784,9 @@ const Upload = () => {
             </>
             :
             <div className='w-full text-center space-y-4'>
-              <div className='w-full border flex flex-col gap-1 justify-center items-center min-h-[20vh] bg-[#EFF5F5] rounded-md relative py-4'>
+              <div className='w-full border flex flex-col gap-1 justify-center items-center min-h-[20vh] max-h-[40vh] bg-[#EFF5F5] rounded-md relative p-4 overflow-y-scroll'>
 
-                {files?.map(file => <p key={file?.name} className='text-sm leading-6'>{file?.name}</p>)}
+                {files?.map(file => <p key={file?.name} className='text-sm leading-6 break-all'>{file?.name}</p>)}
                 <X size={'1rem'} className='self-start absolute top-1 right-1 hover:cursor-pointer' onClick={() => setFiles([])} />
               </div>
 
