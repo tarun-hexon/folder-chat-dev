@@ -610,8 +610,6 @@ const ChatWindow = () => {
 
     }
 
-
-
     async function getDocSetDetails(folder_id) {
 
         if (!folder_id) {
@@ -638,8 +636,6 @@ const ChatWindow = () => {
 
 
     }
-
-
 
     useEffect(() => {
         resizeTextarea();
