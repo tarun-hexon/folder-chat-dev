@@ -224,7 +224,7 @@ const EditIndex = ({ cc_pair_id, setOpen }) => {
                             
                         </TooltipTrigger>
                         {!connectorDetails?.connector?.disabled && <TooltipContent className={cn('w-[60%] break-words m-auto text-justify bg-gray-500 text-white opacity-90')}>
-                                <p className='text-sm leading-5 font-[400] '>You must disable the connector first before deleting it</p>
+                                <p className='text-sm leading-5 font-[400]'>You must disable the connector first before deleting it</p>
                         </TooltipContent>}
                     </Tooltip>
                 </TooltipProvider>
