@@ -598,9 +598,10 @@ const Upload = () => {
   async function uploadDocSetFiles() {
 
     if (selectedDoc?.length === 0) {
+      
       return toast({
         variant: 'destructive',
-        title: "Please Select Atleast One File!"
+        title: "Please select atleast one file!"
       })
     }
     // console.log(selectedDoc);
@@ -639,6 +640,40 @@ const Upload = () => {
   //   return []
   // };
 
+  function dialogOpenChange(){
+    if(documentSet[0]?.cc_pair_id?.length > 0){
+      setSelectedDoc(documentSet[0]?.cc_pair_id)
+      context.fileName !== ''  && setD_open(!d_open)
+    }else{
+      () => setSelectedDoc([])
+      if(context.fileName !=='' && context.contextName !== ''){
+        setD_open(!d_open)
+      }
+    }
+    // setSelectedDoc(documentSet[0]?.cc_pair_id?.length > 0 ? documentSet[0]?.cc_pair_id : []); 
+    // setD_open(!d_open)
+
+  };
+
+  function selectFromExistingOnClick(){
+    if(documentSet[0]?.cc_pair_id?.length > 0){
+      if(context.fileName === ''){
+        return toast({
+          variant: 'destructive',
+          title: "File Name is required!"
+        })
+      }
+    }else{
+      if(context.fileName=='' || context.contextName === ''){
+        return toast({
+          variant: 'destructive',
+          title: "File and context name are required!"
+        })
+      }
+    }
+    setD_open(!d_open)
+    
+  }
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
@@ -751,12 +786,9 @@ const Upload = () => {
               </div>
               {userConnectors?.length > 0 && <div className='w-full text-sm leading-5 text-center space-y-2'>
                 <p className='font-[500]'>OR</p>
-                <Dialog open={d_open} onOpenChange={() => { setSelectedDoc(documentSet[0]?.cc_pair_id?.length > 0 ? documentSet[0]?.cc_pair_id : []); context.fileName  && setD_open(!d_open) }} className='fixed max-h-52 overflow-x-scroll no-scrollbar' >
+                <Dialog open={d_open} onOpenChange={() => dialogOpenChange()} className='fixed max-h-52 overflow-x-scroll no-scrollbar' >
                   <DialogTrigger asChild>
-                    <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer' onClick={() => context.fileName !== '' ? setD_open(true) : toast({
-                      variant: 'destructive',
-                      title: "File Name is required!"
-                    })}>Select From Existing Files</p>
+                    <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer' onClick={() => selectFromExistingOnClick()}>Select From Existing Files</p>
                   </DialogTrigger>
                   <DialogContent>
                     {!dialogLoader ? 
