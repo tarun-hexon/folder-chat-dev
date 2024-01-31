@@ -447,7 +447,6 @@ const ChatWindow = () => {
         return entireResponse; // Return the entire response
     }
 
-
     const processRawChunkString = (rawChunkString, previousPartialChunk) => {
         if (!rawChunkString) {
             return [[], null];
@@ -686,37 +685,37 @@ const ChatWindow = () => {
                             <Image src={plus} alt='add' title='Add Documents' />
                         </Link>
                         :
-                        
-                        <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen) }}>
-                            <DialogTrigger asChild>
-                                <Image src={editIcon} alt='edit' title='edit' onClick={() => { getDocSetDetails(folderId); setDocSetOpen(true) }} />
-                            </DialogTrigger>
-                            <DialogContent>
-                                <DialogHeader className='mb-2'>
-                                    <DialogTitle>
-                                        Update Documents
-                                    </DialogTitle>
-                                </DialogHeader>
-                                <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
-                                <div className='flex w-full flex-wrap gap-1'>
+                        null
+                        // <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen) }}>
+                        //     <DialogTrigger asChild>
+                        //         <Image src={editIcon} alt='edit' title='edit' onClick={() => { getDocSetDetails(folderId); setDocSetOpen(true) }} />
+                        //     </DialogTrigger>
+                        //     <DialogContent>
+                        //         <DialogHeader className='mb-2'>
+                        //             <DialogTitle>
+                        //                 Update Documents
+                        //             </DialogTitle>
+                        //         </DialogHeader>
+                        //         <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
+                        //         <div className='flex w-full flex-wrap gap-1'>
 
-                                    {/* {documentSet[0]?.cc_pair_id?.length > 0 &&
-                                        documentSet[0]?.cc_pair_id?.map((connector, idx) =>
-                                            <div key={connector} className='flex items-center gap-2 justify-center px-2'>
-                                                <input type="checkbox" value={connector} id={connector} checked={selectedDoc.includes(connector)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector} >{documentSet[0]?.files_name[idx]}</label>
-                                            </div>)
-                                    } */}
-                                    {userConnectors?.map((connector) =>
-                                        <div className='space-x-2 p-1 border flex items-center rounded-sm hover:bg-slate-100 w-fit break-all' key={connector?.cc_pair_id}>
-                                            <input type="checkbox" value={connector?.cc_pair_id} checked={selectedDoc?.includes(connector?.cc_pair_id)} id={connector?.cc_pair_id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 `} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector?.cc_pair_id} >{connector?.name}</label></div>)
-                                    }
-                                </div>
-                                <DialogFooter className={cn('w-full')}>
-                                    <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet(selectedDoc, inputDocDes)}>Update</Button>
-                                </DialogFooter>
+                        //             {/* {documentSet[0]?.cc_pair_id?.length > 0 &&
+                        //                 documentSet[0]?.cc_pair_id?.map((connector, idx) =>
+                        //                     <div key={connector} className='flex items-center gap-2 justify-center px-2'>
+                        //                         <input type="checkbox" value={connector} id={connector} checked={selectedDoc.includes(connector)} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100`} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector} >{documentSet[0]?.files_name[idx]}</label>
+                        //                     </div>)
+                        //             } */}
+                        //             {userConnectors?.map((connector) =>
+                        //                 <div className='space-x-2 p-1 border flex items-center rounded-sm hover:bg-slate-100 w-fit break-all' key={connector?.cc_pair_id}>
+                        //                     <input type="checkbox" value={connector?.cc_pair_id} checked={selectedDoc?.includes(connector?.cc_pair_id)} id={connector?.cc_pair_id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 `} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector?.cc_pair_id} >{connector?.name}</label></div>)
+                        //             }
+                        //         </div>
+                        //         <DialogFooter className={cn('w-full')}>
+                        //             <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateDocumentSet(selectedDoc, inputDocDes)}>Update</Button>
+                        //         </DialogFooter>
 
-                            </DialogContent>
-                        </Dialog>
+                        //     </DialogContent>
+                        // </Dialog>
                     )
                     }
                 </div>

@@ -30,7 +30,6 @@ const FolderCard = ({ fol, doc, folder }) => {
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
     const [files, setFiles] = useState([])
     const [chatTitle, setChatTitle] = useAtom(chatTitleAtom);
-    
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [popOpen, setPopOpen] = useState(false)
     const [isRenamingChat, setIsRenamingChat] = useState(false);
