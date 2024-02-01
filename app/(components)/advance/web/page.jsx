@@ -179,6 +179,21 @@ const Web = () => {
         }
     };
 
+    function statusBackGround(status){
+        if(status?.connector?.disabled){
+            return ('text-yellow-500')
+        }else if(status?.latest_index_attempt?.status === "success"){
+            return ('text-[#22C55E]')
+        }else if(status?.latest_index_attempt?.status === "failed"){
+            return ('text-[#eb3838]')
+        }else if(status?.latest_index_attempt?.status === "not_started"){
+            return ('text-[#FF5737]')
+        }else{
+            return ('text-yellow-500')
+        }
+    }
+    
+
     useEffect(()=> {
 
         if(allConnectors !== null ){
@@ -246,9 +261,10 @@ const Web = () => {
                             return (
                                 <TableRow className='border-b' key={idx}>
                                     <TableCell className="font-medium w-96 text-left px-2 py-3 text-ellipsis break-all text-emphasis overflow-hidden">{item?.name}</TableCell>
-                                    <TableCell>
-                                        <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
-                                            <Image src={check} alt='checked' className='w-4 h-4' />Running!
+                                    <TableCell className='w-[20%]'>
+                                        <div className={`flex justify-center items-center gap-1 ${statusBackGround(item)} p-1 rounded-full `}>
+                                        {/* <Image src={check} alt='checked' className='w-4 h-4' /> */}
+                                            {`${!item?.connector?.disabled ? item?.latest_index_attempt?.status || 'Processsing' : 'Disabled'}`}
                                         </div>
                                     </TableCell>
                                     {/* <TableCell><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer' onClick={()=> deleteConnector(item.id, item.credential_ids[0])}/></TableCell> */}

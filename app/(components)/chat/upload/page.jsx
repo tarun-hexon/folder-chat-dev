@@ -460,7 +460,7 @@ const Upload = () => {
   async function updateDocumentSetInServer2(db_id, ccID, c_name) {
 
     let newArr = [...documentSet[0]?.cc_pair_id]
-
+    
     for (let i = 0; i < ccID?.length; i++) {
       if (newArr.indexOf(ccID[i]) < 0) {
         newArr.push(ccID[i])
@@ -524,7 +524,7 @@ const Upload = () => {
     if (documentSet[0]?.files_name?.length > 0) {
       names = [...documentSet[0]?.files_name, name]
     } else {
-      names = [...documentSet[0]?.files_name, name]
+      names = [name]
 
     }
     // console.log(names)
@@ -795,9 +795,10 @@ const Upload = () => {
                     <>
                     <h1 className='font-[600] text-sm leading-5 m-2'>Select Documents</h1>
                     <div className='flex gap-2 flex-wrap'>
-                      {userConnectors?.map((connector) =>
+                      {userConnectors?.map((connector) => connector?.connector?.source === 'file' ?
                         <div className='space-x-2 p-1 border flex items-center rounded-sm hover:bg-slate-100 w-fit break-all' key={connector?.cc_pair_id}>
-                          <input type="checkbox" value={connector?.cc_pair_id} checked={selectedDoc?.includes(connector?.cc_pair_id)} id={connector?.cc_pair_id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 `} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector?.cc_pair_id} >{connector?.name}</label></div>)
+                          <input type="checkbox" value={connector?.cc_pair_id} checked={selectedDoc?.includes(connector?.cc_pair_id)} id={connector?.cc_pair_id} className={`px-2 py-1 border rounded hover:cursor-pointer hover:bg-gray-100 `} onChange={(e) => handleDocSetID(e.target.value)} /><label htmlFor={connector?.cc_pair_id} >{connector?.name}</label>
+                        </div>: null)
                       }
                     </div>
                     <DialogFooter className={cn('w-full')}>

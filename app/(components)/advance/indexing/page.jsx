@@ -97,7 +97,7 @@ const Indexing = () => {
                                                 </div>
                                             </TableCell>
                                             <TableCell className='text-center'>
-                                                <div className={`flex justify-center items-center gap-1 ${statusBackGround(item)} border-2 p-1 rounded-full `}>
+                                                <div className={`flex justify-center items-center gap-1 ${statusBackGround(item)} border p-1 rounded-full `}>
                                                     {`${!item?.connector?.disabled ? item?.latest_index_attempt?.status || 'Processsing' : 'Disabled'}`}
                                                 </div>
                                             </TableCell>
