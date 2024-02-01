@@ -568,7 +568,6 @@ const ChatWindow = () => {
 
     useEffect(() => {
         resizeTextarea();
-
     }, [userMsg]);
 
     useEffect(() => {

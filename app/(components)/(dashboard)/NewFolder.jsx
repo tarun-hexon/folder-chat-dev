@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import {
     Dialog,
@@ -27,17 +28,21 @@ import { v4 as uuidv4 } from 'uuid';
 import { isUserExist } from '../../../config/lib';
 import supabase from '../../../config/supabse';
 import { useRouter } from 'next/navigation';
+import { getCurrentUser } from '../../../lib/user';
 
 const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     // const [folder, setFolder] = useAtom(folderAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
-
     const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
-    const [session, setSession] = useAtom(sessionAtom);
+    // const [session, setSession] = useAtom(sessionAtom);
+
+    //danswer user data
+
+    const [currentUser, setCurrentUser] = useState({})
     
     const router = useRouter()
-    // const id = uuidv4()
+    
     const [fol, setFol] = useState({
         title: '',
         description: '',
@@ -63,12 +68,12 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                 .insert([
                     { 
                         'workspace_id': wkID[0].id, 
-                        'user_id': session.user.id, 
-                        'name' :folderData.title, 
-                        'description':folderData.description, 
-                        'function':folderData.function, 
-                        'is_active':true, 
-                        'chat_enabled':true 
+                        'user_id': currentUser?.id, 
+                        'name' : folderData.title, 
+                        'description': folderData.description, 
+                        'function': folderData.function, 
+                        'is_active': true, 
+                        'chat_enabled': true 
                     }
                 ])
                 .select();
@@ -89,7 +94,16 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
         } catch (error) {
             console.log(error)
         }
-    }
+    };
+    async function fetchCurrentUser(){
+        const user = await getCurrentUser();
+        setCurrentUser(user)
+      };
+  
+      useEffect(() => {
+          fetchCurrentUser();
+      }, []);
+   
 
     return (
         <Dialog open={open} onOpenChange={() => {

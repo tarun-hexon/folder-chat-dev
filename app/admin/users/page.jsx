@@ -3,14 +3,15 @@ import React, { useEffect, useState } from 'react'
 import { Loader2, Users } from 'lucide-react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '../../../components/ui/table';
 import { Button } from '../../../components/ui/button';
-import { cn } from '../../../lib/utils';
-import { deleteUser, getAllUsers, promoteUser } from '../../../lib/user';
+import { useToast } from '../../../components/ui/use-toast';
+import { deleteUser, getAllUsers, getCurrentUser, promoteUser } from '../../../lib/user';
 
 function Admin() {
 
-
-    const [users, setUsers] = useState([])
-    const [loader, setLoader] = useState(true)
+    const { toast } = useToast();
+    const [users, setUsers] = useState([]);
+    const [loader, setLoader] = useState(true);
+    const [curentUser, setCurrentUser] = useState({})
 
     async function getUsers() {
         try {
@@ -29,6 +30,15 @@ function Admin() {
             if (res.ok) {
                 await getUsers()
                 setLoader(false)
+                return toast({
+                  variant: 'default',
+                  title: "User deleted."
+                  });
+            }else{
+              return toast({
+                variant: 'destructive',
+                title: "Something went wrong"
+                });
             }
 
         } catch (error) {
@@ -39,14 +49,29 @@ function Admin() {
     async function promoteToAdmin(email){
         setLoader(true)
         const res = await promoteUser(email);
-        
         if(res.ok){
             await getUsers();
             setLoader(false)
+            return toast({
+              variant: 'default',
+              title: "Promoted to admin!"
+              });
+        }else{
+          return toast({
+            variant: 'destructive',
+            title: "Something went wrong"
+            });
         }
-    }
+    };
+
+    async function fetchCurrentUser(){
+      const user = await getCurrentUser();
+      setCurrentUser(user)
+    };
+
     useEffect(() => {
-        getUsers()
+        getUsers();
+        currentUser();
     }, []);
 
     
@@ -77,14 +102,14 @@ function Admin() {
                             </TableCell >
                             <TableCell className='text-center'>
                                 <div>
-                                    <Button className='w-[12rem] bg-green-400 hover:bg-green-500' onClick={()=> promoteToAdmin(user?.email)}>
+                                    <Button disabled={user?.id === curentUser?.id} className={`w-[12rem] ${user?.role === "admin" ? "bg-orange-300 hover:bg-orange-400" : "bg-green-400 hover:bg-green-500"}`} onClick={()=> promoteToAdmin(user?.email)}>
                                         {user?.role === "admin" ? "Demote to User" : "Promote to Admin"}
                                     </Button>
                                 </div>
                             </TableCell>
                             <TableCell className='text-center'>
                                 <div>
-                                    <Button className={cn('bg-red-400 hover:bg-red-500')} onClick={() => dltUser(user?.email)}>
+                                    <Button disabled={user?.id === curentUser?.id} className={`bg-red-400 hover:bg-red-500`} onClick={() => dltUser(user?.email)}>
                                         Delete
                                     </Button>
                                 </div>

@@ -30,7 +30,7 @@ function OpenAi() {
               toast({
                 variant: 'default',
                 title: "OpenAi Key Added!"
-            });
+                });
         }else{
             toast({
                 variant: 'destructive',

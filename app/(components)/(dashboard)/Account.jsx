@@ -12,6 +12,7 @@ import { Dialog, DialogTrigger } from '../../../components/ui/dialog';
 import { Setting } from '../(settings)'
 import { LogOut } from 'lucide-react';
 import { isUserExist } from '../../../config/lib';
+import { getCurrentUser } from '../../../lib/user';
 
 const Account = () => {
     const [userSession, setUserSession] = useAtom(sessionAtom);
@@ -20,7 +21,8 @@ const Account = () => {
     const [open, setOpen] = useState(false);
     const [item, setItem] = useState('profile')
     const [workSpace, setWorkSpace] = useState(null);
-    
+    const [currentUser, setCurrentUser] = useState({});
+
     const router = useRouter();
     
     async function signOut() {
@@ -51,8 +53,16 @@ const Account = () => {
         }
     };
 
+    async function fetchCurrentUser(){
+        const user = await getCurrentUser();
+        // console.log(user)
+        setCurrentUser(user)
+      };
+  
+
     useEffect(()=> {
-        getWorkspaceName()
+        getWorkspaceName();
+        fetchCurrentUser();
     }, [])
     return (
         <div className='w-full'>
@@ -60,8 +70,8 @@ const Account = () => {
                 <AccordionItem value="profile" className='p-2 gap-4 flex flex-col w-full'>
                     <AccordionTrigger className='flex-row-reverse justify-between items-center gap-2'>
                         <div className='flex w-full justify-between'>
-                        
-                            <h1 className='font-[600] text-sm leading-5 mr-10'>{workSpace}</h1>
+                            {/* <h1 className='font-[600] text-sm leading-5 mr-10'>{workSpace}</h1> */}
+                            <h1 className='font-[600] text-sm leading-5 mr-10'>{currentUser?.email}</h1>
                             <Image src={threeDot} alt={'options'} className='w-4 h-4 ' />
                         </div>
                     </AccordionTrigger>
