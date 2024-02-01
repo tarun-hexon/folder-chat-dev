@@ -755,7 +755,7 @@ const Upload = () => {
                   <DialogTrigger asChild>
                     <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer' onClick={() => context.fileName !== '' ? setD_open(true) : toast({
                       variant: 'destructive',
-                      title: "File Name is required!"
+                      title: "File name is required!"
                     })}>Select From Existing Files</p>
                   </DialogTrigger>
                   <DialogContent>

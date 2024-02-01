@@ -203,6 +203,19 @@ const Files = () => {
         }
     };
 
+    function statusBackGround(status){
+        if(status?.connector?.disabled){
+            return ('text-yellow-500 border-yellow-500 bg-yellow-100')
+        }else if(status?.latest_index_attempt?.status === "success"){
+            return ('text-[#22C55E] border-[#22C55E] bg-[#d7fae4]')
+        }else if(status?.latest_index_attempt?.status === "failed"){
+            return ('text-[#eb3838] border-[#eb3838] bg-[#fdc7c7]')
+        }else if(status?.latest_index_attempt?.status === "not_started"){
+            return ('text-[#FF5737] border-[#FF5737] bg-[#f5d2ca]')
+        }else{
+            return ('text-yellow-500 border-yellow-500 bg-yellow-100')
+        }
+    };
     
     async function deleteConnector(id1, id2){
         return null
@@ -228,6 +241,7 @@ const Files = () => {
             const filData = userConnectors?.filter((item)=> item?.connector?.source === 'file');
             if(filData.length > 0){
                 setFiles(filData);
+                console.log(filData)
                 const conn_ids = filData?.map(conn => {return conn?.connector?.id});
                 
                 setExistConnector(conn_ids)
@@ -286,11 +300,11 @@ const Files = () => {
                             return (
                                 <TableRow className='border-b hover:cursor-pointer' key={idx}>
                                     <TableCell className="font-medium w-96 text-left p-2 py-3 text-ellipsis break-all text-emphasis overflow-hidden">{item?.name}</TableCell>
-                                    <TableCell>
-                                        <div className='flex justify-center items-center gap-1 text-[#22C55E]'>
-                                            <Image src={check} alt='checked' className='w-4 h-4' />Enabled
-                                        </div>
-                                    </TableCell>
+                                    <TableCell className='text-center'>
+                                                <div className={`flex justify-center items-center gap-1 ${statusBackGround(item)} border-2 p-1 rounded-full `}>
+                                                    {`${!item?.connector?.disabled ? item?.latest_index_attempt?.status || 'Processsing' : 'Disabled'}`}
+                                                </div>
+                                        </TableCell>
                                     {/* <TableCell><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer'/></TableCell> */}
                                 </TableRow>
                             )

@@ -461,14 +461,14 @@ const FolderCard = ({ fol, doc, folder }) => {
                             })
                     }
                     {
-                        documentSet[0]?.cc_pair_id?.map((data, idx) => {
+                        documentSet[0]?.files_name?.map((data, idx) => {
                                 
                             return (
 
                                 <div key={data} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100`}>
                                     <div className='inline-flex gap-1 items-center'>
                                         <Image src={fileIcon} alt='file' />
-                                        <span className={`font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis`} >{documentSet[0]?.files_name[idx]}</span>
+                                        <span className={`font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis`} >{data}</span>
 
                                     </div>
                                     <Popover>
@@ -526,9 +526,10 @@ const SideBar = () => {
     const [session, setSession] = useAtom(sessionAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
-    const current_url = window.location.href;
-    const chat_id = current_url.split("advance");
-    const router = useRouter();
+
+    // const current_url = window.location.href;
+    // const chat_id = current_url.split("advance");
+    // const router = useRouter();
 
     async function getFolders() {
         try {

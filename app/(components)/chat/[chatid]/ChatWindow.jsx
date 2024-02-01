@@ -23,6 +23,7 @@ import { Label } from '../../../../components/ui/label'
 import { cn } from '../../../../lib/utils'
 import plus from '../../../../public/assets/plus.svg'
 import Link from 'next/link'
+import { useParams } from 'next/navigation'
 
 
 
@@ -57,11 +58,13 @@ const ChatWindow = () => {
 
     const botResponse = useRef('');
 
-    const current_url = window.location.href;
+    // const current_url = window.location.href;
 
-    const chat_id = current_url.split("/chat/")[1];
+    // const chatid = current_url.split("/chat/")[1];
 
-    const router = useRouter();
+    // const router = useRouter();
+    const {chatid} = useParams()
+    
     const { toast } = useToast();
 
     async function createChatSessionId(userMsgdata) {
@@ -288,80 +291,6 @@ const ChatWindow = () => {
         }
     };
 
-    // async function handleStream(streamingResponse, userMsg) {
-    //     const reader = streamingResponse.body?.getReader();
-    //     const decoder = new TextDecoder("utf-8");
-
-    //     let previousPartialChunk = null;
-    //     while (true) {
-    //         const rawChunk = await reader?.read();
-    //         if (!rawChunk) {
-    //             throw new Error("Unable to process chunk");
-    //         }
-    //         const { done, value } = rawChunk;
-    //         if (done) {
-    //             console.log(value)
-    //             getCitedDocumentsFromMessage(entireMsg)
-    //             break;
-    //         }
-
-    //         const [completedChunks, partialChunk] = processRawChunkString(
-    //             decoder.decode(value, { stream: true }),
-    //             previousPartialChunk
-    //         );
-    //         if (!completedChunks.length && !partialChunk) {
-
-    //             break;
-    //         }
-    //         previousPartialChunk = partialChunk;
-
-    //         // console.log(partialChunk)
-    //         // console.log('completed chunk', completedChunks)
-    //         const response = await Promise.resolve(completedChunks);
-
-    //         if (response.length > 0) {
-    //             // getCitedDocumentsFromMessage(response)
-    //             // console.log(response)
-    //             for (const obj of response) {
-
-    //                 setEntireMsg((prev) => [...prev, obj])
-
-    //                 if(obj.citations){
-
-    //                     // console.log(obj.citations)
-    //                 }
-    //                 if (obj.answer_piece) {
-    //                     botResponse.current += obj.answer_piece;
-
-    //                     setRcvdMsg(prev => prev + obj.answer_piece);
-
-    //                 } else if (obj.parent_message) {
-
-    //                     setResponseObj(obj);
-    //                     // console.log(obj)
-
-    //                     if (obj?.context_docs?.top_documents.length > 0) {
-    //                         await updateChats({ 'bot': botResponse.current, 'source': obj?.context_docs?.top_documents[0]}, { 'user': userMsg }, chatMsg, obj.message_id)
-    //                     } else {
-    //                         await updateChats({ 'bot': botResponse.current }, { 'user': userMsg }, chatMsg)
-    //                     }
-
-    //                     botResponse.current = ''
-    //                     setMsgLoader(false)
-    //                 } else if (obj.error) {
-    //                     setMsgLoader(false);
-    //                     return toast({
-    //                         variant: 'destructive',
-    //                         description: 'Something Went Wrong!'
-    //                     })
-    //                 }
-    //             }
-
-    //         };
-
-    //     }
-    // };
-
     async function handleStream(streamingResponse, userMsg) {
         const reader = streamingResponse.body?.getReader();
         const decoder = new TextDecoder("utf-8");
@@ -446,7 +375,6 @@ const ChatWindow = () => {
 
         return entireResponse; // Return the entire response
     }
-
 
     const processRawChunkString = (rawChunkString, previousPartialChunk) => {
         if (!rawChunkString) {
@@ -628,10 +556,11 @@ const ChatWindow = () => {
             setLoading(false)
         } else {
             setDocumentSet([])
+            setLoading(false)
             // router.push('/chat/upload')
-            if (folder_id !== null) {
-                router.push('/chat/upload')
-            }
+            // if (folder_id !== null) {
+            //     router.push('/chat/upload')
+            // }
         }
 
 
@@ -644,12 +573,12 @@ const ChatWindow = () => {
 
     useEffect(() => {
         setShowAdvance(false);
+        console.log(chatid)
+        if (chatid !== 'new' && chatid) {
 
-        if (chat_id !== 'new' && chat_id) {
-
-            getChatHistory(chat_id)
-            setChatSessionID(chat_id);
-            localStorage.setItem('chatSessionID', chat_id)
+            getChatHistory(chatid)
+            setChatSessionID(chatid);
+            localStorage.setItem('chatSessionID', chatid)
         } else {
 
             setRcvdMsg('')
@@ -665,7 +594,7 @@ const ChatWindow = () => {
             localStorage.removeItem('chatSessionID');
         }
 
-    }, [chat_id, folderId, folder]);
+    }, [chatid, folderId, folder]);
 
     useEffect(() => {
         if (chatSessionID === 'new') {

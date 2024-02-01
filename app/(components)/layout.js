@@ -21,15 +21,26 @@ export default function RootLayout({ children }) {
 
     const router = useRouter();
     
-    async function getSess() {
+    // async function getSess() {
+    //     await supabase.auth.getSession().then(({ data: { session } }) => {
+    //       if (session) {
+    //         if (!session?.user?.user_metadata?.onBoarding) {
+              
+    //           router.push('/auth/signup')
+    //         }else{
+    //           setLoading(false)
+    //         }
+    //       }
+    //       else {
+    //         router.push('/auth/login')
+    //       }
+    //     });
+    //   };
+
+      async function getSess() {
         await supabase.auth.getSession().then(({ data: { session } }) => {
           if (session) {
-            if (!session?.user?.user_metadata?.onBoarding) {
-              
-              router.push('/auth/signup')
-            }else{
-              setLoading(false)
-            }
+            setLoading(false)
           }
           else {
             router.push('/auth/login')
@@ -38,16 +49,16 @@ export default function RootLayout({ children }) {
       };
 
 useEffect(()=> { 
-  getSess()
+  // getSess()
 }, []);
 
-if(loading || !session){
-  return (
-    <div className='flex w-full justify-center items-center h-screen'>
-      <Loader2 className='animate-spin' />
-    </div>
-  )
-}
+// if(loading || !session){
+//   return (
+//     <div className='flex w-full justify-center items-center h-screen'>
+//       <Loader2 className='animate-spin' />
+//     </div>
+//   )
+// }
 
 return (
     <div className='w-full flex font-Inter box-border'>

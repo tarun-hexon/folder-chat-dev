@@ -11,8 +11,12 @@ import { useAtom } from 'jotai';
 import { darkModeAtom, sessionAtom } from '../../store';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { signup } from '../../api/auth';
+import axios from 'axios';
+import { requestEmailVerification } from "../../lib";
+import { basicSignup } from "../../../lib/user";
 
-const Signup = () => {
+const Signup = ( { isSignup, shouldVerify } ) => {
 
   const [disabled, setDisabled] = useState(false);
   const [userInput, setUserInput] = useState({
@@ -28,40 +32,76 @@ const Signup = () => {
   const [loading, setLoading] = useState(true)
   const router = useRouter();
 
-  async function signUpFunction() {
-    if(userInput.password !== userInput.confirm_password){
-      setInputError('Password and confirm password does not match');
-      return null
-    }else{
-      setInputError(false);
-    }
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: userInput.email,
-        password: userInput.password,
-        options: {
-          data: {
-            onBoarding: false,
-          },
-        },
-        });
-        if (error) {
-          setInputError(error.message)
-        }else if (data.user?.identities?.length === 0) {
-          setInputError('User already registered');
-        }
-        else {
+  // async function signUpFunction() {
+  //   if(userInput.password !== userInput.confirm_password){
+  //     setInputError('Password and confirm password does not match');
+  //     return null
+  //   }else{
+  //     setInputError(false);
+  //   }
+  //   try {
+  //     const { data, error } = await supabase.auth.signUp({
+  //       email: userInput.email,
+  //       password: userInput.password,
+  //       options: {
+  //         data: {
+  //           onBoarding: false,
+  //         },
+  //       },
+  //       });
+  //       if (error) {
+  //         setInputError(error.message)
+  //       }else if (data.user?.identities?.length === 0) {
+  //         setInputError('User already registered');
+  //       }
+  //       else {
         
-        setEmailSent('Check Your Email For Confirmation Mail')
-      }
-      console.log(error)
-    } catch (error) {
-      setInputError(error?.message)
-      console.error('Error logging in:', error?.message);
-    }
-  };
+  //       setEmailSent('Check Your Email For Confirmation Mail')
+  //     }
+  //     console.log(error)
+  //   } catch (error) {
+  //     setInputError(error?.message)
+  //     console.error('Error logging in:', error?.message);
+  //   }
+  // };
 
+  // async function signUpFunction() {
+  //   if(userInput.password !== userInput.confirm_password){
+  //     setInputError('Password and confirm password does not match');
+  //     return null
+  //   }else{
+  //     setInputError(false);
+  //   }
+  //   try {
+  //     const jsonData = JSON.stringify({
+  //       'email': userInput.email,
+  //       'username': userInput.email,
+  //       'password': userInput.password
+  //   });
 
+  //   const response = await axios.post('https://danswer-dev.folder.chat/api/auth/register', jsonData, {
+  //       credentials: "include",
+  //       headers: {
+  //           'Content-Type': 'application/json'
+  //       }
+  //   })
+  //   if(response.status === 201){
+  //     localStorage.setItem('userInfo', response?.data)
+      
+  //     setEmailSent('Check Your Email For Confirmation Mail')
+  //   }
+  //   console.log(response)
+  //   } catch (error) {
+  //     setInputError(error?.message)
+  //     const errorDetail = error?.response?.data?.detail
+  //     let errorMsg = "Unknown error";
+  //     if (errorDetail === "REGISTER_USER_ALREADY_EXISTS") {
+  //       errorMsg = "An account already exists with the specified email.";
+  //     }
+  //     setInputError(errorMsg)
+  //     console.log(error)
+  //   }
+  // };
 
   async function googleSignIn() {
     const { data, error } = await supabase.auth.signInWithOAuth({
@@ -81,6 +121,28 @@ const Signup = () => {
     }
   };
 
+  
+  const signUpFunction = async () => {
+    if (!disabled) {
+        // let isSignup = true
+        const loginResponse = await basicSignup(userInput.email, userInput.password)
+        if (loginResponse.ok) {
+            if (isSignup && shouldVerify) {
+                await requestEmailVerification(userInput.email);
+                router.push("/auth/waiting-on-verification");
+            } else {
+                router.push("/chat/new");
+            }
+        }
+        else {
+            const errorDetail = (await loginResponse.json()).detail;
+            setError("Unknown error")
+            if (errorDetail === "LOGIN_BAD_CREDENTIALS") {
+                setError("Invalid email or password")
+            }
+        }
+    }
+}
 
   function handleOnchange(e){
     setUserInput({
@@ -121,7 +183,7 @@ const Signup = () => {
 
 
   return (
-    <div className={`flex flex-col w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'} px-5 md:px-0`}>
+    <div className={`flex flex-col h-full w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'} px-5 md:px-0`}>
 
       <h1 className='text-5xl w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-3'>Sign Up</h1>
 
@@ -161,7 +223,7 @@ const Signup = () => {
 
       <hr className='border border-[#CBD5E1] w-full' />
 
-      <Button variant="outline" className='w-full text-black border border-[#CBD5E1] rounded-[6px] leading-[20px] flex items-center justify-center gap-1' onClick={googleSignIn}><Image src={Google} alt="google" priority={false} className='w-7 h-7' /><span className='font-[700] text-sm'>Continue With Google</span></Button>
+      {/* <Button variant="outline" className='w-full text-black border border-[#CBD5E1] rounded-[6px] leading-[20px] flex items-center justify-center gap-1' onClick={googleSignIn}><Image src={Google} alt="google" priority={false} className='w-7 h-7' /><span className='font-[700] text-sm'>Continue With Google</span></Button> */}
 
       <div className='w-full text-sm opacity-75 text-center'>Already have an account &#63; <Link href={'/auth/login'} className='font-[500] hover:underline '>Sign In</Link></div>
 
