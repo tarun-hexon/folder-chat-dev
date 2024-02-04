@@ -71,7 +71,7 @@ function Admin() {
 
     useEffect(() => {
         getUsers();
-        currentUser();
+       
     }, []);
 
     
