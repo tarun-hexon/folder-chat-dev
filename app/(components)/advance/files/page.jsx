@@ -3,15 +3,14 @@ import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
 import { Button } from '../../../../components/ui/button';
 import fileIcon from '../../../../public/assets/Danswer-doc-B.svg';
-import check from '../../../../public/assets/check-circle.svg';
-import trash from '../../../../public/assets/trash-2.svg';
+import { useToast } from '../../../../components/ui/use-toast';
 import { useDropzone } from 'react-dropzone';
 import { Label } from '../../../../components/ui/label';
-import { deleteConnectorFromTable, fetchAllConnector, getSess } from '../../../../lib/helpers';
+import { deleteConnectorFromTable, fetchAllConnector, fetchIndexing, getSess } from '../../../../lib/helpers';
 import { useAtom } from 'jotai';
 import { sessionAtom, userConnectorsAtom } from '../../../store';
 import supabase from '../../../../config/supabse';
-import { Loader } from 'lucide-react';
+import { Loader, X } from 'lucide-react';
 import {
     Table,
     TableBody,
@@ -20,40 +19,86 @@ import {
     TableHeader,
     TableRow,
   } from "../../../../components/ui/table";
+import { Input } from '../../../../components/ui/input';
 
 const Files = () => {
 
     const [files, setFiles] = useState([]);
+    const [userFiles, setUserFiles] = useState([]);
     const [loading, setLoading] = useState(true)
     const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom);
     const [session, setSession] = useAtom(sessionAtom);
     const [existConnector ,setExistConnector] = useState([]);
     const [uploading, setUploading] = useState(false);
+    const [connectorName, setConnectorName] = useState('');
+    const { toast } = useToast();
+    
+    const onDrop = (acceptedFiles) => {
 
-    async function uploadFile(file, name) {
-        
-        setUploading(true)
-        try {
-            const formData = new FormData();
-            formData.append('files', file);
-           
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/file/upload`, {
-                method: "POST",
-                body: formData
-            });
-            const json = await data.json();
-            
-            // setFilePath(json.file_paths[0]);
-            connectorRequest(json.file_paths[0], name, file)
-        } catch (error) {
-            console.log(error)
-            setUploading(false)
+        if (acceptedFiles && acceptedFiles.length > 0) {
+    
+          acceptedFiles?.map((file) => {
+            setUserFiles((prev) => [...prev, file])
+          })
+        } else {
+          console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
         }
     };
 
-    async function connectorRequest(path, name, file) {
+    async function uploadFile(files) {
+        if(connectorName === ''){
+            return toast({
+                variant: 'destructive',
+                title: "Please give your connector a name first"
+              }); 
+        }
+        
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector`, {
+          const formData = new FormData();
+          let isZip = false
+          files?.forEach((file) => {
+            //console.log(file.type === "application/zip")
+            if(file.type === "application/zip"){
+              
+              isZip = true
+              return toast({
+                variant: 'destructive',
+                title: "Zip File Not Allowed"
+              });
+            }
+            formData.append("files", file);
+          });
+          
+         if(isZip){
+          
+          return null
+         }
+         setUploading(true)
+         setUserFiles([])
+         setConnectorName('')
+          const data = await fetch(`/api/manage/admin/connector/file/upload`, {
+            method: "POST",
+            body: formData
+          });
+          const json = await data.json();
+          // console.log('upload done', json)
+          // setFilePath(json.file_paths[0]);
+          await connectorRequest(json.file_paths)
+        } catch (error) {
+          console.log('error in upload', error)
+          setUploading(false)
+          return toast({
+            variant: 'destructive',
+            title: "Some Error Ocuured!"
+          });
+    
+        }
+    };
+
+
+    async function connectorRequest(path) {
+        try {
+            const data = await fetch(`/api/manage/admin/connector`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json"
@@ -63,9 +108,7 @@ const Files = () => {
                     "source": "file",
                     "input_type": "load_state",
                     "connector_specific_config": {
-                        "file_locations": [
-                            path
-                        ]
+                        "file_locations": path
                     },
                     "refresh_freq": null,
                     "disabled": false
@@ -74,59 +117,24 @@ const Files = () => {
 
             );
             const json = await data?.json();
-            if(existConnector?.length === 0){
-                await insertDataInConn([json?.id])
-            }else{
-                await updatetDataInConn(existConnector, json?.id)
-            }
-            // setConnectorId(json.id)
-            // console.log(json.id)
-            getCredentials(json?.id, name, file)
+            // if(existConnector?.length === 0){
+            //     await insertDataInConn([json?.id])
+            // }else{
+            //     await updatetDataInConn(existConnector, json?.id)
+            // }
+            getCredentials(json?.id)
         } catch (error) {
             console.log('error while connectorRequest :', error)
             setUploading(false)
         }
     };
 
-    async function insertDataInConn(newData){
-               
-        const { data, error } = await supabase
-        .from('connectors')
-        .insert(
-          { 'connect_id': newData, 'user_id' : session?.user?.id },
-        )
-        .select()
-        // console.log(data)
-        // console.log(error)
-        setExistConnector(data[0]?.connect_id);
-        
-        setUploading(false)
-    };
-
-    async function updatetDataInConn(exConn, newData){
-        
-        const allConn = [...exConn, newData]
-        const { data, error } = await supabase
-        .from('connectors')
-        .update(
-          { 'connect_id': allConn },
-        )
-        .eq('user_id', session?.user?.id)
-        .select()
-        // console.log(data)
-        // console.log(error)
-        setExistConnector(data[0]?.connect_id);
-        
-        setUploading(false)
-    };
-
-    async function getCredentials(connectID, name, file) {
+    async function getCredentials(connectID) {
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/credential`, {
+            const data = await fetch(`/api/manage/credential`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
-                    
                 },
                 body: JSON.stringify({
                     "credential_json": {},
@@ -135,35 +143,19 @@ const Files = () => {
             });
             const json = await data.json();
             // setCredentialID(json.id);
-            sendURL(connectID, json.id, name, file)
+            sendURL(connectID, json.id)
         } catch (error) {
             console.log('error while getCredentials:', error);
             setUploading(false)
+        }finally{
+            setConnectorName('');
+            setUploading(false);
         }
     };
-
-    const onDrop = (acceptedFiles) => {
-        if (acceptedFiles && acceptedFiles.length > 0) {
-            const file = acceptedFiles[0];
-            
-            const fileType = file.name.split('.')[1]
-            if(fileType !== 'pdf' && fileType !== 'txt'){
-                toast({
-                    variant:'destructive',
-                    title: "This File type is not supported!"
-                });
-                return null
-            }
-            // setFileName(file.name)
-            uploadFile(file, file.name);
-        } else {
-            // console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
-        }
-    };
-
+    
     async function runOnce(conID, credID){
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/run-once`,{
+            const data = await fetch(`/api/manage/admin/connector/run-once`,{
             method:'POST',
             headers: {
                 "Content-Type": "application/json",
@@ -177,45 +169,62 @@ const Files = () => {
         })
         } catch (error) {
             console.log('error in runOnce :', error);
+            
+        }finally{
+            setConnectorName('');
             setUploading(false);
         }
     };
 
-    async function sendURL(connectID, credID, name, file){
+    async function sendURL(connectID, credID){
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/connector/${connectID}/credential/${credID}`, {
+            const data = await fetch(`/api/manage/connector/${connectID}/credential/${credID}`, {
             method: 'PUT',
                 headers: {
                     "Content-Type": "application/json",
                     
                 },
-                body: JSON.stringify({'name':name})
+                body: JSON.stringify({'name': connectorName})
             });
             const json = await data.json();
             setLoading(true)
             await runOnce(connectID, credID);
-            // await getAllExistingConnector();
-           
+            await indexStatus()
         } catch (error) {
             console.log('error while sendURL:', error);
             
             setUploading(false)
         }
     };
+    
 
-    function statusBackGround(status){
-        if(status?.connector?.disabled){
-            return ('text-yellow-500 border-yellow-500 bg-yellow-100')
-        }else if(status?.latest_index_attempt?.status === "success"){
-            return ('text-[#22C55E] border-[#22C55E] bg-[#d7fae4]')
-        }else if(status?.latest_index_attempt?.status === "failed"){
-            return ('text-[#eb3838] border-[#eb3838] bg-[#fdc7c7]')
-        }else if(status?.latest_index_attempt?.status === "not_started"){
-            return ('text-[#FF5737] border-[#FF5737] bg-[#f5d2ca]')
-        }else{
-            return ('text-yellow-500 border-yellow-500 bg-yellow-100')
-        }
+    async function insertDataInConn(newData){
+               
+        const { data, error } = await supabase
+        .from('connectors')
+        .insert(
+          { 'connect_id': newData, 'user_id' : session?.user?.id },
+        )
+        .select()
+        setExistConnector(data[0]?.connect_id);
+        setUploading(false)
     };
+
+    async function updatetDataInConn(exConn, newData){
+        
+        const allConn = [...exConn, newData]
+        const { data, error } = await supabase
+        .from('connectors')
+        .update(
+          { 'connect_id': allConn },
+        )
+        .eq('user_id', session?.user?.id)
+        .select()
+        setExistConnector(data[0]?.connect_id);
+        
+        setUploading(false)
+    };
+
     
     async function deleteConnector(id1, id2){
         return null
@@ -234,20 +243,45 @@ const Files = () => {
     const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
 
-    useEffect(()=> {
-        // getAllExistingConnector();
+    function statusBackGround(status){
+        if(status?.connector?.disabled){
+            return ('text-yellow-500')
+        }else if(status?.latest_index_attempt?.status === "success"){
+            return ('text-[#22C55E]')
+        }else if(status?.latest_index_attempt?.status === "failed"){
+            return ('text-[#eb3838]')
+        }else if(status?.latest_index_attempt?.status === "not_started"){
+            return ('text-[#FF5737]')
+        }else{
+            return ('text-yellow-500')
+        }
+    }
 
+    async function indexStatus(){
+        const res = await fetch(`/api/manage/admin/connector/indexing-status`);
+        const json = await res.json();
+        if(json.detail){
+
+        }else{
+            setFiles(json)
+        }
+        
+    }
+
+    useEffect(()=> {
+        indexStatus();
         if(userConnectors !== null ){
             const filData = userConnectors?.filter((item)=> item?.connector?.source === 'file');
             if(filData.length > 0){
+                // console.log(filData)
                 setFiles(filData);
-                console.log(filData)
                 const conn_ids = filData?.map(conn => {return conn?.connector?.id});
                 
                 setExistConnector(conn_ids)
             };
-            setLoading(false)
+            
         }
+        setLoading(false)
         
     }, [userConnectors]);
 
@@ -267,25 +301,38 @@ const Files = () => {
                             <h2 className='font-[600] text-sm leading-5 text-[#0F172A]'>Upload Files</h2>
                             <p className='font-[400] text-sm leading-5'>Specify files below, click the Upload button, and the contents of these files will be searchable via Advance!</p>
                         </div>
-
+                        <div className='w-full flex flex-col p-4 space-y-2 border rounded-md'>
+                                <Label className='text-start font-[500]' htmlFor='con-name'>Connector Name</Label>
+                                <Input type='text' id='con-name' placeholder='Write a name to identify your files' onChange={(e) => setConnectorName(e.target.value)}/>
                         {!uploading ? 
-                            <div className={`w-full bg-slate-100 shadow-md border rounded-lg flex flex-col justify-center items-center p-5 gap-4 ${isDragActive && 'opacity-50'}`} {...getRootProps()}>
-                                <input {...getInputProps()} multiple accept=".pdf, .zip, .txt, .md, .mdx" required/>
-                            <div className={`font-[500] text-[16px] leading-6`}>
-                            Drag and drop files here, or click ‘Upload’ button and select files
-                                
+                            
+                            (userFiles.length === 0 ? <div className={`w-full min-h-[20vh] bg-slate-100 shadow-md border rounded-lg flex flex-col justify-center items-center p-5 gap-4 ${isDragActive && 'opacity-50'}`} {...getRootProps()}>
+                                <input {...getInputProps()} multiple accept=".pdf, .txt, .md, .mdx, .docx, .doc" required />
+                                <div className={`font-[500] text-[16px] leading-6`}>
+                                    Drag and drop files here, or click to upload files
+                                </div>
+                            </div> :
+                            <div className='w-full text-center space-y-4'>
+                            <div className='w-full border h-fit max-h-[40vh] bg-slate-100 rounded-md relative p-4 overflow-y-scroll '>
+                            <ol>
+                              {userFiles?.map(file => <li key={file?.name} className='text-sm leading-6 break-all'>{file?.name}</li>)}
+                              </ol>
+                              <X size={'1rem'} className='self-start absolute top-1 right-1 hover:cursor-pointer' onClick={() => setUserFiles([])} />
                             </div>
-                            <Button className='w-20'>Upload</Button>
-                            </div>
+                          </div>
+                            )
                             :
-                            <div className={`w-full bg-slate-100 shadow-md border rounded-lg flex flex-col justify-center items-center p-8 gap-4 `}>
+                            <div className={`w-full min-h-[20vh] max-h-[40vh] bg-slate-100 shadow-md border rounded-lg flex flex-col justify-center items-center p-8 gap-4 `}>
                                 <Loader className='animate-spin' />
                             </div>
+                            
                         }
+                        <Button className='w-20 m-auto' onClick={()=> uploadFile(userFiles)}>Upload</Button>
+                        </div>
 
                     </div>
                 </div>
-                <Table className='w-full text-sm'>
+                <Table className='w-full text-sm overflow-scroll max-h-[60vh]'>
                     <TableHeader className='p-2 '>
                         <TableRow className='border-b p-2 hover:bg-transparent'>
                             <TableHead className="w-96 text-left p-2">File Name</TableHead>
@@ -299,12 +346,13 @@ const Files = () => {
                             // console.log(item)
                             return (
                                 <TableRow className='border-b hover:cursor-pointer' key={idx}>
-                                    <TableCell className="font-medium w-96 text-left p-2 py-3 text-ellipsis break-all text-emphasis overflow-hidden">{item?.name}</TableCell>
-                                    <TableCell className='text-center'>
-                                                <div className={`flex justify-center items-center gap-1 ${statusBackGround(item)} border-2 p-1 rounded-full `}>
-                                                    {`${!item?.connector?.disabled ? item?.latest_index_attempt?.status || 'Processsing' : 'Disabled'}`}
-                                                </div>
-                                        </TableCell>
+                                    <TableCell className="font-medium w-[80%] text-left p-2 py-3 text-ellipsis break-all text-emphasis overflow-hidden">{item?.name}</TableCell>
+                                    <TableCell className='w-[20%]'>
+                                        <div className={`flex justify-center items-center gap-1 ${statusBackGround(item)} p-1 rounded-full `}>
+                                        {/* <Image src={check} alt='checked' className='w-4 h-4' /> */}
+                                            {`${!item?.connector?.disabled ? item?.latest_index_attempt?.status || 'Processsing' : 'Disabled'}`}
+                                        </div>
+                                    </TableCell>
                                     {/* <TableCell><Image src={trash} alt='remove' className='m-auto hover:cursor-pointer'/></TableCell> */}
                                 </TableRow>
                             )

@@ -6,6 +6,7 @@ const version = env_version || package_version;
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false,
   output: "standalone",
   rewrites: async () => {
     // In production, something else (nginx in the one box setup) should take

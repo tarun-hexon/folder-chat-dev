@@ -112,11 +112,16 @@ const ChatWindow = () => {
             setResponseObj(null)
 
         }
-        setChatMsg((prev) => [{
+        // setChatMsg((prev) => [{
+        //     user: data
+        // }, ...prev]);
+        setChatMsg((prev) => [
+            {
+                messageId: null,
+                message: data,
+                message_type: "user",
 
-            user: data
-        }, ...prev]);
-
+            }, ...prev]);
 
         setUserMsg('');
 
@@ -180,26 +185,45 @@ const ChatWindow = () => {
         }
     };
 
-    async function updateTitle(value, id) {
+    // async function updateTitle(value, id) {
+    //     try {
+    //         const { data, error } = await supabase
+    //             .from('chats')
+    //             .update({ 'chat_title': value })
+    //             .eq('session_id', id)
+    //             .select()
+    //         if (data.length) {
+    //             setChatHistory(data[0]);
+    //             setChatRenamed(!chatRenamed)
+    //         } else if (error) {
+    //             throw error
+    //         }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // };
+
+
+    async function updateTitle(newTitle, id) {
 
         try {
+            const response = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/rename-chat-session`, {
+                method: 'PUT',
+                body: JSON.stringify({
+                    "chat_session_id": id,
+                    "name": newTitle || null,
+                    "first_message": userMessage || null
+                })
 
-            const { data, error } = await supabase
-                .from('chats')
-                .update({ 'chat_title': value })
-                .eq('session_id', id)
-                .select()
-            if (data.length) {
-                setChatHistory(data[0]);
-                setChatRenamed(!chatRenamed)
-            } else if (error) {
-                throw error
+            })
+            if (response.ok) {
+                const json = await response.json();
+                setChatTitle(json.new_name)
             }
         } catch (error) {
             console.log(error)
         }
     };
-
 
     async function updateChats(bot, user, oldChat, msgID, obj) {
         var newMsg = [bot, user, ...oldChat]
@@ -296,8 +320,13 @@ const ChatWindow = () => {
         const decoder = new TextDecoder("utf-8");
 
         let entireResponse = []; // Array to store the entire response
-
         let previousPartialChunk = null;
+        let answer = ''
+        let error = ''
+        let finalMessage = ''
+        let documents = null
+        let query = ''
+        
         while (true) {
             const rawChunk = await reader?.read();
             if (!rawChunk) {
@@ -373,6 +402,20 @@ const ChatWindow = () => {
             }
         }
 
+        setChatMsg((prev) => [
+            
+            {
+                messageId: finalMessage?.message_id || null,
+                message: error || answer,
+                message_type: error ? "error" : "assistant",
+                // retrievalType,
+                query: finalMessage?.rephrased_query || query,
+                documents: finalMessage?.context_docs?.top_documents || documents,
+                citations: finalMessage?.citations || {},
+            },
+            ...prev
+        ]);
+
         return entireResponse; // Return the entire response
     }
 
@@ -418,39 +461,57 @@ const ChatWindow = () => {
         }
     };
 
-    async function getChatHistory(id) {
+    // async function getChatHistory(id) {
+    //     try {
+    //         const { data, error } = await supabase
+    //             .from('chats')
+    //             .select('*')
+    //             .eq('session_id', id);
+    //         if (data[0]?.chats) {
+    //             setParentMessageId(data[0]?.message_id)
+    //             // console.log(data[0]?.message_id)
+    //             if (folderId === '') {
+    //                 setFolderId(data[0]?.folder_id)
+    //             }
+    //             await getDocSetDetails(data[0]?.folder_id)
+    //             const msgs = JSON.parse(data[0]?.chats)
+    //             setChatMsg(msgs);
+    //             setChatHistory(data[0])
+    //             setChatTitle(data[0]?.chat_title);
+    //             // const ccPairs = await isDocSetExist(data[0]?.folder_id)
+
+    //             // if (ccPairs.length > 0) {
+
+
+    //             // }
+    //         }
+    //         else if (data.length === 0) {
+    //             setChatMsg([]);
+    //         }
+
+    //     } catch (error) {
+    //         // setLoading(false)
+    //         console.log(error)
+    //     }
+    //     // setLoading(false)
+    // };
+
+    async function getChatHistoryFromServer(id) {
         try {
-            const { data, error } = await supabase
-                .from('chats')
-                .select('*')
-                .eq('session_id', id);
-            if (data[0]?.chats) {
-                setParentMessageId(data[0]?.message_id)
-                // console.log(data[0]?.message_id)
-                if (folderId === '') {
-                    setFolderId(data[0]?.folder_id)
-                }
-                await getDocSetDetails(data[0]?.folder_id)
-                const msgs = JSON.parse(data[0]?.chats)
-                setChatMsg(msgs);
-                setChatHistory(data[0])
-                setChatTitle(data[0]?.chat_title);
-                // const ccPairs = await isDocSetExist(data[0]?.folder_id)
-
-                // if (ccPairs.length > 0) {
-
-
-                // }
+            const data = await fetch(`https://danswer.folder.chat/api/chat/get-chat-session/${id}`);
+            const json = await data.json();
+            console.log(json)
+            if (json?.messages.length > 0) {
+                setParentMessageId(json?.messages[json?.messages.length - 1].message_id);
+                setChatMsg(json?.messages.reverse());
+                setChatHistory(json);
+                setChatTitle(json?.description)
             }
-            else if (data.length === 0) {
-                setChatMsg([]);
-            }
-
         } catch (error) {
-            // setLoading(false)
             console.log(error)
+        } finally {
+            setLoading(false)
         }
-        // setLoading(false)
     };
 
     async function updateDocumentSet(ccID, des) {
@@ -572,10 +633,10 @@ const ChatWindow = () => {
 
     useEffect(() => {
         setShowAdvance(false);
-        console.log(chatid)
+        // console.log(chatid)
         if (chatid !== 'new' && chatid) {
 
-            getChatHistory(chatid)
+            getChatHistoryFromServer(chatid)
             setChatSessionID(chatid);
             localStorage.setItem('chatSessionID', chatid)
         } else {
@@ -723,10 +784,43 @@ const ChatWindow = () => {
 
                                 </>
 
-                                {chatMsg?.map((msg, idx) => msg.user ?
-                                    <div key={idx} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{msg.user}</div>
+                                {chatMsg?.map((msg) => msg?.message_type === 'user' ?
+                                    <div key={msg?.id} className='font-[400] text-sm leading-6 self-end float-right  text-left max-w-[70%] min-w-[40%] bg-[#14B8A6] py-2 px-4 text-[#ffffff] rounded-[6px] rounded-tr-[0px]'>{
+                                        <ReactMarkdown
+                                            className='w-full'
+                                            components={{
+                                                a: ({ node, ...props }) => (
+                                                    <a
+                                                        {...props}
+                                                        className="text-blue-500 hover:text-blue-700"
+                                                        target="_blank"
+                                                        rel="noopener noreferrer"
+                                                    />
+                                                ),
+                                                pre: ({ node, ...props }) => (
+                                                    <div className="overflow-auto  max-w-[18rem] w-full text-white my-2 bg-[#121212] p-2 rounded-lg">
+                                                        <pre {...props} />
+                                                    </div>
+                                                ),
+                                                code: ({ node, ...props }) => (
+                                                    <code className="bg-[#121212] text-white p-1 w-full" {...props} />
+                                                ),
+                                                ul: ({ node, ...props }) => (
+                                                    <ul className="md:pl-10 leading-8 list-disc" {...props} />
+                                                ),
+                                                ol: ({ node, ...props }) => (
+                                                    <ol className="md:pl-10 leading-8 list-decimal" {...props} />
+                                                ),
+                                                menu: ({ node, ...props }) => (
+                                                    <p className="md:pl-10 leading-8" {...props} />
+                                                ),
+                                            }}
+                                        >
+                                            {msg?.message?.replaceAll("\\n", "\n")}
+                                        </ReactMarkdown>
+                                    }</div>
                                     :
-                                    <div key={idx} className='flex flex-col'>
+                                    msg?.message && <div key={msg?.id} className='flex flex-col'>
                                         <div className='font-[400] text-sm leading-6 self-start float-left border-2 max-w-[70%] bg-transparent py-2 px-4 rounded-lg text-justify rounded-tl-[0px] break-words'>{
                                             <ReactMarkdown
                                                 className='w-full'
@@ -758,18 +852,27 @@ const ChatWindow = () => {
                                                     ),
                                                 }}
                                             >
-                                                {msg?.bot?.replaceAll("\\n", "\n")}
+                                                {msg?.message?.replaceAll("\\n", "\n")}
                                             </ReactMarkdown>
                                         }</div>
-                                        {msg?.source &&
-                                            <div className='font-[400] text-sm leading-6 self-start float-left max-w-[70%] bg-transparent text-justify break-words'>
-                                                <h1 className='font-[600] text-sm leading-6'>Source:</h1>
-                                                {msg?.source?.source_type !== 'file' ?
-                                                    <a href={msg?.source?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(msg?.source?.source_type)} alt={msg?.source?.source_type} />{msg?.source?.semantic_identifier}</a>
-                                                    :
-                                                    <div className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-default flex gap-1'><Image src={iconSelector(msg?.source?.semantic_identifier.split('.')[1])} alt={msg?.source?.source_type} />{msg?.source?.semantic_identifier}</div>
-                                                }
-                                            </div>}
+
+                                        {msg?.citations && msg?.context_docs?.top_documents.map((doc) => {
+                                            
+                                            const key = Object.keys(msg?.citations);
+                                            
+                                            return (doc?.db_doc_id === msg?.citations[key[0]] && (
+                                                <div className='font-[400] text-sm leading-6 self-start float-left max-w-[70%] bg-transparent text-justify break-words'>
+                                                    <h1 className='font-[600] text-sm leading-6'>Source:</h1>
+                                                    {doc?.source_type !== 'file' ?
+                                                        <a href={doc?.link} target='_blank' className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-pointer flex gap-1'><Image src={iconSelector(doc?.source_type)} alt={doc?.source_type} />{doc?.semantic_identifier}</a>
+                                                        :
+                                                        <div className='w-full border p-1 text-[13px] hover:bg-gray-100 text-gray-700 rounded-md hover:cursor-default flex gap-1'><Image src={iconSelector(doc?.semantic_identifier.split('.')[1])} alt={doc?.source_type} />{doc?.semantic_identifier}</div>
+                                                    }
+                                                </div>
+                                            ))
+
+
+                                        })}
                                     </div>
                                 )}
 

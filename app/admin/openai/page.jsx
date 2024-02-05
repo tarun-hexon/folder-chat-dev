@@ -1,6 +1,6 @@
 'use client'
 import React, { useEffect, useState } from 'react'
-import { Key, Loader2, Trash } from 'lucide-react'
+import { Key, Loader2, Trash, Trash2 } from 'lucide-react'
 import { Label } from '../../../components/ui/label'
 import { Input } from '../../../components/ui/input'
 import { Button } from '../../../components/ui/button'
@@ -73,9 +73,9 @@ function OpenAi() {
                     :
                     <>
                         <h2 className='font-[500] text-[2xl] leading-6'>Existing Key</h2>
-                        <div className='flex items-center'>
+                        <div className='flex items-center gap-1'>
                             <p className='font-[400] text-sm leading-5'>sk- ****...**{existingKey}</p>
-                            <Trash size={14} className='hover:cursor-pointer' onClick={()=> deleteApiKey()}/>
+                            <Trash2 size={14} className='hover:cursor-pointer opacity-40 hover:opacity-100' title='Remove Key' onClick={()=> deleteApiKey()}/>
                         </div>
                     </>
                     }

@@ -11,7 +11,7 @@ function Admin() {
     const { toast } = useToast();
     const [users, setUsers] = useState([]);
     const [loader, setLoader] = useState(true);
-    const [curentUser, setCurrentUser] = useState({})
+    const [currentUser, setCurrentUser] = useState({})
 
     async function getUsers() {
         try {
@@ -71,7 +71,7 @@ function Admin() {
 
     useEffect(() => {
         getUsers();
-        currentUser();
+        fetchCurrentUser();
     }, []);
 
     
@@ -92,7 +92,7 @@ function Admin() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {users.length > 0 && users?.map(user =>
+                    {users?.length > 0 && users?.map(user =>
                         <TableRow key={user.id}>
                             <TableCell className='font-[500] text-sm leading-5'>
                                 {user?.email}
@@ -102,14 +102,14 @@ function Admin() {
                             </TableCell >
                             <TableCell className='text-center'>
                                 <div>
-                                    <Button disabled={user?.id === curentUser?.id} className={`w-[12rem] ${user?.role === "admin" ? "bg-orange-300 hover:bg-orange-400" : "bg-green-400 hover:bg-green-500"}`} onClick={()=> promoteToAdmin(user?.email)}>
+                                    <Button disabled={user?.id === currentUser?.id} className={`w-[10rem] p-2 ${user?.role === "admin" ? "bg-orange-300 hover:bg-orange-400" : "bg-green-400 hover:bg-green-500"}`} onClick={()=> promoteToAdmin(user?.email)}>
                                         {user?.role === "admin" ? "Demote to User" : "Promote to Admin"}
                                     </Button>
                                 </div>
                             </TableCell>
                             <TableCell className='text-center'>
                                 <div>
-                                    <Button disabled={user?.id === curentUser?.id} className={`bg-red-400 hover:bg-red-500`} onClick={() => dltUser(user?.email)}>
+                                    <Button disabled={user?.id === currentUser?.id} className={`bg-red-400 hover:bg-red-500`} onClick={() => dltUser(user?.email)}>
                                         Delete
                                     </Button>
                                 </div>
