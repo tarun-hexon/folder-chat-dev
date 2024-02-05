@@ -26,11 +26,11 @@ const AdvanceMenu = () => {
                         </Link>
                     )
                 })}
-                <h1 className='text-start font-[700] text-sm leading-5 p-2'>Keys</h1>
+                {/* <h1 className='text-start font-[700] text-sm leading-5 p-2'>Keys</h1>
                 <div className={`inline-flex p-2 items-center text-sm leading-5 rounded-md hover:cursor-pointer gap-2 hover:bg-[#FFFFFF33]`} >
                     <Image src={key} alt={'apikey'} />
                     <span className='font-[500]'>{'OpenAI'}</span>
-                </div>
+                </div> */}
             </div>
 
 
