@@ -10,12 +10,13 @@ import { useRouter } from 'next/navigation';
 import { sidebarOptions } from '../../../config/constants';
 import { Dialog, DialogTrigger } from '../../../components/ui/dialog';
 import { Setting } from '../(settings)'
-import { LogOut } from 'lucide-react';
+import { ArrowDownUp, Check, LogOut } from 'lucide-react';
 import { isUserExist } from '../../../config/lib';
 import { getCurrentUser } from '../../../lib/user';
 import { logout } from '../../../lib/user';
 import { Button } from '../../../components/ui/button';
 import { Workspace } from '../(common)';
+
 import {
     Command,
     CommandEmpty,
@@ -28,6 +29,7 @@ import {
     PopoverContent,
     PopoverTrigger,
 } from "../../../components/ui/popover"
+import { cn } from '../../../lib/utils';
 
 
 const Account = () => {
@@ -38,8 +40,33 @@ const Account = () => {
     const [item, setItem] = useState('profile')
     const [workSpace, setWorkSpace] = useState(null);
     const [currentUser, setCurrentUser] = useState({});
-
+    const [value, setValue] = useState("")
     const router = useRouter();
+
+    const frameworks = [
+        {
+          value: "next.js",
+          label: "Next.js",
+        },
+        {
+          value: "sveltekit",
+          label: "SvelteKit",
+        },
+        {
+          value: "nuxt.js",
+          label: "Nuxt.js",
+        },
+        {
+          value: "remix",
+          label: "Remix",
+        },
+        {
+          value: "astro",
+          label: "Astro",
+        },
+    ]
+
+
 
     async function signOut() {
         const { error } = await supabase.auth.signOut();
@@ -131,7 +158,8 @@ const Account = () => {
         //     </Popover>
 
         // </div>
-        <Popover open={open} onOpenChange={setOpen}>
+        <div className='w-full'>
+            <Popover open={open} onOpenChange={setOpen} className='w-full'>
             <PopoverTrigger asChild>
                 <Button
                     variant="outline"
@@ -142,7 +170,7 @@ const Account = () => {
                     {value
                         ? frameworks.find((framework) => framework.value === value)?.label
                         : "Select framework..."}
-                    <CaretSortIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ArrowDownUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-[200px] p-0">
@@ -160,7 +188,7 @@ const Account = () => {
                                 }}
                             >
                                 {framework.label}
-                                <CheckIcon
+                                <Check
                                     className={cn(
                                         "ml-auto h-4 w-4",
                                         value === framework.value ? "opacity-100" : "opacity-0"
@@ -172,6 +200,8 @@ const Account = () => {
                 </Command>
             </PopoverContent>
         </Popover>
+        </div>
+        
     )
 }
 
