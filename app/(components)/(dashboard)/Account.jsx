@@ -30,6 +30,7 @@ import {
     PopoverTrigger,
 } from "../../../components/ui/popover"
 import { cn } from '../../../lib/utils';
+import Link from 'next/link';
 
 
 const Account = () => {
@@ -45,19 +46,6 @@ const Account = () => {
 
     const [workspaces, setWorkSpaces] = useState([])
 
-
-
-    async function signOut() {
-        const { error } = await supabase.auth.signOut();
-        if (error) {
-            console.log(error)
-        } else {
-            router.push('/auth/login');
-            setUserSession(null);
-            setPostSignupComplete(false);
-            setPostUserComplete(false);
-        }
-    };
 
     async function getWorkspaceName() {
         try {
@@ -165,8 +153,9 @@ const Account = () => {
                     <CommandEmpty>No workspace found.</CommandEmpty>
                     <CommandGroup>
                         {workspaces?.map((workspace) => (
+                            <Link href={`/workspace/${workspace?.id}/chat/new`} key={workspace.id} className='hover:cursor-pointer'>
                             <CommandItem
-                                key={workspace.id}
+                                className='hover:cursor-pointer'
                                 value={workspace.name}
                                 onSelect={(currentValue) => {
                                     setValue(workspace)
@@ -181,10 +170,11 @@ const Account = () => {
                                     )}
                                 />
                             </CommandItem>
+                            </Link>
                         ))}
                     </CommandGroup>
                 </Command>
-                {/* <Workspace /> */}
+                <Workspace />
             </PopoverContent>
             
             </Popover>

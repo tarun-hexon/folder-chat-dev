@@ -15,7 +15,7 @@ export const metadata = {
 }
 
 export default function RootLayout({ children }) {
-
+  
   return (
 
     <html lang="en" className='overflow-y-scroll no-scrollbar'>

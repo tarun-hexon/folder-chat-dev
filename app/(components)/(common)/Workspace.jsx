@@ -16,7 +16,7 @@ import { Button } from "../../../components/ui/button";
 import plus from '../../../public/assets/plus - light.svg';
 import Image from 'next/image';
 import { useAtom } from 'jotai';
-import { folderAtom, sessionAtom, folderIdAtom } from '../../store';
+import { workAddedAtom } from '../../store';
 import { Folder } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { isUserExist } from '../../../config/lib';
@@ -28,7 +28,7 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
     
     const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
-
+    const [workAdded, setWorkAdded] = useAtom(workAddedAtom)
     const [currentUser, setCurrentUser] = useState({})
 
     const router = useRouter()
@@ -63,6 +63,7 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
                 })
             });
             if (res.ok) {
+                workSpaceAdded(!workAdded)
                 setOpen(false);
             }
         } catch (error) {
@@ -90,9 +91,9 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
             setOpenMenu && setOpenMenu(false)
         }}>
             {!openMenu && <DialogTrigger className='w-full'>
-                <Button className='w-full bg-[#14B8A6] hover:bg-[#14B8A6] opacity-75 hover:opacity-100 shadow-lg'>
+                <div className='w-full bg-[#14B8A6] hover:bg-[#14B8A6] opacity-75 hover:opacity-100 shadow-lg text-white rounded-md p-1'>
                     Add Workspace
-                </Button>
+                </div>
             </DialogTrigger>}
 
             <DialogContent>

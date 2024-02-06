@@ -1,10 +1,10 @@
 'use client'
 import React, { useEffect, useState, useRef } from 'react'
-import sendIcon from '../../../../public/assets/send.svg'
-import Logo from "../../../../public/assets/Logo.svg"
-import editIcon from "../../../../public/assets/edit-2.svg"
-import shareIcon from '../../../../public/assets/Navbar_Share.svg'
-import openDocIcon from '../../../../public/assets/Navbar_OpenDoc.svg'
+import sendIcon from '../../../../../../public/assets/send.svg'
+import Logo from "../../../../../../public/assets/Logo.svg"
+import editIcon from "../../../../../../public/assets/edit-2.svg"
+import shareIcon from '../../../../../../public/assets/Navbar_Share.svg'
+import openDocIcon from '../../../../../../public/assets/Navbar_OpenDoc.svg'
 import Image from 'next/image'
 import { iconSelector } from '../../../../../../config/constants'
 import { Folder, Loader2, Plus, MoreHorizontal } from 'lucide-react';
@@ -17,11 +17,11 @@ import { NewFolder } from '../../../../(dashboard)'
 import { useRouter } from 'next/navigation'
 import { getSess } from '../../../../../../lib/helpers'
 import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../../../components/ui/dialog'
-import pdfIcon from '../../../../public/assets/pdf.svg'
+import pdfIcon from '../../../../../../public/assets/pdf.svg'
 import { Button } from '../../../../../../components/ui/button';
 import { Label } from '../../../../../../components/ui/label'
 import { cn } from '../../../../../../lib/utils'
-import plus from '../../../../public/assets/plus.svg'
+import plus from '../../../../../../public/assets/plus.svg'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
 import { Workspace } from '../../../../(common)'
@@ -637,9 +637,12 @@ const ChatWindow = () => {
 
     async function getWorkSpace(){
         const res = await fetch('/api/workspace/list-workspace');
-        const json = await res.json()
-        
-        setUserWorkSpaces(json?.data)
+        if(res.ok){
+            const json = await res.json();
+            setUserWorkSpaces(json.data)
+        }else{
+            setUserWorkSpaces([])
+        }
     }
 
 
@@ -679,11 +682,13 @@ const ChatWindow = () => {
     }, [chatSessionID])
 
    if(userWorkSpaces.length === 0){
-        return <div className='w-full flex flex-col justify-center rounded-[6px] items-center no-scrollbar box-border h-screen px-80 text-center'><Workspace openMenu={openWorkSpace} setOpenMenu={setOpenWorkSpace} /></div>
+        // return <div className='w-full flex flex-col justify-center rounded-[6px] items-center no-scrollbar box-border h-screen px-80 text-center'><Workspace openMenu={openWorkSpace} setOpenMenu={setOpenWorkSpace} /></div>
+       
    }
 
     return (
         <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2 text-center'>
+            
             <div className='w-full flex justify-between px-4 py-2 h-fit '>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
                     {folder?.length === 0 ? <Image src={Logo} alt='folder.chat' /> :

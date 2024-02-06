@@ -28,21 +28,20 @@ import { v4 as uuidv4 } from 'uuid';
 import { isUserExist } from '../../../config/lib';
 import supabase from '../../../config/supabse';
 import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation'
 import { getCurrentUser } from '../../../lib/user';
-import { useSearchParams } from 'next/navigation'
-
 
 const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     // const [folder, setFolder] = useAtom(folderAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
-    const [currentWorkSpace, setCurrentWorkSpace] = useAtom(currentWorkSpaceAtom)
+    // const [currentWorkSpace, setCurrentWorkSpace] = useAtom(currentWorkSpaceAtom)
     const [currentUser, setCurrentUser] = useState({})
-    
+    const params = useParams()
+
     const router = useRouter()
-     const searchParams = useSearchParams()   
-     const search = searchParams.get('workspaceid')
+
 
     const [fol, setFol] = useState({
         "title": '',
@@ -66,7 +65,7 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    "workspace_id":currentWorkSpace?.id,
+                    "workspace_id":params.workspaceid,
                     "user_id": currentUser?.id,
                     "name": folderData.title,
                     "description": folderData.description,
@@ -96,7 +95,7 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
   
       useEffect(() => {
           fetchCurrentUser();
-          console.log(currentWorkSpace?.id)
+          console.log(params.workspaceid)
       }, []);
    
 

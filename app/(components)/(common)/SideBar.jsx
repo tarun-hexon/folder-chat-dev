@@ -13,7 +13,7 @@ import { Pencil, Trash2, Check, X, MessageSquare, LogOut } from 'lucide-react';
 import { AdvanceMenu } from './index'
 import supabase from '../../../config/supabse';
 import { isUserExist } from '../../../config/lib';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Input } from '../../../components/ui/input';
 import fileIcon from '../../../public/assets/Danswer-doc-B.svg';
 import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
@@ -26,7 +26,7 @@ import { sidebarOptions } from '../../../config/constants';
 import { Setting } from '../(settings)'
 import { logout } from '../../../lib/user';
 
-const FolderCard = ({ fol, doc, folder }) => {
+const FolderCard = ({ fol }) => {
     // console.log(fol)
     const { name, id } = fol
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
@@ -529,60 +529,81 @@ const SideBar = () => {
     const [session, setSession] = useAtom(sessionAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
+    const [workSpaces, setWorkSpaces] = useState([])
     const router = useRouter()
-    // const current_url = window.location.href;
-    // const chat_id = current_url.split("advance");
-    // const router = useRouter();
+    const param = useParams()
 
-    async function getFolders() {
-        try {
+    // async function getFolders() {
+    //     try {
+    //         const wkID = await isUserExist('workspaces', 'id', 'created_by', session?.user?.id);
+    //         let { data: folders, error } = await supabase
+    //             .from('folders')
+    //             .select('*')
+    //             .eq('workspace_id', wkID[0]?.id);
+    //         if (folders.length > 0) {
 
-            const wkID = await isUserExist('workspaces', 'id', 'created_by', session?.user?.id);
-            let { data: folders, error } = await supabase
-                .from('folders')
-                .select('*')
-                .eq('workspace_id', wkID[0]?.id);
-            if (folders.length > 0) {
+    //             const lastFolder = folders[folders.length - 1];
+    //             // if (folder?.length === 0) {
+    //             //     setFolderId(lastFolder?.id)
+    //             // }
+    //             setFolderId(lastFolder?.id)
+    //             if (!folderId && !localStorage.getItem('chatSessionID')) {
+    //                 localStorage.setItem('lastFolderId', lastFolder?.id)
+    //             }
+    //             // console.log(folders)
+    //             setFolder(folders);
+    //             return null
+    //         } else {
+    //             setFolderId(null)
+    //             setFolder([])
+    //             localStorage.removeItem('lastFolderId')
+    //         }
+    //         if (error) {
+    //             throw error
+    //         }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // };
 
-                const lastFolder = folders[folders.length - 1];
-                // if (folder?.length === 0) {
-                //     setFolderId(lastFolder?.id)
-                // }
-                setFolderId(lastFolder?.id)
-                if (!folderId && !localStorage.getItem('chatSessionID')) {
-                    localStorage.setItem('lastFolderId', lastFolder?.id)
-                }
-                // console.log(folders)
-                setFolder(folders);
-                return null
-            } else {
-                setFolderId(null)
-                setFolder([])
-                localStorage.removeItem('lastFolderId')
-            }
-            if (error) {
-                throw error
-            }
-        } catch (error) {
-            console.log(error)
+    async function getWorkSpace(){
+        const res = await fetch('/api/workspace/list-workspace');
+        if(res.ok){
+            const json = await res.json()
+            setWorkSpaces(json.data)
+        }else{
+            setWorkSpaces([])
         }
-    };
-
-    // async function getWorkSpace(){
-    //     const res = await fetch('/api/workspace/list-workspace');
-    //     const json = await res.json()
+    }
+    async function getFolders(){
         
-    // }
-    useEffect(() => {
-        //getFolders()
-        //getWorkSpace()
-    }, [folderAdded]);
+        const res = await fetch(`/api/workspace/list-folder?workspace_id=${param.workspaceid}`);
+        if(res.ok){
+            const json = await res.json()
+            
+            if(json.data.length > 0){
+                console.log(json?.data)
+                setFolder(json?.data)
+            }else{
+                setFolder([])
+            }
+        }else{
+            setFolder([])
+        }
+    }
 
+    useEffect(() => {
+        getFolders()
+        
+    }, [folderAdded, param.workspaceid]);
+    useEffect(()=> {
+        getWorkSpace()
+    }, [])
 
     return (
         <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-4 font-Inter relative min-h-screen'>
 
-            <Account />
+            <Account/>
 
             <div className='flex flex-col gap-2 w-full p-2'>
                 <div className='flex flex-col gap-2 w-full'>
@@ -635,7 +656,7 @@ const SideBar = () => {
             {folder?.length > 0 && <div className='flex flex-col gap-2'>
                 {folder?.map((fol, idx) => {
                     return (
-                        <FolderCard key={idx} fol={fol} folder={folder} />
+                        <FolderCard key={idx} fol={fol} />
                     )
                 })}
             </div>}
