@@ -38,7 +38,8 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     const [inputError, setInputError] = useState(false);
     // const [currentWorkSpace, setCurrentWorkSpace] = useAtom(currentWorkSpaceAtom)
     const [currentUser, setCurrentUser] = useState({})
-    const params = useParams()
+
+    const { workspaceid } = useParams()
 
     const router = useRouter()
 
@@ -79,7 +80,7 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
             });
 
             if(response?.ok){
-                router.push(`/chat/upload`)
+                router.push(`/workspace/${workspaceid}/chat/upload`)
                 return 
             }
             
@@ -95,7 +96,7 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
   
       useEffect(() => {
           fetchCurrentUser();
-          console.log(params.workspaceid)
+        //   console.log(params.workspaceid)
       }, []);
    
 

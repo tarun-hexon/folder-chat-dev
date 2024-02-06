@@ -65,13 +65,8 @@ const ChatWindow = () => {
     const [workSpaceValue, setWorkSpaceValue] = useState(null)
     const [userWorkSpaces, setUserWorkSpaces] = useState([]);
     const botResponse = useRef('');
-
-    // const current_url = window.location.href;
-
-    // const chatid = current_url.split("/chat/")[1];
-
-    // const router = useRouter();
-    const {chatid} = useParams()
+    const router = useRouter();
+    const { workspaceid, chatid } = useParams()
     
     const { toast } = useToast();
 
@@ -79,7 +74,8 @@ const ChatWindow = () => {
         setRcvdMsg('')
         botResponse.current = ''
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/create-chat-session`, {
+            const data = await fetch(`/api/chat/create-chat-session`, {
+                credentials:'include',
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json"
@@ -92,13 +88,13 @@ const ChatWindow = () => {
             localStorage.setItem('chatSessionID', json?.chat_session_id)
             setChatSessionID(json?.chat_session_id)
 
-            await insertChatInDB(null, json?.chat_session_id, folderId);
+            //await insertChatInDB(null, json?.chat_session_id, folderId);
 
             await sendChatMsgs(userMsgdata, json.chat_session_id, parentMessageId);
             await createChatTitle(json.chat_session_id, null, userMsgdata)
 
             // router.push(`/chat/${json.chat_session_id}`)
-            window.history.pushState('', '', `/chat/${json.chat_session_id}`);
+            window.history.pushState('', '', `/workspace/${workspaceid}/chat/${json.chat_session_id}`);
 
         } catch (error) {
 
@@ -149,7 +145,8 @@ const ChatWindow = () => {
     async function createChatTitle(session_id, name, userMessage) {
         // console.log(session_id, name, userMessage)
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/rename-chat-session`, {
+            const data = await fetch(`/api/chat/rename-chat-session`, {
+                credentials:'include',
                 method: 'PUT',
                 headers: {
                     "Content-Type": "application/json"
@@ -162,7 +159,7 @@ const ChatWindow = () => {
             });
             const json = await data.json();
             // console.log(json.new_name);
-            await updateTitle(json.new_name, session_id)
+            //await updateTitle(json.new_name, session_id, userMessage)
             setChatTitle(json.new_name)
         } catch (error) {
             console.log(error)
@@ -212,10 +209,10 @@ const ChatWindow = () => {
     // };
 
 
-    async function updateTitle(newTitle, id) {
+    async function updateTitle(newTitle, id, userMessage) {
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/rename-chat-session`, {
+            const response = await fetch(`/api/chat/rename-chat-session`, {
                 method: 'PUT',
                 body: JSON.stringify({
                     "chat_session_id": id,
@@ -279,15 +276,18 @@ const ChatWindow = () => {
     };
 
     async function sendChatMsgs(userMsg, chatID, parent_ID) {
-
+        console.log(userMsg, chatID, parent_ID, folderId)
         try {
-            const sendMessageResponse = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/send-message`, {
+            const sendMessageResponse = await fetch(`/api/chat/send-message`, {
+                credentials:'include',
                 method: 'POST',
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
+                    "Cookie":'fastapiusersauth=xXP_ecceQE_XmIJDNdy7DwyhbrjSREpC8BXjW9o5fGI'
                 },
                 body: JSON.stringify({
                     "chat_session_id": chatID,
+                    "folder_id":folderId,
                     "parent_message_id": parent_ID,
                     "message": userMsg,
                     "prompt_id": 0,
@@ -297,7 +297,7 @@ const ChatWindow = () => {
                         "real_time": true,
                         "filters": {
                             "source_type": null,
-                            "document_set": documentSet.length === 0 ? null : [documentSet[0]?.doc_set_name],
+                            "document_set": documentSet.length === 0 ? null : [documentSet[0]?.name],
                             "time_cutoff": null
                         }
                     }
@@ -379,22 +379,22 @@ const ChatWindow = () => {
                             // console.log(obj.citations[key[0]])
                             const relatedDoc = obj?.context_docs?.top_documents.filter(doc => doc?.db_doc_id === obj?.citations[key[0]])
                             // console.log(relatedDoc)
-                            await updateChats(
-                                {
-                                    bot: botResponse.current,
-                                    source: relatedDoc[0],
-                                },
-                                { user: userMsg },
-                                chatMsg,
-                                obj.message_id
-                            );
+                            // await updateChats(
+                            //     {
+                            //         bot: botResponse.current,
+                            //         source: relatedDoc[0],
+                            //     },
+                            //     { user: userMsg },
+                            //     chatMsg,
+                            //     obj.message_id
+                            // );
                         } else {
-                            await updateChats(
-                                { bot: botResponse.current },
-                                { user: userMsg },
-                                chatMsg,
-                                obj.message_id
-                            );
+                            // await updateChats(
+                            //     { bot: botResponse.current },
+                            //     { user: userMsg },
+                            //     chatMsg,
+                            //     obj.message_id
+                            // );
                         }
 
                         botResponse.current = '';
@@ -508,8 +508,9 @@ const ChatWindow = () => {
         try {
             const data = await fetch(`/api/chat/get-chat-session/${id}`);
             const json = await data.json();
-            console.log(json)
+            // console.log(json)
             if (json?.messages.length > 0) {
+                await getDocSetDetails(folderId)
                 setParentMessageId(json?.messages[json?.messages.length - 1].message_id);
                 setChatMsg(json?.messages.reverse());
                 setChatHistory(json);
@@ -537,7 +538,7 @@ const ChatWindow = () => {
             });
         }
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+            const res = await fetch(`/api/manage/admin/document-set`, {
                 method: 'PATCH',
                 headers: {
                     "Content-Type": "application/json",
@@ -607,33 +608,70 @@ const ChatWindow = () => {
 
     }
 
-    async function getDocSetDetails(folder_id) {
+    // async function getDocSetDetails(folder_id) {
 
+    //     if (!folder_id) {
+    //         setLoading(false);
+    //         return null
+    //     }
+    //     // console.log(folder_id)
+    //     let { data: document_set, error } = await supabase
+    //         .from('document_set')
+    //         .select("*")
+    //         .eq('folder_id', folder_id)
+
+    //     if (document_set?.length > 0) {
+    //         setDocumentSet(document_set)
+    //         setSelectedDoc(document_set[0]?.cc_pair_id)
+    //         setLoading(false)
+    //     } else {
+    //         setDocumentSet([])
+    //         setLoading(false)
+    //         // router.push('/chat/upload')
+    //         // if (folder_id !== null) {
+    //         //     router.push('/chat/upload')
+    //         // }
+    //     }
+
+
+    // };
+
+    async function getDocSetDetails(folder_id) {
+        // console.log(folder_id)
         if (!folder_id) {
             setLoading(false);
             return null
         }
-        // console.log(folder_id)
-        let { data: document_set, error } = await supabase
-            .from('document_set')
-            .select("*")
-            .eq('folder_id', folder_id)
-
-        if (document_set?.length > 0) {
-            setDocumentSet(document_set)
-            setSelectedDoc(document_set[0]?.cc_pair_id)
-            setLoading(false)
-        } else {
-            setDocumentSet([])
-            setLoading(false)
-            // router.push('/chat/upload')
-            // if (folder_id !== null) {
-            //     router.push('/chat/upload')
-            // }
+        
+        const res = await fetch(`/api/manage/document-set?folder_id=${folder_id}`)
+        if(res.ok){
+            const data = await res.json();
+            // console.log(data)
+            if(data.length > 0){
+                setDocumentSet(data)
+            }else{
+                setDocumentSet([])
+                router.push(`/workspace/${workspaceid}/chat/upload`)
+            }
+            
         }
+        setLoading(false)
+        // if (document_set?.length > 0) {
+        //     setDocumentSet(document_set)
+        //     setSelectedDoc(document_set[0]?.cc_pair_id)
+        //     setLoading(false)
+        // } else {
+        //     setDocumentSet([])
+        //     setLoading(false)
+        //     // router.push('/chat/upload')
+        //     // if (folder_id !== null) {
+        //     //     router.push('/chat/upload')
+        //     // }
+        // }
 
 
     };
+
 
     async function getWorkSpace(){
         const res = await fetch('/api/workspace/list-workspace');
@@ -692,9 +730,9 @@ const ChatWindow = () => {
             <div className='w-full flex justify-between px-4 py-2 h-fit '>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
                     {folder?.length === 0 ? <Image src={Logo} alt='folder.chat' /> :
-                        <span className='text-sm leading-5 font-[500] opacity-[60%] hover:opacity-100'>Context : {documentSet[0]?.doc_set_name?.split('-')[0] || 'No Doc Uploaded'}</span>}
+                        <span className='text-sm leading-5 font-[500] opacity-[60%] hover:opacity-100'>Context : {documentSet[0]?.name?.split('-')[0] || 'No Doc Uploaded'}</span>}
 
-                    {folder?.length !== 0 && (!documentSet[0]?.doc_set_id ?
+                    {folder?.length !== 0 && (!documentSet[0]?.id ?
                         <Link href={'/chat/upload'}>
                             <Image src={plus} alt='add' title='Add Documents' />
                         </Link>
@@ -702,7 +740,7 @@ const ChatWindow = () => {
                         
                         <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen) }}>
                             <DialogTrigger asChild>
-                                <Image src={editIcon} alt='edit' title='edit' onClick={() => { getDocSetDetails(folderId); setDocSetOpen(true) }} />
+                                <Image src={editIcon} alt='edit' title='edit' onClick={async () => { await getDocSetDetails(folderId); setDocSetOpen(true) }} />
                             </DialogTrigger>
                             <DialogContent>
                                 <DialogHeader className='mb-2'>
@@ -758,37 +796,6 @@ const ChatWindow = () => {
                         {open && <NewFolder setFolderAdded={setFolderAdded} openMenu={open} setOpenMenu={setOpen} />}
                         
                     </div>
-
-                    // <div className='w-96 border-2 rounded-sm shadow-md h-fit m-auto p-12 flex flex-col justify-center items-center gap-2 text-[16px] leading-5 font-[400]'>
-                        
-                    //     {false ? 
-                    //     <p>No Workspace Found</p> :
-                    //     <div className="flex flex-col gap-4 w-64 justify-center items-center font-[500] text-sm leading-5">
-                        
-                    //     <Select 
-                            
-                    //         onValueChange={(e) => (setWorkSpaceValue(e))}
-                    //         className='select-none'
-                    //     >
-                    //         <SelectTrigger>
-                    //             <SelectValue
-                    //                 placeholder="select from existing workplaces"
-                    //             />
-                    //         </SelectTrigger>
-                    //         <SelectContent className="full">
-                    //             <SelectItem value="General" >Workspace 1</SelectItem>
-                                
-                    //         </SelectContent>
-                    //     </Select>
-                    //     <p>OR</p>
-                    //     </div>
-                        
-                    //     }
-                    //     <Button className='w-64 bg-[#14B8A6] hover:bg-[#14B8A6] opacity-75 hover:opacity-100 shadow-lg' onClick={() => setOpen(true)}>
-                    //         Create a New Workspace
-                    //     </Button>
-                    //     {open && <Workspace openMenu={open} setOpenMenu={setOpen} />}
-                    // </div>
 
                     :
                     <div className='w-[70%] h-[88%] rounded-[6px] flex flex-col justify-between box-border'>

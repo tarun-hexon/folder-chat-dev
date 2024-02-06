@@ -1,25 +1,25 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { useAtom } from 'jotai';
-import uploadIcon from '../../../../public/assets/upload-cloud.svg'
-import { Label } from '../../../../components/ui/label';
-import { Input } from '../../../../components/ui/input';
+import uploadIcon from '../../../../../../public/assets/upload-cloud.svg'
+import { Label } from '../../../../../../components/ui/label';
+import { Input } from '../../../../../../components/ui/input';
 import Image from 'next/image';
 import { useDropzone } from 'react-dropzone';
-import { folderAtom, folderIdAtom, sessionAtom, userConnectorsAtom, documentSetAtom } from '../../../store';
-import { useToast } from '../../../../components/ui/use-toast';
+import { folderAtom, folderIdAtom, sessionAtom, userConnectorsAtom, documentSetAtom } from '../../../../../store';
+import { useToast } from '../../../../../../components/ui/use-toast';
 import { useRouter } from 'next/navigation';
-import supabase from '../../../../config/supabse';
+import supabase from '../../../../../../config/supabse';
 import { Loader, Loader2, X } from 'lucide-react';
-import { Button } from '../../../../components/ui/button';
-import { cn } from '../../../../lib/utils';
-import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../components/ui/dialog'
+import { Button } from '../../../../../../components/ui/button';
+import { cn } from '../../../../../../lib/utils';
+import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../../../components/ui/dialog'
 
 
 const Upload = () => {
 
   const [session, setSession] = useAtom(sessionAtom);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [d_open, setD_open] = useState(false)
   const [uploading, setUploading] = useState(false);
   const [files, setFiles] = useState([]);
@@ -45,33 +45,9 @@ const Upload = () => {
 
     if (acceptedFiles && acceptedFiles.length > 0) {
 
-      acceptedFiles?.map((file, index) => {
-
-        const fileType = file?.name?.split('.')[1]
-        // if (fileType !== 'pdf' && fileType !== 'txt') {
-
-        //   toast({
-        //     variant: 'destructive',
-        //     title: "This File type is not supported!"
-        //   });
-
-        //   return null
-        // }
-        // const maxSize = 1024 * 1024
-        // if (file.size > maxSize) {
-        //   toast({
-        //     variant: 'destructive',
-        //     title: "File size exceeded!"
-        //   });
-        // };
-        // const file = acceptedFiles[index];
-
+      acceptedFiles?.map((file) => {
         setFiles((prev) => [...prev, file])
       })
-
-        ;
-    } else {
-      // console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
     }
   };
 
@@ -135,7 +111,7 @@ const Upload = () => {
       return null
      }
      
-      const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/file/upload`, {
+      const data = await fetch(`/api/manage/admin/connector/file/upload`, {
         method: "POST",
         body: formData
       });
@@ -156,7 +132,7 @@ const Upload = () => {
 
   async function connectorRequest(path) {
     try {
-      const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector`, {
+      const data = await fetch(`/api/manage/admin/connector`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"
@@ -198,7 +174,7 @@ const Upload = () => {
 
   async function getCredentials(connectID) {
     try {
-      const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/credential`, {
+      const data = await fetch(`/api/manage/credential`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
@@ -224,7 +200,7 @@ const Upload = () => {
 
   async function sendURL(connectID, credID) {
     try {
-      const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/connector/${connectID}/credential/${credID}`, {
+      const data = await fetch(`/api/manage/connector/${connectID}/credential/${credID}`, {
         method: 'PUT',
         headers: {
           "Content-Type": "application/json",
@@ -256,7 +232,7 @@ const Upload = () => {
 
   async function runOnce(conID, credID) {
     try {
-      const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/run-once`, {
+      const data = await fetch(`/api/manage/admin/connector/run-once`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
@@ -301,7 +277,7 @@ const Upload = () => {
 
     try {
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+      const res = await fetch(`/api/manage/admin/document-set`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
@@ -317,7 +293,7 @@ const Upload = () => {
 
       if (id) {
 
-        await insertDataInDB(docSetid, `${set_name}-${session?.user?.email.split('@')[0]}`, id, context.fileName)
+        //await insertDataInDB(docSetid, `${set_name}-${session?.user?.email.split('@')[0]}`, id, context.fileName)
         
       } else {
         return toast({
@@ -348,7 +324,7 @@ const Upload = () => {
     };
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+      const res = await fetch(`/api/manage/admin/document-set`, {
         method: 'PATCH',
         headers: {
           "Content-Type": "application/json",
@@ -398,7 +374,7 @@ const Upload = () => {
     
     try {
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+      const res = await fetch(`/api/manage/admin/document-set`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
@@ -414,7 +390,6 @@ const Upload = () => {
 
       if (id) {
 
-        
         const { data, error } = await supabase
           .from('document_set')
           .insert(
@@ -471,7 +446,7 @@ const Upload = () => {
     // return null
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+      const res = await fetch(`/api/manage/admin/document-set`, {
         method: 'PATCH',
         headers: {
           "Content-Type": "application/json",
@@ -483,7 +458,8 @@ const Upload = () => {
         })
       });
 
-      await updatetDataInDB(newArr, c_name);
+      //await updatetDataInDB(newArr, c_name);
+
       setContext({ fileName: '', description: '', contextName: '' })
       setD_open(false)
       setDialogLoader(false)
@@ -613,6 +589,7 @@ const Upload = () => {
   };
 
   async function getDocSetDetails(folder_id) {
+
     let { data: document_set, error } = await supabase
       .from('document_set')
       .select("*")
@@ -645,7 +622,7 @@ const Upload = () => {
   useEffect(() => {
 
     if (folder === null || folder?.length === 0) {
-      router.push('/chat/new')
+      // router.push('/chat/new')
     } 
     // else {
     //   setLoading(false)
@@ -655,7 +632,7 @@ const Upload = () => {
 
   useEffect(() => {
     if (folderId) {
-      getDocSetDetails(folderId);
+      //getDocSetDetails(folderId);
       // getConnectorsID(folderId);
     }
 

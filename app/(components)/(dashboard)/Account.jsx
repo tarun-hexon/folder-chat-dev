@@ -31,7 +31,7 @@ import {
 } from "../../../components/ui/popover"
 import { cn } from '../../../lib/utils';
 import Link from 'next/link';
-
+import { useParams } from 'next/navigation'
 
 const Account = () => {
     const [userSession, setUserSession] = useAtom(sessionAtom);
@@ -43,7 +43,7 @@ const Account = () => {
     const [currentUser, setCurrentUser] = useState({});
     const [value, setValue] = useAtom(currentWorkSpaceAtom)
     const router = useRouter();
-
+    const { workspaceid } = useParams()
     const [workspaces, setWorkSpaces] = useState([])
 
 
@@ -72,7 +72,6 @@ const Account = () => {
     async function getWorkSpace(){
         const res = await fetch('/api/workspace/list-workspace');
         const json = await res.json()
-        
         setWorkSpaces(json?.data)
     }
 
@@ -166,7 +165,7 @@ const Account = () => {
                                 <Check
                                     className={cn(
                                         "ml-auto h-4 w-4",
-                                        value === workspace.name ? "opacity-100" : "opacity-0"
+                                        value.name === workspace.name ? "opacity-100" : "opacity-0"
                                     )}
                                 />
                             </CommandItem>
