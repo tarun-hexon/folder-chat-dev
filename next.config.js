@@ -28,7 +28,7 @@ const nextConfig = {
     const defaultRedirects = [
       {
         source: "/",
-        destination: "/workspace",
+        destination: "/workspace/0/chat/new",
         permanent: true,
       },
     ];
