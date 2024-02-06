@@ -6,14 +6,14 @@ import threeDot from '../../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../components/ui/accordion";
 import { Account, NewFolder } from '../(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom,  showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom, tempAtom } from '../../store';
+import { folderAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom, tempAtom, workAddedAtom } from '../../store';
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
-import { Pencil, Trash2, Check, X, MessageSquare } from 'lucide-react';
+import { Pencil, Trash2, Check, X, MessageSquare, LogOut } from 'lucide-react';
 import { AdvanceMenu } from './index'
 import supabase from '../../../config/supabse';
 import { isUserExist } from '../../../config/lib';
-import { useRouter } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Input } from '../../../components/ui/input';
 import fileIcon from '../../../public/assets/Danswer-doc-B.svg';
 import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../components/ui/dialog';
@@ -22,15 +22,18 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { Label } from '../../../components/ui/label';
 import { cn } from '../../../lib/utils';
 import Link from 'next/link';
+import { sidebarOptions } from '../../../config/constants';
+import { Setting } from '../(settings)'
+import { logout } from '../../../lib/user';
 
+const FolderCard = ({ fol }) => {
+    // console.log(fol) 
+    const { name, id, workspace_id } = fol
 
-const FolderCard = ({ fol, doc, folder }) => {
-    // console.log(fol)
-    const { name, id } = fol
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
     const [files, setFiles] = useState([])
     const [chatTitle, setChatTitle] = useAtom(chatTitleAtom);
-    
+
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [popOpen, setPopOpen] = useState(false)
     const [isRenamingChat, setIsRenamingChat] = useState(false);
@@ -44,46 +47,39 @@ const FolderCard = ({ fol, doc, folder }) => {
     const [temp, setTemp] = useAtom(tempAtom)
 
     // const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
-    
+
     const router = useRouter();
-    
-    const current_url = window.location.href;
-
-    const chat_id = current_url.split("/chat/")[1];
-
-    async function getChatFiles() {
-        // let ID = id === undefined ? props.fol[0].id : id
-        try {
-            const { data, error } = await supabase
-                .from('chats')
-                .select('*')
-                .eq('folder_id', fol.id);
-            if (data) {
-                setFiles(data);
-
-            } else {
-                throw error
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    };
 
 
-    function handleOptionsOnclick(id, fol_id) {
+    // async function getChatFiles() {
+       
+    //     try {
+    //         const { data, error } = await supabase
+    //             .from('chats')
+    //             .select('*')
+    //             .eq('folder_id', fol.id);
+    //         if (data) {
+    //             setFiles(data);
+
+    //         } else {
+    //             throw error
+    //         }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // };
 
 
+    function handleOptionsOnclick(id, fol_id, wk_id) {
+        setFolderId(fol_id);
         if (id === 'new-chat') {
-
             localStorage.removeItem('chatSessionID')
             localStorage.removeItem('lastFolderId')
             setChatSessionID('new')
-            setFolderId(fol_id);
-            router.push('/chat/new')
+            router.push(`/workspace/${wk_id}/chat/new`)
 
         } else if (id === 'upload') {
-            setFolderId(fol_id)
-            router.push('/chat/upload')
+            router.push(`/workspace/${wk_id}/chat/upload`)
         }
 
         setPopOpen(false)
@@ -103,18 +99,18 @@ const FolderCard = ({ fol, doc, folder }) => {
                 },
             });
         }
-        await supabase
-            .from('document_set')
-            .delete()
-            .eq('folder_id', fol_id);
+        // await supabase
+        //     .from('document_set')
+        //     .delete()
+        //     .eq('folder_id', fol_id);
 
-        const { error } = await supabase
-            .from('folders')
-            .delete()
-            .eq('id', fol_id)
-           
+        // const { error } = await supabase
+        //     .from('folders')
+        //     .delete()
+        //     .eq('id', fol_id)
+
         if (!error) {
-            
+
             setFolderAdded(!folderAdded)
             setPopOpen(false)
         }
@@ -122,7 +118,7 @@ const FolderCard = ({ fol, doc, folder }) => {
     };
 
     function handleFilessOnclick(data) {
-        
+
         setChatSessionID(data.session_id)
         setFolderId(data.folder_id)
     };
@@ -161,7 +157,7 @@ const FolderCard = ({ fol, doc, folder }) => {
             .delete()
             .eq('session_id', id)
         if (!error) {
-            await getChatFiles();
+            // await getChatFiles();
             router.push('/chat/new')
         }
 
@@ -169,7 +165,7 @@ const FolderCard = ({ fol, doc, folder }) => {
 
     async function deleteChatsFromServer(chat_session_id) {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/delete-chat-session/${chat_session_id}`, {
+            const res = await fetch(`/api/chat/delete-chat-session/${chat_session_id}`, {
                 method: 'DELETE',
                 headers: {
                     "Content-Type": "application/json"
@@ -180,119 +176,155 @@ const FolderCard = ({ fol, doc, folder }) => {
         }
     };
 
-    async function updateFolderName(name, id) {
+    // async function updateFolderName(name, id) {
 
-        const { data, error } = await supabase
-            .from('folders')
-            .update({ name: name })
-            .eq('id', id)
-            .select()
-        setFolderAdded(!folderAdded)
-        setDialogOpen(false);
-        setPopOpen(false);
-    };
+    //     const { data, error } = await supabase
+    //         .from('folders')
+    //         .update({ name: name })
+    //         .eq('id', id)
+    //         .select()
+    //     setFolderAdded(!folderAdded)
+    //     setDialogOpen(false);
+    //     setPopOpen(false);
+    // };
 
-    async function deleteDocSetFile(ccID, fol_id) {
-        // console.log(ccID, fol_id)
+    // async function deleteDocSetFile(ccID, fol_id) {
+    //     // console.log(ccID, fol_id)
+
+    //     const allPairIds = [...documentSet[0]?.cc_pair_id]
+    //     const allNames = [...documentSet[0]?.files_name]
+    //     const idxOfID = documentSet[0]?.cc_pair_id.indexOf(ccID);
+    //     // const idxOfName = documentSet[0]?.files_name.indexOf(c_name);
+
+    //     allPairIds.splice(idxOfID, 1)
+    //     allNames.splice(idxOfID, 1)
+
+    //     // console.log(allPairIds)
+
+    //     // console.log(allNames)
+    //     // return null
+
+
+    //     if (allPairIds?.length > 0) {
+
+    //         const { data, error } = await supabase
+    //             .from('document_set')
+    //             .update({ 'cc_pair_id': allPairIds, "files_name": allNames })
+    //             .eq('folder_id', fol_id)
+    //             .select()
+
+    //         if (data.length > 0) {
+    //             setDocumentSet(data)
+    //         } else {
+    //             setDocumentSet([])
+    //         };
+
+    //         await fetch(`/api/manage/admin/document-set`, {
+    //             method: 'PATCH',
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //             body: JSON.stringify({
+    //                 "id": documentSet[0]?.doc_set_id,
+    //                 "description": '',
+    //                 "cc_pair_ids": allPairIds
+    //             })
+    //         })
+
+    //     } else if (allPairIds?.length === 0) {
+
+    //         const { data, error } = await supabase
+    //             .from('document_set')
+    //             .delete()
+    //             .eq('folder_id', fol_id);
+
+    //         setDocumentSet([])
+
+    //         await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set/${documentSet[0]?.doc_set_id}`, {
+    //             method: "DELETE",
+    //             headers: {
+    //                 "Content-Type": "application/json",
+    //             },
+    //         });
+    //         router.push('/chat')
+    //     }
+
+
+    // }
+
+    // async function getDocSetDetails() {
+    //     if (!fol.id) {
+    //         return null
+    //     }
+    //     let { data: document_set, error } = await supabase
+    //         .from('document_set')
+    //         .select("*")
+    //         .eq('folder_id', fol.id)
+
+    //     if (document_set?.length > 0) {
+    //         setDocumentSet(document_set)
+
+    //     } else {
+    //         setDocumentSet([])
+
+    //     }
+
+    // }
+
+    async function getDocSetDetails(folder_id) {
+        // console.log(folder_id, '275')
+        if (!folder_id) {
+            // setLoading(false);
+            return null
+        }
         
-        const allPairIds = [...documentSet[0]?.cc_pair_id]
-        const allNames = [...documentSet[0]?.files_name]
-        const idxOfID = documentSet[0]?.cc_pair_id.indexOf(ccID);
-        // const idxOfName = documentSet[0]?.files_name.indexOf(c_name);
-
-        allPairIds.splice(idxOfID, 1)
-        allNames.splice(idxOfID, 1)
-
-        // console.log(allPairIds)
-        
-        // console.log(allNames)
-        // return null
-        
-        
-        if(allPairIds?.length > 0){
-
-            const { data, error } = await supabase
-            .from('document_set')
-            .update({ 'cc_pair_id': allPairIds, "files_name": allNames })
-            .eq('folder_id', fol_id)
-            .select()
-
+        const res = await fetch(`/api/manage/document-set-v2?folder_id=${folder_id}`)
+        if(res.ok){
+            const data = await res.json();
+            
             if(data.length > 0){
                 setDocumentSet(data)
             }else{
                 setDocumentSet([])
-            };
-
-            await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
-                method: 'PATCH',
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                  "id": documentSet[0]?.doc_set_id,
-                  "description": '',
-                  "cc_pair_ids": allPairIds
-                })
-              })
-              
-        }else if(allPairIds?.length === 0){
-
-            const { data, error } = await supabase
-            .from('document_set')
-            .delete()
-            .eq('folder_id', fol_id);
-
-            setDocumentSet([])
-
-            await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set/${documentSet[0]?.doc_set_id}`, {
-                method: "DELETE",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-            });
-            router.push('/chat')
-        }
-
-
-    }
-
-    async function getDocSetDetails(){
-        if(!fol.id){
-            return null
-        }
-        let { data: document_set, error } = await supabase
-          .from('document_set')
-          .select("*")
-          .eq('folder_id', fol.id)
-
-          if(document_set?.length > 0){
-            setDocumentSet(document_set)
+                //router.push(`/workspace/${workspaceid}/chat/upload`)
+            }
             
-          }else{
-            setDocumentSet([])
-            
-          }
-          
-      }
-
-    useEffect(() => {
-        getChatFiles();
-        getDocSetDetails();
-
-    }, [chatHistory, chatTitle, id]);
-
-    
-    useEffect(() => {
-        
-        getDocSetDetails()
-    }, [chat_id, temp])
-    
-    useEffect(() => {
-        setIsSelected(chat_id);
-        if (chat_id !== 'new' && chat_id) {
-            //getFolderId(chat_id);
         }
-    }, [chat_id]);
+        // setLoading(false)
+        // if (document_set?.length > 0) {
+        //     setDocumentSet(document_set)
+        //     setSelectedDoc(document_set[0]?.cc_pair_id)
+        //     setLoading(false)
+        // } else {
+        //     setDocumentSet([])
+        //     setLoading(false)
+        //     // router.push('/chat/upload')
+        //     // if (folder_id !== null) {
+        //     //     router.push('/chat/upload')
+        //     // }
+        // }
+
+
+    };
+
+    useEffect(() => {
+        // getChatFiles();
+        getDocSetDetails(fol.id);
+
+    }, [chatHistory, chatTitle, id, temp]);
+
+
+    useEffect(() => {
+
+        // getDocSetDetails()
+    }, [temp])
+
+    // useEffect(() => {
+    //     setIsSelected(chat_id);
+    //     if (chat_id !== 'new' && chat_id) {
+    //         //getFolderId(chat_id);
+    //     }
+    // }, [chat_id]);
 
     return (
 
@@ -311,7 +343,7 @@ const FolderCard = ({ fol, doc, folder }) => {
                                 return (
                                     option.id !== 'delete' ?
                                         option.id !== 'edit' ?
-                                            <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer" onClick={() => { handleOptionsOnclick(option.id, id) }}>
+                                            <div key={option.id} className="inline-flex p-2 items-center font-[400] text-sm leading-5 hover:bg-[#F1F5F9] rounded-md hover:cursor-pointer" onClick={() => { handleOptionsOnclick(option.id, id, workspace_id) }}>
                                                 <option.icon className="mr-2 h-4 w-4" />
                                                 <span>{option.title}</span>
                                             </div> :
@@ -380,7 +412,7 @@ const FolderCard = ({ fol, doc, folder }) => {
                 <AccordionContent className='flex flex-col gap-2 p-1'>
                     {
                         files?.length === 0 ?
-                            <Link href={'/chat/new'} className='flex justify-between bg-[#EFF5F5] hover:cursor-pointer hover:bg-slate-200 p-2 rounded-lg' onClick={() => { setFolderId(id) }}>
+                            <Link href={`/workspace/${workspace_id}/chat/new`} className='flex justify-between bg-[#EFF5F5] hover:cursor-pointer hover:bg-slate-200 p-2 rounded-lg' onClick={() => { setFolderId(id) }}>
                                 <span className='text-sm font-[500] leading-5 '>Create First Chat</span>
 
                             </Link>
@@ -391,7 +423,7 @@ const FolderCard = ({ fol, doc, folder }) => {
                                     <Link href={`/chat/${data?.session_id}`} key={data?.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100 ${chat_id === data.session_id ? 'bg-slate-200' : ''}`} onClick={() => handleFilessOnclick(data)}>
                                         <div className='inline-flex gap-1 items-center'>
                                             <div>
-                                            <MessageSquare color='#14B8A6' size={'1rem'} className='hover:cursor-pointer' />
+                                                <MessageSquare color='#14B8A6' size={'1rem'} className='hover:cursor-pointer' />
                                             </div>
                                             <span className={`w-full font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis ${isRenamingChat && chat_id === data.session_id ? 'hidden' : ''} `} >{data?.chat_title || 'New Chat'}</span>
                                             {isRenamingChat ?
@@ -461,14 +493,14 @@ const FolderCard = ({ fol, doc, folder }) => {
                             })
                     }
                     {
-                        documentSet[0]?.cc_pair_id?.map((data, idx) => {
-                                
+                        documentSet[0]?.cc_pair_descriptors?.map((data) => {
+
                             return (
 
-                                <div key={data} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100`}>
+                                <div key={data.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100`}>
                                     <div className='inline-flex gap-1 items-center'>
                                         <Image src={fileIcon} alt='file' />
-                                        <span className={`font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis`} >{documentSet[0]?.files_name[idx]}</span>
+                                        <span className={`font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis`} >{data?.name}</span>
 
                                     </div>
                                     <Popover>
@@ -522,59 +554,124 @@ const FolderCard = ({ fol, doc, folder }) => {
 const SideBar = () => {
     const [folder, setFolder] = useAtom(folderAtom);
     const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
-
+    const [open, setOpen] = useState(false);
+    const [item, setItem] = useState('profile')
     const [session, setSession] = useAtom(sessionAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
-    const current_url = window.location.href;
-    const chat_id = current_url.split("advance");
-    const router = useRouter();
+    const [workSpaces, setWorkSpaces] = useState([])
+    const [workSpaceAdded, setWorkSpaceAdded] = useAtom(workAddedAtom)
+    const router = useRouter()
+    const param = useParams()
 
-    async function getFolders() {
-        try {
+    // async function getFolders() {
+    //     try {
+    //         const wkID = await isUserExist('workspaces', 'id', 'created_by', session?.user?.id);
+    //         let { data: folders, error } = await supabase
+    //             .from('folders')
+    //             .select('*')
+    //             .eq('workspace_id', wkID[0]?.id);
+    //         if (folders.length > 0) {
 
-            const wkID = await isUserExist('workspaces', 'id', 'created_by', session?.user?.id);
-            let { data: folders, error } = await supabase
-                .from('folders')
-                .select('*')
-                .eq('workspace_id', wkID[0]?.id);
-            if (folders.length > 0) {
+    //             const lastFolder = folders[folders.length - 1];
+    //             // if (folder?.length === 0) {
+    //             //     setFolderId(lastFolder?.id)
+    //             // }
+    //             setFolderId(lastFolder?.id)
+    //             if (!folderId && !localStorage.getItem('chatSessionID')) {
+    //                 localStorage.setItem('lastFolderId', lastFolder?.id)
+    //             }
+    //             // console.log(folders)
+    //             setFolder(folders);
+    //             return null
+    //         } else {
+    //             setFolderId(null)
+    //             setFolder([])
+    //             localStorage.removeItem('lastFolderId')
+    //         }
+    //         if (error) {
+    //             throw error
+    //         }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // };
 
-                const lastFolder = folders[folders.length - 1];
-                // if (folder?.length === 0) {
-                //     setFolderId(lastFolder?.id)
-                // }
-                setFolderId(lastFolder?.id)
-                if (!folderId && !localStorage.getItem('chatSessionID')) {
-                    localStorage.setItem('lastFolderId', lastFolder?.id)
-                }
-                // console.log(folders)
-                setFolder(folders);
-                return null
-            } else {
-                setFolderId(null)
-                setFolder([])
-                localStorage.removeItem('lastFolderId')
-            }
-            if (error) {
-                throw error
-            }
-        } catch (error) {
-            console.log(error)
+    async function getWorkSpace(){
+        const res = await fetch('/api/workspace/list-workspace');
+        if(res.ok){
+            const json = await res.json()
+            setWorkSpaces(json.data)
+        }else{
+            setWorkSpaces([])
         }
-    };
-
+    }
+    async function getFolders(){
+        
+        const res = await fetch(`/api/workspace/list-folder?workspace_id=${param.workspaceid}`);
+        if(res.ok){
+            const json = await res.json()
+            
+            if(json.data.length > 0){
+                setFolder(json?.data);
+                //console.log(json?.data[json?.data.length - 1].id)
+                setFolderId(json?.data[json?.data.length - 1].id)
+            }else{
+                setFolder([])
+            }
+        }else{
+            setFolder([])
+        }
+    }
 
     useEffect(() => {
         getFolders()
-    }, [folderAdded]);
-
+        
+    }, [folderAdded, param.workspaceid, workSpaceAdded]);
+    useEffect(()=> {
+        getWorkSpace()
+    }, [workSpaceAdded])
 
     return (
         <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-4 font-Inter relative min-h-screen'>
 
-            <div className='w-full overflow-x-scroll no-scrollbar px-2'>
-                <Account />
+            <Account/>
+
+            <div className='flex flex-col gap-2 w-full p-2'>
+                <div className='flex flex-col gap-2 w-full'>
+
+                    {sidebarOptions.map(option => {
+                        return (
+                            option.id !== 'settings' ?
+                                <div key={option.id} className='inline-flex gap-2 hover:cursor-pointer hover:bg-[#d9dada] w-full p-2 rounded-md' onClick={() => { setItem(option.id); setOpen(true); }}>
+                                    <Image src={option.icon} alt={option.title} />
+                                    <span className='text-sm leading-5 font-[500]'>{option.title}</span>
+                                </div>
+                                :
+                                <Dialog open={open} onOpenChange={() => { setOpen(!open); setItem(option.id) }} key={option.id}>
+
+                                    <DialogTrigger asChild className='self-start'>
+
+                                        <div key={option.title} className='inline-flex gap-2 hover:cursor-pointer hover:bg-[#d9dada] w-full p-2 rounded-md' >
+                                            <Image src={option.icon} alt={option.title} />
+                                            <span className='text-sm leading-5 font-[500]'>{option.title}</span>
+                                        </div>
+
+                                    </DialogTrigger>
+                                    <Setting item={item} setItem={setItem} />
+                                </Dialog>
+                        )
+                    })}
+                </div>
+                <div className='flex items-center gap-2 hover:cursor-pointer hover:bg-[#d9dada] w-full p-2 rounded-md' onClick={async () => {
+                    const res = await logout();
+                    if (res.ok) {
+                        router.push('/auth/login')
+                    }
+                }}>
+                    <LogOut className='w-4 h-4' color='#14B8A6' /><span className='font-[500] leading-5 text-sm hover:cursor-pointer'>Log Out</span>
+                    {/* <Image src={threeDot} alt={'options'} className='w-4 h-4 hover:cursor-pointer' /> */}
+                </div>
             </div>
 
             {!showAdvance ?
@@ -586,10 +683,12 @@ const SideBar = () => {
                 <div className='w-full h-fit bg-[#14B8A6] text-[#FFFFFF] rounded-lg shadow-md'>
                     <AdvanceMenu />
                 </div>}
+
+
             {folder?.length > 0 && <div className='flex flex-col gap-2'>
-                {folder?.map((fol, idx) => {
+                {folder?.map((fol) => {
                     return (
-                        <FolderCard key={idx} fol={fol} folder={folder}/>
+                        <FolderCard key={fol.id} fol={fol} />
                     )
                 })}
             </div>}

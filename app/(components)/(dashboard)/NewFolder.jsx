@@ -1,3 +1,4 @@
+'use client'
 import React, { useEffect, useState } from 'react'
 import {
     Dialog,
@@ -21,75 +22,83 @@ import { Button } from "../../../components/ui/button";
 import plus from '../../../public/assets/plus - light.svg'
 import Image from 'next/image';
 import { useAtom } from 'jotai';
-import { folderAtom, sessionAtom, folderIdAtom } from '../../store';
+import { currentWorkSpaceAtom, folderIdAtom } from '../../store';
 import { Folder } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { isUserExist } from '../../../config/lib';
 import supabase from '../../../config/supabse';
 import { useRouter } from 'next/navigation';
+import { useParams } from 'next/navigation'
+import { getCurrentUser } from '../../../lib/user';
 
 const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     // const [folder, setFolder] = useAtom(folderAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
-
     const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
-    const [session, setSession] = useAtom(sessionAtom);
-    
+    // const [currentWorkSpace, setCurrentWorkSpace] = useAtom(currentWorkSpaceAtom)
+    const [currentUser, setCurrentUser] = useState({})
+
+    const { workspaceid } = useParams()
+
     const router = useRouter()
-    // const id = uuidv4()
+
+
     const [fol, setFol] = useState({
-        title: '',
-        description: '',
-        function: '',
+        "title": '',
+        "description": '',
+        "type":[],
+        "function": '',
     });
 
 
     async function createFolder(folderData){
-        if (folderData.title === '') {
-            setInputError('Write some valid folder name');
+        if (folderData.title === '' || folderData.description === '' || folderData.function === '') {
+            setInputError('select all the field first');
             return null
-        } else if (folderData.description === '') {
-            setInputError('Write some valid folder description');
-            return null
-        };
+        } 
 
         try {
-            
-            const wkID = await isUserExist('workspaces', 'id', 'created_by',session.user.id);
-            
-            const { data, error } = await supabase
-                .from('folders')
-                .insert([
-                    { 
-                        'workspace_id': wkID[0].id, 
-                        'user_id': session.user.id, 
-                        'name' :folderData.title, 
-                        'description':folderData.description, 
-                        'function':folderData.function, 
-                        'is_active':true, 
-                        'chat_enabled':true 
+            const response = await fetch('/api/workspace/create-folder', {
+                method:'POST',
+                credentials:'include',
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    "workspace_id":params.workspaceid,
+                    "user_id": currentUser?.id,
+                    "name": folderData.title,
+                    "description": folderData.description,
+                    "function": folderData.description,
+                    "is_active":true,
+                    "chat_enabled":true,
+                    "permissions":{
+                        "type": folderData.type
                     }
-                ])
-                .select();
-                if(data){
-                    // console.log(data);
-                    // setFolder([...folder, data]);
-                    setFolderAdded(prev => !prev)
-                    setOpen(false);
-                    setFolderId(data[0].id)
-                    
-                    router.push(`/chat/upload`)
-                    // window.history.replaceState('', '', `/chat/new`);
-                    return 
-                }
-                if(error){
-                    throw error
-                }
+                })
+            });
+
+            if(response?.ok){
+                router.push(`/workspace/${workspaceid}/chat/upload`)
+                return 
+            }
+            
         } catch (error) {
             console.log(error)
         }
-    }
+    };
+
+    async function fetchCurrentUser(){
+        const user = await getCurrentUser();
+        setCurrentUser(user)
+      };
+  
+      useEffect(() => {
+          fetchCurrentUser();
+        //   console.log(params.workspaceid)
+      }, []);
+   
 
     return (
         <Dialog open={open} onOpenChange={() => {
@@ -111,9 +120,9 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle className='font-[600] text-[18px] leading-[18px] text-[#0F172A]'>Create New Folder</DialogTitle>
-                    <DialogDescription className='font-[400] text-[14px] leading-5'>
+                    {/* <DialogDescription className='font-[400] text-[14px] leading-5'>
                         Workplace is where you & your team organize documents
-                    </DialogDescription>
+                    </DialogDescription> */}
                 </DialogHeader>
                 <div className="flex flex-col gap-4 py-4">
                     <div className="flex flex-col items-start gap-4">
@@ -149,6 +158,32 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                             autoComplete='off'
                         />
                     </div>
+                    {/* <div className="flex flex-col items-start gap-4">
+                        <Label htmlFor="permission" className="font-[500] text-sm leading-5">
+                            Permissions
+                        </Label>
+                        <Select 
+                            
+                            id="permission" 
+                            onValueChange={(e) => setFol({
+                                ...fol,
+                                "type" : e === 'both' ? ["editor", "basic"] : [e]
+                            })}>
+
+                            <SelectTrigger className="w-full text-black flex justify-between">
+                                <SelectValue
+                                    placeholder="select an option"
+                                    className='font-[400] text-[12px] leading-[20px]'
+                                />
+                            </SelectTrigger>
+                            <SelectContent className="full">
+                                <SelectItem value="editor" >Editor</SelectItem>
+                                <SelectItem value="viewer">Viewer</SelectItem>
+                                <SelectItem value="both">Both</SelectItem>
+                                
+                            </SelectContent>
+                        </Select>
+                    </div> */}
                     <div className="flex flex-col items-start gap-4">
                         <Label htmlFor="description" className="font-[500] text-sm leading-5">
                             Function

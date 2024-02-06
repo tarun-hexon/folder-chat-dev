@@ -1,19 +1,19 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import { useAtom } from 'jotai';
-import uploadIcon from '../../../../public/assets/upload-cloud.svg'
-import { Label } from '../../../../components/ui/label';
-import { Input } from '../../../../components/ui/input';
+import uploadIcon from '../../../../../../public/assets/upload-cloud.svg'
+import { Label } from '../../../../../../components/ui/label';
+import { Input } from '../../../../../../components/ui/input';
 import Image from 'next/image';
 import { useDropzone } from 'react-dropzone';
-import { folderAtom, folderIdAtom, sessionAtom, userConnectorsAtom, documentSetAtom } from '../../../store';
-import { useToast } from '../../../../components/ui/use-toast';
+import { folderAtom, folderIdAtom, sessionAtom, userConnectorsAtom, documentSetAtom } from '../../../../../store';
+import { useToast } from '../../../../../../components/ui/use-toast';
 import { useRouter } from 'next/navigation';
-import supabase from '../../../../config/supabse';
+import supabase from '../../../../../../config/supabse';
 import { Loader, Loader2, X } from 'lucide-react';
-import { Button } from '../../../../components/ui/button';
-import { cn } from '../../../../lib/utils';
-import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../components/ui/dialog'
+import { Button } from '../../../../../../components/ui/button';
+import { cn } from '../../../../../../lib/utils';
+import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../../../components/ui/dialog'
 
 
 const Upload = () => {
@@ -45,33 +45,9 @@ const Upload = () => {
 
     if (acceptedFiles && acceptedFiles.length > 0) {
 
-      acceptedFiles?.map((file, index) => {
-
-        const fileType = file?.name?.split('.')[1]
-        // if (fileType !== 'pdf' && fileType !== 'txt') {
-
-        //   toast({
-        //     variant: 'destructive',
-        //     title: "This File type is not supported!"
-        //   });
-
-        //   return null
-        // }
-        // const maxSize = 1024 * 1024
-        // if (file.size > maxSize) {
-        //   toast({
-        //     variant: 'destructive',
-        //     title: "File size exceeded!"
-        //   });
-        // };
-        // const file = acceptedFiles[index];
-
+      acceptedFiles?.map((file) => {
         setFiles((prev) => [...prev, file])
       })
-
-        ;
-    } else {
-      // console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
     }
   };
 
@@ -135,7 +111,7 @@ const Upload = () => {
       return null
      }
      
-      const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/file/upload`, {
+      const data = await fetch(`/api/manage/admin/connector/file/upload`, {
         method: "POST",
         body: formData
       });
@@ -156,7 +132,7 @@ const Upload = () => {
 
   async function connectorRequest(path) {
     try {
-      const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector`, {
+      const data = await fetch(`/api/manage/admin/connector`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json"
@@ -175,15 +151,15 @@ const Upload = () => {
 
       );
       const json = await data?.json();
-      // console.log(existConnector, '164')
+      
 
-      if (existConnector?.length === 0) {
-        // console.log(existConnector, '166')
-        await insertDataInConTable([json?.id])
-      } else {
-        // console.log(existConnector, '169')
-        await updatetDataInConTable(existConnector, json?.id)
-      }
+      // if (existConnector?.length === 0) {
+        
+      //   await insertDataInConTable([json?.id])
+      // } else {
+       
+      //   await updatetDataInConTable(existConnector, json?.id)
+      // }
 
       await getCredentials(json?.id)
     } catch (error) {
@@ -198,7 +174,7 @@ const Upload = () => {
 
   async function getCredentials(connectID) {
     try {
-      const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/credential`, {
+      const data = await fetch(`/api/manage/credential`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
@@ -224,7 +200,7 @@ const Upload = () => {
 
   async function sendURL(connectID, credID) {
     try {
-      const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/connector/${connectID}/credential/${credID}`, {
+      const data = await fetch(`/api/manage/connector/${connectID}/credential/${credID}`, {
         method: 'PUT',
         headers: {
           "Content-Type": "application/json",
@@ -256,7 +232,7 @@ const Upload = () => {
 
   async function runOnce(conID, credID) {
     try {
-      const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/run-once`, {
+      const data = await fetch(`/api/manage/admin/connector/run-once`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
@@ -283,7 +259,7 @@ const Upload = () => {
 
   async function setDocumentSetInServer(ccID, set_name, con) {
 
-    const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    const data = await fetch(`/api/manage/admin/connector/indexing-status`);
     const json = await data.json();
 
     const docSetid = []
@@ -301,7 +277,7 @@ const Upload = () => {
 
     try {
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+      const res = await fetch(`/api/manage/admin/document-set`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
@@ -317,7 +293,7 @@ const Upload = () => {
 
       if (id) {
 
-        await insertDataInDB(docSetid, `${set_name}-${session?.user?.email.split('@')[0]}`, id, context.fileName)
+        //await insertDataInDB(docSetid, `${set_name}-${session?.user?.email.split('@')[0]}`, id, context.fileName)
         
       } else {
         return toast({
@@ -337,7 +313,7 @@ const Upload = () => {
 
   async function updateDocumentSetInServer(db_id, ccID, con) {
 
-    const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    const data = await fetch(`/api/manage/admin/connector/indexing-status`);
     const json = await data.json();
 
     const docSetid = documentSet[0]?.cc_pair_id
@@ -348,7 +324,7 @@ const Upload = () => {
     };
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+      const res = await fetch(`/api/manage/admin/document-set`, {
         method: 'PATCH',
         headers: {
           "Content-Type": "application/json",
@@ -360,7 +336,7 @@ const Upload = () => {
         })
       });
 
-      await updatetDataInDB(docSetid, context.fileName)
+      //await updatetDataInDB(docSetid, context.fileName)
       setContext({ fileName: '', description: '', contextName: '' })
     } catch (error) {
       console.log(error)
@@ -369,7 +345,7 @@ const Upload = () => {
 
   async function setDocumentSetInServer2(ccID, context) {
 
-    const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    const data = await fetch(`/api/manage/admin/connector/indexing-status`);
     const json = await data.json();
 
 
@@ -398,7 +374,7 @@ const Upload = () => {
     
     try {
 
-      const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+      const res = await fetch(`/api/manage/admin/document-set`, {
         method: 'POST',
         headers: {
           "Content-Type": "application/json",
@@ -412,41 +388,40 @@ const Upload = () => {
 
       const id = await res.json();
 
-      if (id) {
+      // if (id) {
 
-        
-        const { data, error } = await supabase
-          .from('document_set')
-          .insert(
-            {
-              'cc_pair_id': newArr,
-              'user_id': session?.user?.id,
-              'folder_id': folderId,
-              'doc_set_name': `${context.contextName}-${session?.user?.email.split('@')[0]}`,
-              'doc_set_id': id,
-              'files_name': docSetName
-            },
-          )
-          .select()
+      //   const { data, error } = await supabase
+      //     .from('document_set')
+      //     .insert(
+      //       {
+      //         'cc_pair_id': newArr,
+      //         'user_id': session?.user?.id,
+      //         'folder_id': folderId,
+      //         'doc_set_name': `${context.contextName}-${session?.user?.email.split('@')[0]}`,
+      //         'doc_set_id': id,
+      //         'files_name': docSetName
+      //       },
+      //     )
+      //     .select()
 
-        if (data?.length > 0) {
-          setDocumentSet(data)
-          toast({
-            variant: 'default',
-            title: "File Uploaded!"
-          });
-          router.push('/chat/new')
-        }
-        setContext({ fileName: '', contextName: '', description: '' })
+      //   if (data?.length > 0) {
+      //     setDocumentSet(data)
+      //     toast({
+      //       variant: 'default',
+      //       title: "File Uploaded!"
+      //     });
+      //     router.push('/chat/new')
+      //   }
+      //   setContext({ fileName: '', contextName: '', description: '' })
         
-        setD_open(false)
-        setDialogLoader(false)
-      } else {
-        return toast({
-          variant: 'destructive',
-          title: "Some Error Occured!"
-        })
-      }
+      //   setD_open(false)
+      //   setDialogLoader(false)
+      // } else {
+      //   return toast({
+      //     variant: 'destructive',
+      //     title: "Some Error Occured!"
+      //   })
+      // }
 
     } catch (error) {
       console.log(error);
@@ -471,7 +446,7 @@ const Upload = () => {
     // return null
 
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+      const res = await fetch(`/api/manage/admin/document-set`, {
         method: 'PATCH',
         headers: {
           "Content-Type": "application/json",
@@ -483,7 +458,8 @@ const Upload = () => {
         })
       });
 
-      await updatetDataInDB(newArr, c_name);
+      //await updatetDataInDB(newArr, c_name);
+
       setContext({ fileName: '', description: '', contextName: '' })
       setD_open(false)
       setDialogLoader(false)
@@ -581,7 +557,6 @@ const Upload = () => {
     // }
   };
 
-
   function handleDocSetID(id) {
     //console.log(id)
     if (selectedDoc?.includes(parseInt(id))) {
@@ -613,16 +588,28 @@ const Upload = () => {
   };
 
   async function getDocSetDetails(folder_id) {
-    let { data: document_set, error } = await supabase
-      .from('document_set')
-      .select("*")
-      .eq('folder_id', folder_id)
-    if (document_set.length > 0) {
-      setDocumentSet(document_set)
-    } else {
-      setDocumentSet([])
-    }
-    setLoading(false)
+
+    
+      console.log(folder_id, '639')
+      if (!folder_id) {
+          setLoading(false);
+          return null
+      }
+      const res = await fetch(`/api/manage/document-set-v2?folder_id=${folder_id}`)
+      if(res.ok){
+          const data = await res.json();
+          console.log(data)
+          if(data.length > 0){
+              setDocumentSet(data)
+          }else{
+              setDocumentSet([])
+              // router.push(`/workspace/${workspaceid}/chat/upload`)
+          }
+          setLoading(false)
+
+
+  };
+    
   };
 
   // async function getConnectorsID(folderId){
@@ -639,13 +626,17 @@ const Upload = () => {
   //   return []
   // };
 
-
+  async function indexingAll(){
+    const data = await fetch(`/api/manage/admin/connector/indexing-status`);
+    const json = await data.json();
+    console.log(json)
+  }
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   useEffect(() => {
-
+    indexingAll()
     if (folder === null || folder?.length === 0) {
-      router.push('/chat/new')
+      // router.push('/chat/new')
     } 
     // else {
     //   setLoading(false)
@@ -755,7 +746,7 @@ const Upload = () => {
                   <DialogTrigger asChild>
                     <p className='font-[600] p-2 border w-[70%] m-auto rounded-sm shadow-sm bg-[#EFF5F5] hover:cursor-pointer' onClick={() => context.fileName !== '' ? setD_open(true) : toast({
                       variant: 'destructive',
-                      title: "File Name is required!"
+                      title: "File name is required!"
                     })}>Select From Existing Files</p>
                   </DialogTrigger>
                   <DialogContent>
