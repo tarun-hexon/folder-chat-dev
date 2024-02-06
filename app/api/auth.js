@@ -12,7 +12,7 @@ export async function signin(email, password){
     
     // console.log(formData)
     try {
-        const response = await axios.post('https://danswer-dev.folder.chat/api/auth/login', formData, {
+        const response = await axios.post('/api/auth/login', formData, {
             headers: {
                 'Content-Type': 'multipart/form-data',
             },
@@ -24,12 +24,7 @@ export async function signin(email, password){
     }
 }
     
-export async function logout(){
 
-    const response = await axios.post('https://danswer-dev.folder.chat/auth/logout')
-
-    return response;
-}
 
 export async function signup(email, password){
     const jsonData = JSON.stringify({
@@ -38,7 +33,7 @@ export async function signup(email, password){
         'password': password
     });
 
-    const response = await axios.post('https://danswer-dev.folder.chat/api/auth/register', jsonData, {
+    const response = await axios.post('/api/auth/register', jsonData, {
         headers: {
             'Content-Type': 'application/json'
         }
@@ -53,7 +48,7 @@ export async function test(){
 
 
   export const getCurrentUser = async () => {
-    const response = await fetch("https://danswer-dev.folder.chat/api/manage/me")
+    const response = await fetch("/api/manage/me")
     // if (!response.ok) {
     //     console.log(response)
     //   return null;

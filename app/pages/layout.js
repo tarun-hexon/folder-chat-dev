@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
   return (
     <>
     <div className={`flex font-Inter items-center h-fit w-full box-border flex-col gap-1 ${darkMode ? 'bg-[#EFF5F5] text-black' : 'bg-[#115E59] text-white'} p-2`}>
-        <Header />
+        <Header showActions={false} />
     </div>
     <div className="w-full h-full min-h-screen flex justify-center px-14 py-10 text-sm text-justify">
         { children }

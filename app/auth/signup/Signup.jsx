@@ -79,7 +79,7 @@ const Signup = ( { isSignup, shouldVerify } ) => {
   //       'password': userInput.password
   //   });
 
-  //   const response = await axios.post('https://danswer-dev.folder.chat/api/auth/register', jsonData, {
+  //   const response = await axios.post('/api/auth/register', jsonData, {
   //       credentials: "include",
   //       headers: {
   //           'Content-Type': 'application/json'
@@ -136,9 +136,9 @@ const Signup = ( { isSignup, shouldVerify } ) => {
         }
         else {
             const errorDetail = (await loginResponse.json()).detail;
-            setError("Unknown error")
+            setInputError("Unknown error")
             if (errorDetail === "LOGIN_BAD_CREDENTIALS") {
-                setError("Invalid email or password")
+              setInputError("Invalid email or password")
             }
         }
     }
@@ -183,6 +183,7 @@ const Signup = ( { isSignup, shouldVerify } ) => {
 
 
   return (
+    <div className={`h-full w-full box-border flex justify-center items-center ${darkMode ? 'bg-[#EFF5F5] text-black' : 'bg-[#115E59] text-white'}`}>
     <div className={`flex flex-col h-full w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'} px-5 md:px-0`}>
 
       <h1 className='text-5xl w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-3'>Sign Up</h1>
@@ -227,6 +228,7 @@ const Signup = ( { isSignup, shouldVerify } ) => {
 
       <div className='w-full text-sm opacity-75 text-center'>Already have an account &#63; <Link href={'/auth/login'} className='font-[500] hover:underline '>Sign In</Link></div>
 
+    </div>
     </div>
   )
 }

@@ -15,7 +15,7 @@ export default async function AuthLayout({ children }) {
       getAuthTypeMetadataSS(),
       getCurrentUserSS(),
     ]);
-    console.log(authTypeMetadata)
+    // console.log(authTypeMetadata)
   } catch (e) {
     console.log(`Some fetch failed for the login page - ${e}`);
   }
@@ -29,7 +29,7 @@ export default async function AuthLayout({ children }) {
     return redirect("/chat/new");
   }
   return (
-    <div className={`flex font-Inter items-center h-screen w-full box-border flex-col gap-1 ${darkMode ? 'bg-[#EFF5F5] text-black' : 'bg-[#115E59] text-white'}`}>
+    <div className={`flex font-Inter items-center h-screen w-full box-border flex-col`}>
       <Header showActions={true} />
       {children}
     </div>

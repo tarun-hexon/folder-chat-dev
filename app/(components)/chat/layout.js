@@ -15,7 +15,7 @@ export default function RootLayout({ children }) {
     async function indexingStatus(ses){
       // console.log(ses)
       try {
-          const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+          const data = await fetch(`/api/manage/admin/connector/indexing-status`);
           const json = await data?.json();
           // console.log(json)
           setAllConnectorFromServer(json)

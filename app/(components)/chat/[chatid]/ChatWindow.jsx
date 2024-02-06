@@ -24,7 +24,14 @@ import { cn } from '../../../../lib/utils'
 import plus from '../../../../public/assets/plus.svg'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-
+import { Workspace } from '../../(common)'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "../../../../components/ui/select"
 
 
 const ChatWindow = () => {
@@ -40,6 +47,7 @@ const ChatWindow = () => {
     const [folder, setFolder] = useAtom(folderAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [open, setOpen] = useState(false)
+    const [openWorkSpace, setOpenWorkSpace] = useState(true)
     const textareaRef = useRef(null);
     const [responseObj, setResponseObj] = useState(null)
     const [msgLoader, setMsgLoader] = useState(false);
@@ -54,8 +62,8 @@ const ChatWindow = () => {
     const [inputDocDes, setInputDocDes] = useState('');
     const [selectedDoc, setSelectedDoc] = useState([]);
     const [docSetOpen, setDocSetOpen] = useState(false);
-
-
+    const [workSpaceValue, setWorkSpaceValue] = useState(null)
+    const [userWorkSpaces, setUserWorkSpaces] = useState([1]);
     const botResponse = useRef('');
 
     // const current_url = window.location.href;
@@ -662,6 +670,9 @@ const ChatWindow = () => {
         }
     }, [chatSessionID])
 
+   if(userWorkSpaces.length === 0){
+        return <div className='w-full flex flex-col justify-center rounded-[6px] items-center no-scrollbar box-border h-screen px-80 text-center'><Workspace openMenu={openWorkSpace} setOpenMenu={setOpenWorkSpace} /></div>
+   }
 
     return (
         <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2 text-center'>
@@ -732,7 +743,40 @@ const ChatWindow = () => {
                         <Folder color='#14B8A6' size={'3rem'} className='block animate-pulse' />
                         <p className='text-[16px] leading-5 font-[400]'><strong className='hover:underline hover:cursor-pointer' onClick={() => setOpen(true)}>Create</strong> a Folder and start chating with folder.chat</p>
                         {open && <NewFolder setFolderAdded={setFolderAdded} openMenu={open} setOpenMenu={setOpen} />}
+                        
                     </div>
+
+                    // <div className='w-96 border-2 rounded-sm shadow-md h-fit m-auto p-12 flex flex-col justify-center items-center gap-2 text-[16px] leading-5 font-[400]'>
+                        
+                    //     {false ? 
+                    //     <p>No Workspace Found</p> :
+                    //     <div className="flex flex-col gap-4 w-64 justify-center items-center font-[500] text-sm leading-5">
+                        
+                    //     <Select 
+                            
+                    //         onValueChange={(e) => (setWorkSpaceValue(e))}
+                    //         className='select-none'
+                    //     >
+                    //         <SelectTrigger>
+                    //             <SelectValue
+                    //                 placeholder="select from existing workplaces"
+                    //             />
+                    //         </SelectTrigger>
+                    //         <SelectContent className="full">
+                    //             <SelectItem value="General" >Workspace 1</SelectItem>
+                                
+                    //         </SelectContent>
+                    //     </Select>
+                    //     <p>OR</p>
+                    //     </div>
+                        
+                    //     }
+                    //     <Button className='w-64 bg-[#14B8A6] hover:bg-[#14B8A6] opacity-75 hover:opacity-100 shadow-lg' onClick={() => setOpen(true)}>
+                    //         Create a New Workspace
+                    //     </Button>
+                    //     {open && <Workspace openMenu={open} setOpenMenu={setOpen} />}
+                    // </div>
+
                     :
                     <div className='w-[70%] h-[88%] rounded-[6px] flex flex-col justify-between box-border'>
 

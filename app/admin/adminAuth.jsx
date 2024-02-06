@@ -29,6 +29,7 @@ export default async function AdminAuth({ children }) {
 
     const authDisabled = authTypeMetadata?.authType === "disabled";
     const requiresVerification = authTypeMetadata?.requiresVerification;
+
     if (!authDisabled) {
         if (!user) {
             return redirect("/auth/login");

@@ -44,57 +44,95 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     const router = useRouter()
     
     const [fol, setFol] = useState({
-        title: '',
-        description: '',
-        function: '',
+        "title": '',
+        "description": '',
+        "type":[],
+        "function": '',
     });
 
 
+    // async function createFolder(folderData){
+    //     if (folderData.title === '' || folderData.description === '' || folderData.function === '' || folderData.permissions.type.length === 0) {
+    //         setInputError('select all the field first');
+    //         return null
+    //     } 
+
+    //     try {
+            
+    //         const wkID = await isUserExist('workspaces', 'id', 'created_by',session.user.id);
+            
+    //         const { data, error } = await supabase
+    //             .from('folders')
+    //             .insert([
+    //                 { 
+    //                     'workspace_id': wkID[0].id, 
+    //                     'user_id': currentUser?.id, 
+    //                     'name' : folderData.title, 
+    //                     'description': folderData.description, 
+    //                     'function': folderData.function, 
+    //                     'is_active': true, 
+    //                     'chat_enabled': true 
+    //                 }
+    //             ])
+    //             .select();
+    //             if(data){
+    //                 // console.log(data);
+    //                 // setFolder([...folder, data]);
+    //                 setFolderAdded(prev => !prev)
+    //                 setOpen(false);
+    //                 setFolderId(data[0].id)
+                    
+    //                 router.push(`/chat/upload`)
+    //                 // window.history.replaceState('', '', `/chat/new`);
+    //                 return 
+    //             }
+    //             if(error){
+    //                 throw error
+    //             }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // };
+
     async function createFolder(folderData){
-        if (folderData.title === '') {
-            setInputError('Write some valid folder name');
+        if (folderData.title === '' || folderData.description === '' || folderData.function === '' || folderData.type.length === 0) {
+            setInputError('select all the field first');
             return null
-        } else if (folderData.description === '') {
-            setInputError('Write some valid folder description');
-            return null
-        };
+        } 
 
         try {
             
             const wkID = await isUserExist('workspaces', 'id', 'created_by',session.user.id);
-            
-            const { data, error } = await supabase
-                .from('folders')
-                .insert([
-                    { 
-                        'workspace_id': wkID[0].id, 
-                        'user_id': currentUser?.id, 
-                        'name' : folderData.title, 
-                        'description': folderData.description, 
-                        'function': folderData.function, 
-                        'is_active': true, 
-                        'chat_enabled': true 
-                    }
-                ])
-                .select();
-                if(data){
-                    // console.log(data);
-                    // setFolder([...folder, data]);
-                    setFolderAdded(prev => !prev)
-                    setOpen(false);
-                    setFolderId(data[0].id)
+            const response = await fetch('/workspace/create-folder', {
+                method:'POST',
+                credentials:'include',
+                headers:{
                     
-                    router.push(`/chat/upload`)
-                    // window.history.replaceState('', '', `/chat/new`);
-                    return 
-                }
-                if(error){
-                    throw error
-                }
+                },
+                body: JSON.stringify({
+                    "workspace_id":1,
+                    "user_id": currentUser?.id,
+                    "name": folderData.title,
+                    "description": folderData.description,
+                    "function": folderData,description,
+                    "is_active":true,
+                    "chat_enabled":true,
+                    "permissions":{
+                        "type": folderData.type
+                    }
+                })
+            });
+
+            if(response?.ok){
+                router.push(`/chat/upload`)
+                return 
+            }
+            
         } catch (error) {
             console.log(error)
         }
     };
+
     async function fetchCurrentUser(){
         const user = await getCurrentUser();
         setCurrentUser(user)
@@ -125,9 +163,9 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
             <DialogContent>
                 <DialogHeader>
                     <DialogTitle className='font-[600] text-[18px] leading-[18px] text-[#0F172A]'>Create New Folder</DialogTitle>
-                    <DialogDescription className='font-[400] text-[14px] leading-5'>
+                    {/* <DialogDescription className='font-[400] text-[14px] leading-5'>
                         Workplace is where you & your team organize documents
-                    </DialogDescription>
+                    </DialogDescription> */}
                 </DialogHeader>
                 <div className="flex flex-col gap-4 py-4">
                     <div className="flex flex-col items-start gap-4">
@@ -163,6 +201,32 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                             autoComplete='off'
                         />
                     </div>
+                    {/* <div className="flex flex-col items-start gap-4">
+                        <Label htmlFor="permission" className="font-[500] text-sm leading-5">
+                            Permissions
+                        </Label>
+                        <Select 
+                            
+                            id="permission" 
+                            onValueChange={(e) => setFol({
+                                ...fol,
+                                "type" : e === 'both' ? ["editor", "basic"] : [e]
+                            })}>
+
+                            <SelectTrigger className="w-full text-black flex justify-between">
+                                <SelectValue
+                                    placeholder="select an option"
+                                    className='font-[400] text-[12px] leading-[20px]'
+                                />
+                            </SelectTrigger>
+                            <SelectContent className="full">
+                                <SelectItem value="editor" >Editor</SelectItem>
+                                <SelectItem value="viewer">Viewer</SelectItem>
+                                <SelectItem value="both">Both</SelectItem>
+                                
+                            </SelectContent>
+                        </Select>
+                    </div> */}
                     <div className="flex flex-col items-start gap-4">
                         <Label htmlFor="description" className="font-[500] text-sm leading-5">
                             Function

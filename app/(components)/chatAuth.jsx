@@ -15,7 +15,7 @@ export default async function ChatAuth({ children }) {
             getAuthTypeMetadataSS(),
             getCurrentUserSS(),
         ]);
-        console.log(authTypeMetadata)
+        // console.log(authTypeMetadata)
     } catch (e) {
         console.log(`Some fetch failed for the login page - ${e}`);
     }

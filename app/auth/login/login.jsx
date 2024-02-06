@@ -10,6 +10,8 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { requestEmailVerification } from "../../lib";
 import { basicLogin } from "../../../lib/user";
+import { useAtom } from 'jotai'
+import { darkModeAtom } from '../../store'
 
 const Login= ( { shouldVerify } ) => {
 
@@ -17,7 +19,7 @@ const Login= ( { shouldVerify } ) => {
     const [disabled, setDisabled] = useState(false);
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const [darkMode] = useState(true);
+    const [darkMode, setDarkMode] = useAtom(darkModeAtom);
     const [errorMsg, setErrorMsg] = useState(false);
     const [error, setError] = useState(null);
     const router = useRouter()
@@ -65,8 +67,8 @@ const Login= ( { shouldVerify } ) => {
     }
     return (
 
-        <div className={`flex flex-col h-full w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'} px-5 md:px-0`}>
-            <>
+        <div className={`h-full w-full box-border flex justify-center items-center ${darkMode ? 'bg-[#EFF5F5] text-black' : 'bg-[#115E59] text-white'}`}>
+            <div className={`flex flex-col h-full w-[22rem] gap-3 justify-center items-center box-border ${darkMode ? '' : 'text-white'} px-5 md:px-0`}>
                 <h1 className='text-5xl space-x-0 w-full text-center font-[800] leading-[48px] tracking-[1.2%] mb-8'>Sign In</h1>
                 <div className='w-full flex flex-col gap-3 text-sm font-inter'>
                     <div>
@@ -74,7 +76,7 @@ const Login= ( { shouldVerify } ) => {
                         <Input type='email' id="email" placeholder='Enter Your Email' className='text-black mt-2 bg-white font-[400] leading-[20px]' onChange={(e) => { setEmail(e.target.value); setErrorMsg(false) }} />
                     </div>
                     <div className='relative'>
-                        <Label htmlFor="login-code" className='text-sm font-[500] leading-[20px]'>Password</Label>
+                        <Label htmlFor="password" className='text-sm font-[500] leading-[20px]'>Password</Label>
                         <Input type={'password'} id="password" value={password} placeholder='Password' className='text-black mt-2 font-[400]' onChange={(e) => { setPassword(e.target.value); setErrorMsg(false) }} />
 
                         {password !== '' && <button className="absolute top-12 right-2 transform -translate-y-1/2 px-2 py-1" onClick={() => showPassword('password')}>
@@ -95,7 +97,7 @@ const Login= ( { shouldVerify } ) => {
 
                 <div className='w-full text-sm opacity-75 text-center'>Don&apos;t have an account &#63; <Link href={'/auth/signup'} className='font-[500] hover:underline '>Sign Up</Link></div>
                {/* <Link href={'/auth/reset'} className='w-full text-sm opacity-75 text-center hover:underline'>Forgot your password &#63;</Link> */}
-            </>
+            </div>
 
         </div>
 

@@ -6,10 +6,10 @@ import threeDot from '../../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../components/ui/accordion";
 import { Account, NewFolder } from '../(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom,  showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom, tempAtom } from '../../store';
+import { folderAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom, tempAtom } from '../../store';
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
-import { Pencil, Trash2, Check, X, MessageSquare } from 'lucide-react';
+import { Pencil, Trash2, Check, X, MessageSquare, LogOut } from 'lucide-react';
 import { AdvanceMenu } from './index'
 import supabase from '../../../config/supabse';
 import { isUserExist } from '../../../config/lib';
@@ -22,7 +22,9 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { Label } from '../../../components/ui/label';
 import { cn } from '../../../lib/utils';
 import Link from 'next/link';
-
+import { sidebarOptions } from '../../../config/constants';
+import { Setting } from '../(settings)'
+import { logout } from '../../../lib/user';
 
 const FolderCard = ({ fol, doc, folder }) => {
     // console.log(fol)
@@ -30,7 +32,7 @@ const FolderCard = ({ fol, doc, folder }) => {
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
     const [files, setFiles] = useState([])
     const [chatTitle, setChatTitle] = useAtom(chatTitleAtom);
-    
+
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [popOpen, setPopOpen] = useState(false)
     const [isRenamingChat, setIsRenamingChat] = useState(false);
@@ -44,9 +46,9 @@ const FolderCard = ({ fol, doc, folder }) => {
     const [temp, setTemp] = useAtom(tempAtom)
 
     // const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
-    
+
     const router = useRouter();
-    
+
     const current_url = window.location.href;
 
     const chat_id = current_url.split("/chat/")[1];
@@ -112,9 +114,9 @@ const FolderCard = ({ fol, doc, folder }) => {
             .from('folders')
             .delete()
             .eq('id', fol_id)
-           
+
         if (!error) {
-            
+
             setFolderAdded(!folderAdded)
             setPopOpen(false)
         }
@@ -122,7 +124,7 @@ const FolderCard = ({ fol, doc, folder }) => {
     };
 
     function handleFilessOnclick(data) {
-        
+
         setChatSessionID(data.session_id)
         setFolderId(data.folder_id)
     };
@@ -194,7 +196,7 @@ const FolderCard = ({ fol, doc, folder }) => {
 
     async function deleteDocSetFile(ccID, fol_id) {
         // console.log(ccID, fol_id)
-        
+
         const allPairIds = [...documentSet[0]?.cc_pair_id]
         const allNames = [...documentSet[0]?.files_name]
         const idxOfID = documentSet[0]?.cc_pair_id.indexOf(ccID);
@@ -204,43 +206,43 @@ const FolderCard = ({ fol, doc, folder }) => {
         allNames.splice(idxOfID, 1)
 
         // console.log(allPairIds)
-        
+
         // console.log(allNames)
         // return null
-        
-        
-        if(allPairIds?.length > 0){
+
+
+        if (allPairIds?.length > 0) {
 
             const { data, error } = await supabase
-            .from('document_set')
-            .update({ 'cc_pair_id': allPairIds, "files_name": allNames })
-            .eq('folder_id', fol_id)
-            .select()
+                .from('document_set')
+                .update({ 'cc_pair_id': allPairIds, "files_name": allNames })
+                .eq('folder_id', fol_id)
+                .select()
 
-            if(data.length > 0){
+            if (data.length > 0) {
                 setDocumentSet(data)
-            }else{
+            } else {
                 setDocumentSet([])
             };
 
             await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
                 method: 'PATCH',
                 headers: {
-                  "Content-Type": "application/json",
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                  "id": documentSet[0]?.doc_set_id,
-                  "description": '',
-                  "cc_pair_ids": allPairIds
+                    "id": documentSet[0]?.doc_set_id,
+                    "description": '',
+                    "cc_pair_ids": allPairIds
                 })
-              })
-              
-        }else if(allPairIds?.length === 0){
+            })
+
+        } else if (allPairIds?.length === 0) {
 
             const { data, error } = await supabase
-            .from('document_set')
-            .delete()
-            .eq('folder_id', fol_id);
+                .from('document_set')
+                .delete()
+                .eq('folder_id', fol_id);
 
             setDocumentSet([])
 
@@ -256,24 +258,24 @@ const FolderCard = ({ fol, doc, folder }) => {
 
     }
 
-    async function getDocSetDetails(){
-        if(!fol.id){
+    async function getDocSetDetails() {
+        if (!fol.id) {
             return null
         }
         let { data: document_set, error } = await supabase
-          .from('document_set')
-          .select("*")
-          .eq('folder_id', fol.id)
+            .from('document_set')
+            .select("*")
+            .eq('folder_id', fol.id)
 
-          if(document_set?.length > 0){
+        if (document_set?.length > 0) {
             setDocumentSet(document_set)
-            
-          }else{
+
+        } else {
             setDocumentSet([])
-            
-          }
-          
-      }
+
+        }
+
+    }
 
     useEffect(() => {
         getChatFiles();
@@ -281,12 +283,12 @@ const FolderCard = ({ fol, doc, folder }) => {
 
     }, [chatHistory, chatTitle, id]);
 
-    
+
     useEffect(() => {
-        
+
         getDocSetDetails()
     }, [chat_id, temp])
-    
+
     useEffect(() => {
         setIsSelected(chat_id);
         if (chat_id !== 'new' && chat_id) {
@@ -391,7 +393,7 @@ const FolderCard = ({ fol, doc, folder }) => {
                                     <Link href={`/chat/${data?.session_id}`} key={data?.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100 ${chat_id === data.session_id ? 'bg-slate-200' : ''}`} onClick={() => handleFilessOnclick(data)}>
                                         <div className='inline-flex gap-1 items-center'>
                                             <div>
-                                            <MessageSquare color='#14B8A6' size={'1rem'} className='hover:cursor-pointer' />
+                                                <MessageSquare color='#14B8A6' size={'1rem'} className='hover:cursor-pointer' />
                                             </div>
                                             <span className={`w-full font-[500] text-sm leading-5 text-ellipsis break-all line-clamp-1 mr-3 text-emphasis ${isRenamingChat && chat_id === data.session_id ? 'hidden' : ''} `} >{data?.chat_title || 'New Chat'}</span>
                                             {isRenamingChat ?
@@ -462,7 +464,7 @@ const FolderCard = ({ fol, doc, folder }) => {
                     }
                     {
                         documentSet[0]?.files_name?.map((data, idx) => {
-                                
+
                             return (
 
                                 <div key={data} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100`}>
@@ -522,7 +524,8 @@ const FolderCard = ({ fol, doc, folder }) => {
 const SideBar = () => {
     const [folder, setFolder] = useAtom(folderAtom);
     const [showAdvance, setShowAdvance] = useAtom(showAdvanceAtom);
-
+    const [open, setOpen] = useState(false);
+    const [item, setItem] = useState('profile')
     const [session, setSession] = useAtom(sessionAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
@@ -567,7 +570,7 @@ const SideBar = () => {
 
 
     useEffect(() => {
-        getFolders()
+        //getFolders()
     }, [folderAdded]);
 
 
@@ -576,6 +579,42 @@ const SideBar = () => {
 
             <div className='w-full overflow-x-scroll no-scrollbar px-2'>
                 <Account />
+            </div>
+            <div className='flex flex-col gap-2 w-full p-2'>
+                <div className='flex flex-col gap-2 w-full'>
+
+                    {sidebarOptions.map(option => {
+                        return (
+                            option.id !== 'settings' ?
+                                <div key={option.id} className='inline-flex gap-2 hover:cursor-pointer hover:bg-[#d9dada] w-full p-2 rounded-md' onClick={() => { setItem(option.id); setOpen(true); }}>
+                                    <Image src={option.icon} alt={option.title} />
+                                    <span className='text-sm leading-5 font-[500]'>{option.title}</span>
+                                </div>
+                                :
+                                <Dialog open={open} onOpenChange={() => { setOpen(!open); setItem(option.id) }} key={option.id}>
+
+                                    <DialogTrigger asChild className='self-start'>
+
+                                        <div key={option.title} className='inline-flex gap-2 hover:cursor-pointer hover:bg-[#d9dada] w-full p-2 rounded-md' >
+                                            <Image src={option.icon} alt={option.title} />
+                                            <span className='text-sm leading-5 font-[500]'>{option.title}</span>
+                                        </div>
+
+                                    </DialogTrigger>
+                                    <Setting item={item} setItem={setItem} />
+                                </Dialog>
+                        )
+                    })}
+                </div>
+                <div className='flex items-center gap-2 hover:cursor-pointer hover:bg-[#d9dada] w-full p-2 rounded-md' onClick={async () => {
+                    const res = await logout();
+                    if (res.ok) {
+                        router.push('/auth/login')
+                    }
+                }}>
+                    <LogOut className='w-4 h-4' color='#14B8A6' /><span className='font-[500] leading-5 text-sm hover:cursor-pointer'>Log Out</span>
+                    {/* <Image src={threeDot} alt={'options'} className='w-4 h-4 hover:cursor-pointer' /> */}
+                </div>
             </div>
 
             {!showAdvance ?
@@ -587,10 +626,12 @@ const SideBar = () => {
                 <div className='w-full h-fit bg-[#14B8A6] text-[#FFFFFF] rounded-lg shadow-md'>
                     <AdvanceMenu />
                 </div>}
+
+
             {folder?.length > 0 && <div className='flex flex-col gap-2'>
                 {folder?.map((fol, idx) => {
                     return (
-                        <FolderCard key={idx} fol={fol} folder={folder}/>
+                        <FolderCard key={idx} fol={fol} folder={folder} />
                     )
                 })}
             </div>}

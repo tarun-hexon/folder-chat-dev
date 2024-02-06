@@ -24,12 +24,12 @@ const Page = async (
       getAuthTypeMetadataSS(),
       getCurrentUserSS(),
     ]);
-    console.log(authTypeMetadata)
+    // console.log(authTypeMetadata)
   } catch (e) {
     console.log(`Some fetch failed for the login page - ${e}`);
   }
   
-  console.log('user', currentUser)
+  // console.log('user', currentUser)
   // simply take the user to the home page if Auth is disabled
   if (authTypeMetadata?.authType === "disabled") {
     return redirect("/");
