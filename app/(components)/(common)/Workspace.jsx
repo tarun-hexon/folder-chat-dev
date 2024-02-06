@@ -49,11 +49,11 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
         };
 
         try {
-            const res = await fetch('/workspace/create-workspace', {
+            const res = await fetch('/api/workspace/create-workspace', {
                 method: 'POST',
                 credentials: "include",
                 headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     "name": userInput.name,

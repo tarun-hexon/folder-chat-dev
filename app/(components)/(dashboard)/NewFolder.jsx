@@ -22,27 +22,28 @@ import { Button } from "../../../components/ui/button";
 import plus from '../../../public/assets/plus - light.svg'
 import Image from 'next/image';
 import { useAtom } from 'jotai';
-import { folderAtom, sessionAtom, folderIdAtom } from '../../store';
+import { currentWorkSpaceAtom, folderIdAtom } from '../../store';
 import { Folder } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { isUserExist } from '../../../config/lib';
 import supabase from '../../../config/supabse';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser } from '../../../lib/user';
+import { useSearchParams } from 'next/navigation'
+
 
 const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     // const [folder, setFolder] = useAtom(folderAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
-    // const [session, setSession] = useAtom(sessionAtom);
-
-    //danswer user data
-
+    const [currentWorkSpace, setCurrentWorkSpace] = useAtom(currentWorkSpaceAtom)
     const [currentUser, setCurrentUser] = useState({})
     
     const router = useRouter()
-    
+     const searchParams = useSearchParams()   
+     const search = searchParams.get('workspaceid')
+
     const [fol, setFol] = useState({
         "title": '',
         "description": '',
@@ -51,70 +52,25 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
     });
 
 
-    // async function createFolder(folderData){
-    //     if (folderData.title === '' || folderData.description === '' || folderData.function === '' || folderData.permissions.type.length === 0) {
-    //         setInputError('select all the field first');
-    //         return null
-    //     } 
-
-    //     try {
-            
-    //         const wkID = await isUserExist('workspaces', 'id', 'created_by',session.user.id);
-            
-    //         const { data, error } = await supabase
-    //             .from('folders')
-    //             .insert([
-    //                 { 
-    //                     'workspace_id': wkID[0].id, 
-    //                     'user_id': currentUser?.id, 
-    //                     'name' : folderData.title, 
-    //                     'description': folderData.description, 
-    //                     'function': folderData.function, 
-    //                     'is_active': true, 
-    //                     'chat_enabled': true 
-    //                 }
-    //             ])
-    //             .select();
-    //             if(data){
-    //                 // console.log(data);
-    //                 // setFolder([...folder, data]);
-    //                 setFolderAdded(prev => !prev)
-    //                 setOpen(false);
-    //                 setFolderId(data[0].id)
-                    
-    //                 router.push(`/chat/upload`)
-    //                 // window.history.replaceState('', '', `/chat/new`);
-    //                 return 
-    //             }
-    //             if(error){
-    //                 throw error
-    //             }
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // };
-
     async function createFolder(folderData){
-        if (folderData.title === '' || folderData.description === '' || folderData.function === '' || folderData.type.length === 0) {
+        if (folderData.title === '' || folderData.description === '' || folderData.function === '') {
             setInputError('select all the field first');
             return null
         } 
 
         try {
-            
-            const wkID = await isUserExist('workspaces', 'id', 'created_by',session.user.id);
-            const response = await fetch('/workspace/create-folder', {
+            const response = await fetch('/api/workspace/create-folder', {
                 method:'POST',
                 credentials:'include',
-                headers:{
-                    
+                headers: {
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    "workspace_id":1,
+                    "workspace_id":currentWorkSpace?.id,
                     "user_id": currentUser?.id,
                     "name": folderData.title,
                     "description": folderData.description,
-                    "function": folderData,description,
+                    "function": folderData.description,
                     "is_active":true,
                     "chat_enabled":true,
                     "permissions":{
@@ -140,6 +96,7 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
   
       useEffect(() => {
           fetchCurrentUser();
+          console.log(currentWorkSpace?.id)
       }, []);
    
 

@@ -529,7 +529,7 @@ const SideBar = () => {
     const [session, setSession] = useAtom(sessionAtom);
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
-
+    const router = useRouter()
     // const current_url = window.location.href;
     // const chat_id = current_url.split("advance");
     // const router = useRouter();
@@ -568,9 +568,14 @@ const SideBar = () => {
         }
     };
 
-
+    // async function getWorkSpace(){
+    //     const res = await fetch('/api/workspace/list-workspace');
+    //     const json = await res.json()
+        
+    // }
     useEffect(() => {
         //getFolders()
+        //getWorkSpace()
     }, [folderAdded]);
 
 

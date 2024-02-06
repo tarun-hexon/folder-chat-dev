@@ -7,6 +7,8 @@ import { redirect } from "next/navigation";
 
 export default async function ChatAuth({ children }) {
     const darkMode = true
+
+    
     let authTypeMetadata = null;
     let currentUser = null;
 
@@ -21,6 +23,16 @@ export default async function ChatAuth({ children }) {
     }
     if (!currentUser) {
         return redirect("/auth/login");
+    }
+    async function getWorkSpace(){
+        const res = await fetch('/api/workspace/list-workspace');
+        const json = await res.json()
+        return json.data
+    }
+
+    const workSpaces = getWorkSpace();
+    if(!workSpaces){
+        redirect('/workspace/new')
     }
     return (
         <div className='w-full flex font-Inter box-border'>

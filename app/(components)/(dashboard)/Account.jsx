@@ -5,7 +5,7 @@ import threeDot from '../../../public/assets/more-horizontal.svg'
 import supabase from '../../../config/supabse';
 import Image from 'next/image';
 import { useAtom } from 'jotai'
-import { sessionAtom, isPostSignUpCompleteAtom, isPostUserCompleteAtom } from '../../store';
+import { sessionAtom, isPostSignUpCompleteAtom, isPostUserCompleteAtom, currentWorkSpaceAtom } from '../../store';
 import { useRouter } from 'next/navigation';
 import { sidebarOptions } from '../../../config/constants';
 import { Dialog, DialogTrigger } from '../../../components/ui/dialog';
@@ -40,31 +40,10 @@ const Account = () => {
     const [item, setItem] = useState('profile')
     const [workSpace, setWorkSpace] = useState(null);
     const [currentUser, setCurrentUser] = useState({});
-    const [value, setValue] = useState("")
+    const [value, setValue] = useAtom(currentWorkSpaceAtom)
     const router = useRouter();
 
-    const workspaces = [
-        {
-          value: "next.js",
-          label: "Workspace1",
-        },
-        {
-          value: "sveltekit",
-          label: "Hexon Global",
-        },
-        {
-          value: "nuxt.js",
-          label: "Hexon Test",
-        },
-        {
-          value: "remix",
-          label: "Test 2",
-        },
-        {
-          value: "astro",
-          label: "Test 3",
-        },
-    ]
+    const [workspaces, setWorkSpaces] = useState([])
 
 
 
@@ -102,9 +81,16 @@ const Account = () => {
         setCurrentUser(user)
     };
 
+    async function getWorkSpace(){
+        const res = await fetch('/api/workspace/list-workspace');
+        const json = await res.json()
+        
+        setWorkSpaces(json?.data)
+    }
 
     useEffect(() => {
         // getWorkspaceName();
+        getWorkSpace()
         fetchCurrentUser();
     }, [])
     return (
@@ -168,38 +154,41 @@ const Account = () => {
                     className="w-full justify-between"
                 >
                     {value
-                        ? workspaces.find((workspace) => workspace.value === value)?.label
+                        ? workspaces.find((workspace) => workspace.name === value.name)?.name
                         : "Select workspace..."}
                     <ArrowDownUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-full p-0">
+            <PopoverContent className="w-full p-2">
                 <Command>
                     <CommandInput placeholder="Search workspace..." className="h-9" />
                     <CommandEmpty>No workspace found.</CommandEmpty>
                     <CommandGroup>
-                        {workspaces.map((workspace) => (
+                        {workspaces?.map((workspace) => (
                             <CommandItem
-                                key={workspace.value}
-                                value={workspace.value}
+                                key={workspace.id}
+                                value={workspace.name}
                                 onSelect={(currentValue) => {
-                                    setValue(currentValue === value ? "" : currentValue)
+                                    setValue(workspace)
                                     setOpen(false)
                                 }}
                             >
-                                {workspace.label}
+                                {workspace.name}
                                 <Check
                                     className={cn(
                                         "ml-auto h-4 w-4",
-                                        value === workspace.value ? "opacity-100" : "opacity-0"
+                                        value === workspace.name ? "opacity-100" : "opacity-0"
                                     )}
                                 />
                             </CommandItem>
                         ))}
                     </CommandGroup>
                 </Command>
+                {/* <Workspace /> */}
             </PopoverContent>
+            
             </Popover>
+            
         </div>
         
     )

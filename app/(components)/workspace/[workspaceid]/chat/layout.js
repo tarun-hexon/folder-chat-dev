@@ -1,9 +1,9 @@
 'use client'
 
 import { useEffect } from "react"
-import { folderIdAtom, allIndexingConnectorAtom, userConnectorsAtom, sessionAtom } from "../../store"
+import { folderIdAtom, allIndexingConnectorAtom, userConnectorsAtom, sessionAtom } from "../../../../store"
 import { useAtom } from "jotai"
-import supabase from "../../../config/supabse"
+import supabase from "../../../../../config/supabse"
 
 export default function RootLayout({ children }) {
 
@@ -11,7 +11,7 @@ export default function RootLayout({ children }) {
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [allConnectorFromServer, setAllConnectorFromServer] = useAtom(allIndexingConnectorAtom)
     const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom);
-    
+   
     async function indexingStatus(ses){
       // console.log(ses)
       try {
@@ -52,14 +52,14 @@ export default function RootLayout({ children }) {
   };
 
     useEffect(()=> {
-      indexingStatus()
-    const int = setInterval(()=> {
-      indexingStatus(session)
-    }, 5000);
+    //   indexingStatus()
+    //   const int = setInterval(()=> {
+    //   indexingStatus(session)
+    // }, 5000);
 
-    return ()=> {
-      clearInterval(int)
-    }
+    // return ()=> {
+    //   clearInterval(int)
+    // }
       
     }, [])
 

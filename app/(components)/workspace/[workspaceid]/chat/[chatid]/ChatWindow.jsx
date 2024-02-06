@@ -6,32 +6,32 @@ import editIcon from "../../../../public/assets/edit-2.svg"
 import shareIcon from '../../../../public/assets/Navbar_Share.svg'
 import openDocIcon from '../../../../public/assets/Navbar_OpenDoc.svg'
 import Image from 'next/image'
-import { iconSelector } from '../../../../config/constants'
+import { iconSelector } from '../../../../../../config/constants'
 import { Folder, Loader2, Plus, MoreHorizontal } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { chatHistoryAtom, chatTitleAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, showAdvanceAtom, userConnectorsAtom, documentSetAtom } from '../../../store'
+import { chatHistoryAtom, chatTitleAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, showAdvanceAtom, userConnectorsAtom, documentSetAtom } from '../../../../../store'
 import ReactMarkdown from "react-markdown";
-import supabase from '../../../../config/supabse'
-import { useToast } from '../../../../components/ui/use-toast'
-import { NewFolder } from '../../(dashboard)'
+import supabase from '../../../../../../config/supabse'
+import { useToast } from '../../../../../../components/ui/use-toast'
+import { NewFolder } from '../../../../(dashboard)'
 import { useRouter } from 'next/navigation'
-import { getSess } from '../../../../lib/helpers'
-import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../components/ui/dialog'
+import { getSess } from '../../../../../../lib/helpers'
+import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../../../components/ui/dialog'
 import pdfIcon from '../../../../public/assets/pdf.svg'
-import { Button } from '../../../../components/ui/button';
-import { Label } from '../../../../components/ui/label'
-import { cn } from '../../../../lib/utils'
+import { Button } from '../../../../../../components/ui/button';
+import { Label } from '../../../../../../components/ui/label'
+import { cn } from '../../../../../../lib/utils'
 import plus from '../../../../public/assets/plus.svg'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { Workspace } from '../../(common)'
+import { Workspace } from '../../../../(common)'
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "../../../../components/ui/select"
+} from "../../../../../../components/ui/select"
 
 
 const ChatWindow = () => {
@@ -63,7 +63,7 @@ const ChatWindow = () => {
     const [selectedDoc, setSelectedDoc] = useState([]);
     const [docSetOpen, setDocSetOpen] = useState(false);
     const [workSpaceValue, setWorkSpaceValue] = useState(null)
-    const [userWorkSpaces, setUserWorkSpaces] = useState([1]);
+    const [userWorkSpaces, setUserWorkSpaces] = useState([]);
     const botResponse = useRef('');
 
     // const current_url = window.location.href;
@@ -506,7 +506,7 @@ const ChatWindow = () => {
 
     async function getChatHistoryFromServer(id) {
         try {
-            const data = await fetch(`https://danswer.folder.chat/api/chat/get-chat-session/${id}`);
+            const data = await fetch(`/api/chat/get-chat-session/${id}`);
             const json = await data.json();
             console.log(json)
             if (json?.messages.length > 0) {
@@ -633,25 +633,33 @@ const ChatWindow = () => {
         }
 
 
+    };
+
+    async function getWorkSpace(){
+        const res = await fetch('/api/workspace/list-workspace');
+        const json = await res.json()
+        
+        setUserWorkSpaces(json?.data)
     }
 
+
+
     useEffect(() => {
+        getWorkSpace()
         resizeTextarea();
     }, [userMsg]);
 
     useEffect(() => {
         setShowAdvance(false);
         // console.log(chatid)
-        if (chatid !== 'new' && chatid) {
 
+        if (chatid !== 'new' && chatid) {
             getChatHistoryFromServer(chatid)
             setChatSessionID(chatid);
             localStorage.setItem('chatSessionID', chatid)
         } else {
-
             setRcvdMsg('')
             setChatMsg([])
-
             if (!folderId) {
                 getDocSetDetails(localStorage.getItem('lastFolderId'))
             } else {
