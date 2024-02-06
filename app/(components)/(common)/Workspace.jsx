@@ -26,7 +26,7 @@ import { getCurrentUser } from '../../../lib/user';
 
 const Workspace = ({ openMenu, setOpenMenu }) => {
     
-    const [open, setOpen] = useState(openMenu);
+    // const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
     const [workAdded, setWorkAdded] = useAtom(workAddedAtom)
     const [currentUser, setCurrentUser] = useState({})
@@ -65,7 +65,7 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
             });
             if (res.ok) {
                 workSpaceAdded(!workAdded)
-                setOpen(false);
+                setOpenMenu(false);
             }else{
                 const json = await res.json()
                 
@@ -90,14 +90,14 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
 
 
     return (
-        <Dialog open={open} onOpenChange={() => {
-            setOpen(!open);
+        <Dialog open={openMenu} onOpenChange={() => {
+            setOpenMenu(!openMenu);
             setInputError(false); 
             setUserInput({
                 name: '',
                 domain: ''
             });
-            setOpenMenu && setOpenMenu(false)
+            openMenu && setOpenMenu(false)
         }}>
             {!openMenu && <DialogTrigger className='w-full'>
                 <div className='w-full bg-[#14B8A6] hover:bg-[#14B8A6] opacity-75 hover:opacity-100 shadow-lg text-white rounded-md p-1'>

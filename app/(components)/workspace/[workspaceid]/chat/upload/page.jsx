@@ -14,7 +14,7 @@ import { Loader, Loader2, X } from 'lucide-react';
 import { Button } from '../../../../../../components/ui/button';
 import { cn } from '../../../../../../lib/utils';
 import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../../../components/ui/dialog'
-
+import { useParams } from 'next/navigation'
 
 const Upload = () => {
 
@@ -28,7 +28,7 @@ const Upload = () => {
   const [documentSet, setDocumentSet] = useState([]);
   // const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
   const [dialogLoader, setDialogLoader] = useState(false);
-
+  
   const [currentDOC, setCurrentDoc] = useState([]);
   const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom);
   const [existConnector, setExistConnector] = useState([]);
@@ -40,6 +40,10 @@ const Upload = () => {
     description: ''
   })
   const { toast } = useToast();
+
+
+  const { workspaceid, chatid } = useParams()
+
 
   const onDrop = (acceptedFiles) => {
 
@@ -216,7 +220,7 @@ const Upload = () => {
         if (documentSet.length === 0) {
           await setDocumentSetInServer(connectID, context.contextName, context);
         } else {
-          await updateDocumentSetInServer(documentSet[0]?.doc_set_id, connectID, context)
+          await updateDocumentSetInServer(documentSet[0]?.id, connectID, context)
         }
       }, 2000)
 
@@ -257,7 +261,7 @@ const Upload = () => {
     }
   };
 
-  async function setDocumentSetInServer(ccID, set_name, con) {
+  async function setDocumentSetInServer(ccID, set_name) {
 
     const data = await fetch(`/api/manage/admin/connector/indexing-status`);
     const json = await data.json();
@@ -283,7 +287,7 @@ const Upload = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          "name": `${set_name}-${session?.user?.email.split('@')[0]}`,
+          "name": `${set_name}`,
           "description": context.description,
           "cc_pair_ids": docSetid
         })
@@ -294,7 +298,13 @@ const Upload = () => {
       if (id) {
 
         //await insertDataInDB(docSetid, `${set_name}-${session?.user?.email.split('@')[0]}`, id, context.fileName)
-        
+        toast({
+          variant: 'default',
+          title: "File Uploaded!"
+        });
+        router.push(`/workspace/${workspaceid}/chat/new`)
+        setD_open(false)
+        setDialogLoader(false)
       } else {
         return toast({
           variant: 'destructive',
@@ -316,7 +326,7 @@ const Upload = () => {
     const data = await fetch(`/api/manage/admin/connector/indexing-status`);
     const json = await data.json();
 
-    const docSetid = documentSet[0]?.cc_pair_id
+    const docSetid = documentSet[0].cc_pair_descriptors.map(item => item.id)
     for (const pair_id of json) {
       if (pair_id?.connector?.id === ccID) {
         docSetid.push(pair_id?.cc_pair_id);
@@ -380,7 +390,7 @@ const Upload = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          "name": `${context.contextName}-${session?.user?.email.split('@')[0]}`,
+          "name": `${context.contextName}`,
           "description": context.description,
           "cc_pair_ids": newArr
         })
@@ -452,6 +462,7 @@ const Upload = () => {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
+          "folder_id":folderId,
           "id": db_id,
           "description": '',
           "cc_pair_ids": newArr
@@ -461,8 +472,12 @@ const Upload = () => {
       //await updatetDataInDB(newArr, c_name);
 
       setContext({ fileName: '', description: '', contextName: '' })
-      setD_open(false)
-      setDialogLoader(false)
+      toast({
+        variant: 'default',
+        title: "File Uploaded!"
+      });
+      router.push(`/workspace/${workspaceid}/chat/new`)
+      
     } catch (error) {
       console.log(error)
     }
@@ -588,8 +603,6 @@ const Upload = () => {
   };
 
   async function getDocSetDetails(folder_id) {
-
-    
       console.log(folder_id, '639')
       if (!folder_id) {
           setLoading(false);
@@ -597,8 +610,10 @@ const Upload = () => {
       }
       const res = await fetch(`/api/manage/document-set-v2?folder_id=${folder_id}`)
       if(res.ok){
+
           const data = await res.json();
           console.log(data)
+          //console.log(data[0].cc_pair_descriptors.map(item => item.id))
           if(data.length > 0){
               setDocumentSet(data)
           }else{
@@ -606,25 +621,11 @@ const Upload = () => {
               // router.push(`/workspace/${workspaceid}/chat/upload`)
           }
           setLoading(false)
-
-
-  };
+      };
     
   };
 
-  // async function getConnectorsID(folderId){
-    
-  //   const { data, error } = await supabase
-  //   .from('connectors')
-  //   .select('connect_id')
-  //   .eq('user_id', session?.user?.id);
-    
-  //   if(data?.length > 0){
-  //       // console.log(data)
-  //       setExistConnector(data[0]?.connect_id)
-  //   }
-  //   return []
-  // };
+
 
   async function indexingAll(){
     const data = await fetch(`/api/manage/admin/connector/indexing-status`);

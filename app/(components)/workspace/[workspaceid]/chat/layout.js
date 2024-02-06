@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
       try {
           const data = await fetch(`/api/manage/admin/connector/indexing-status`);
           const json = await data?.json();
-          console.log(json)
+          // console.log(json)
           setAllConnectorFromServer(json)
           setUserConnectors(json)
           // const allConID = await readData(ses);

@@ -24,7 +24,7 @@ import { cn } from '../../../lib/utils';
 import Link from 'next/link';
 import { sidebarOptions } from '../../../config/constants';
 import { Setting } from '../(settings)'
-import { logout } from '../../../lib/user';
+import { getCurrentUser, logout } from '../../../lib/user';
 
 const FolderCard = ({ fol }) => {
     // console.log(fol) 
@@ -560,10 +560,18 @@ const SideBar = () => {
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [workSpaces, setWorkSpaces] = useState([])
-    const [workSpaceAdded, setWorkSpaceAdded] = useAtom(workAddedAtom)
+    const [workSpaceAdded, setWorkSpaceAdded] = useAtom(workAddedAtom);
+    const [currentUser, setCurrentUser] = useState({})
     const router = useRouter()
     const param = useParams()
 
+
+
+    async function fetchCurrentUser(){
+        const user = await getCurrentUser();
+        console.log(user)
+        setCurrentUser(user)
+      };
     // async function getFolders() {
     //     try {
     //         const wkID = await isUserExist('workspaces', 'id', 'created_by', session?.user?.id);
@@ -607,7 +615,7 @@ const SideBar = () => {
         }
     }
     async function getFolders(){
-        
+        await fetchCurrentUser()
         const res = await fetch(`/api/workspace/list-folder?workspace_id=${param.workspaceid}`);
         if(res.ok){
             const json = await res.json()
@@ -618,6 +626,7 @@ const SideBar = () => {
                 setFolderId(json?.data[json?.data.length - 1].id)
             }else{
                 setFolder([])
+                setFolderId(null)
             }
         }else{
             setFolder([])
@@ -635,10 +644,10 @@ const SideBar = () => {
     return (
         <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-4 font-Inter relative min-h-screen'>
 
-            <Account/>
+            
 
             <div className='flex flex-col gap-2 w-full p-2'>
-                <div className='flex flex-col gap-2 w-full'>
+                {/* <div className='flex flex-col gap-2 w-full'>
 
                     {sidebarOptions.map(option => {
                         return (
@@ -662,6 +671,9 @@ const SideBar = () => {
                                 </Dialog>
                         )
                     })}
+                </div> */}
+                <div className='w-full p-2 rounded-md text-sm leading-5 font-[500]'>
+                {currentUser?.email}
                 </div>
                 <div className='flex items-center gap-2 hover:cursor-pointer hover:bg-[#d9dada] w-full p-2 rounded-md' onClick={async () => {
                     const res = await logout();
@@ -673,7 +685,7 @@ const SideBar = () => {
                     {/* <Image src={threeDot} alt={'options'} className='w-4 h-4 hover:cursor-pointer' /> */}
                 </div>
             </div>
-
+            <Account/>
             {!showAdvance ?
                 <Link href={'/advance'} className='w-full flex justify-between items-center bg-[#DEEAEA] p-3 rounded-md hover:cursor-pointer' onClick={() => { setShowAdvance(!showAdvance) }}>
                     <h1 className='font-[600] text-sm leading-5'>Advanced</h1>
