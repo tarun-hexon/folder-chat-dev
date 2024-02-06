@@ -43,26 +43,26 @@ const Account = () => {
     const [value, setValue] = useState("")
     const router = useRouter();
 
-    const frameworks = [
+    const workspaces = [
         {
           value: "next.js",
-          label: "Next.js",
+          label: "Workspace1",
         },
         {
           value: "sveltekit",
-          label: "SvelteKit",
+          label: "Hexon Global",
         },
         {
           value: "nuxt.js",
-          label: "Nuxt.js",
+          label: "Hexon Test",
         },
         {
           value: "remix",
-          label: "Remix",
+          label: "Test 2",
         },
         {
           value: "astro",
-          label: "Astro",
+          label: "Test 3",
         },
     ]
 
@@ -165,33 +165,33 @@ const Account = () => {
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="w-[200px] justify-between"
+                    className="w-full justify-between"
                 >
                     {value
-                        ? frameworks.find((framework) => framework.value === value)?.label
-                        : "Select framework..."}
+                        ? workspaces.find((workspace) => workspace.value === value)?.label
+                        : "Select workspace..."}
                     <ArrowDownUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
-            <PopoverContent className="w-[200px] p-0">
+            <PopoverContent className="w-full p-0">
                 <Command>
-                    <CommandInput placeholder="Search framework..." className="h-9" />
-                    <CommandEmpty>No framework found.</CommandEmpty>
+                    <CommandInput placeholder="Search workspace..." className="h-9" />
+                    <CommandEmpty>No workspace found.</CommandEmpty>
                     <CommandGroup>
-                        {frameworks.map((framework) => (
+                        {workspaces.map((workspace) => (
                             <CommandItem
-                                key={framework.value}
-                                value={framework.value}
+                                key={workspace.value}
+                                value={workspace.value}
                                 onSelect={(currentValue) => {
                                     setValue(currentValue === value ? "" : currentValue)
                                     setOpen(false)
                                 }}
                             >
-                                {framework.label}
+                                {workspace.label}
                                 <Check
                                     className={cn(
                                         "ml-auto h-4 w-4",
-                                        value === framework.value ? "opacity-100" : "opacity-0"
+                                        value === workspace.value ? "opacity-100" : "opacity-0"
                                     )}
                                 />
                             </CommandItem>
@@ -199,7 +199,7 @@ const Account = () => {
                     </CommandGroup>
                 </Command>
             </PopoverContent>
-        </Popover>
+            </Popover>
         </div>
         
     )

@@ -577,9 +577,8 @@ const SideBar = () => {
     return (
         <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-4 font-Inter relative min-h-screen'>
 
-            <div className='w-full overflow-x-scroll no-scrollbar px-2'>
-                <Account />
-            </div>
+            <Account />
+
             <div className='flex flex-col gap-2 w-full p-2'>
                 <div className='flex flex-col gap-2 w-full'>
 
