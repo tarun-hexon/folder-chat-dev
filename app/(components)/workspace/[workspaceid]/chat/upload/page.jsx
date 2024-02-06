@@ -19,7 +19,7 @@ import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, Dialo
 const Upload = () => {
 
   const [session, setSession] = useAtom(sessionAtom);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [d_open, setD_open] = useState(false)
   const [uploading, setUploading] = useState(false);
   const [files, setFiles] = useState([]);
@@ -151,15 +151,15 @@ const Upload = () => {
 
       );
       const json = await data?.json();
-      // console.log(existConnector, '164')
+      
 
-      if (existConnector?.length === 0) {
-        // console.log(existConnector, '166')
-        await insertDataInConTable([json?.id])
-      } else {
-        // console.log(existConnector, '169')
-        await updatetDataInConTable(existConnector, json?.id)
-      }
+      // if (existConnector?.length === 0) {
+        
+      //   await insertDataInConTable([json?.id])
+      // } else {
+       
+      //   await updatetDataInConTable(existConnector, json?.id)
+      // }
 
       await getCredentials(json?.id)
     } catch (error) {
@@ -336,7 +336,7 @@ const Upload = () => {
         })
       });
 
-      await updatetDataInDB(docSetid, context.fileName)
+      //await updatetDataInDB(docSetid, context.fileName)
       setContext({ fileName: '', description: '', contextName: '' })
     } catch (error) {
       console.log(error)
@@ -388,40 +388,40 @@ const Upload = () => {
 
       const id = await res.json();
 
-      if (id) {
+      // if (id) {
 
-        const { data, error } = await supabase
-          .from('document_set')
-          .insert(
-            {
-              'cc_pair_id': newArr,
-              'user_id': session?.user?.id,
-              'folder_id': folderId,
-              'doc_set_name': `${context.contextName}-${session?.user?.email.split('@')[0]}`,
-              'doc_set_id': id,
-              'files_name': docSetName
-            },
-          )
-          .select()
+      //   const { data, error } = await supabase
+      //     .from('document_set')
+      //     .insert(
+      //       {
+      //         'cc_pair_id': newArr,
+      //         'user_id': session?.user?.id,
+      //         'folder_id': folderId,
+      //         'doc_set_name': `${context.contextName}-${session?.user?.email.split('@')[0]}`,
+      //         'doc_set_id': id,
+      //         'files_name': docSetName
+      //       },
+      //     )
+      //     .select()
 
-        if (data?.length > 0) {
-          setDocumentSet(data)
-          toast({
-            variant: 'default',
-            title: "File Uploaded!"
-          });
-          router.push('/chat/new')
-        }
-        setContext({ fileName: '', contextName: '', description: '' })
+      //   if (data?.length > 0) {
+      //     setDocumentSet(data)
+      //     toast({
+      //       variant: 'default',
+      //       title: "File Uploaded!"
+      //     });
+      //     router.push('/chat/new')
+      //   }
+      //   setContext({ fileName: '', contextName: '', description: '' })
         
-        setD_open(false)
-        setDialogLoader(false)
-      } else {
-        return toast({
-          variant: 'destructive',
-          title: "Some Error Occured!"
-        })
-      }
+      //   setD_open(false)
+      //   setDialogLoader(false)
+      // } else {
+      //   return toast({
+      //     variant: 'destructive',
+      //     title: "Some Error Occured!"
+      //   })
+      // }
 
     } catch (error) {
       console.log(error);
@@ -557,7 +557,6 @@ const Upload = () => {
     // }
   };
 
-
   function handleDocSetID(id) {
     //console.log(id)
     if (selectedDoc?.includes(parseInt(id))) {
@@ -590,16 +589,27 @@ const Upload = () => {
 
   async function getDocSetDetails(folder_id) {
 
-    let { data: document_set, error } = await supabase
-      .from('document_set')
-      .select("*")
-      .eq('folder_id', folder_id)
-    if (document_set.length > 0) {
-      setDocumentSet(document_set)
-    } else {
-      setDocumentSet([])
-    }
-    setLoading(false)
+    
+      console.log(folder_id, '639')
+      if (!folder_id) {
+          setLoading(false);
+          return null
+      }
+      const res = await fetch(`/api/manage/document-set-v2?folder_id=${folder_id}`)
+      if(res.ok){
+          const data = await res.json();
+          console.log(data)
+          if(data.length > 0){
+              setDocumentSet(data)
+          }else{
+              setDocumentSet([])
+              // router.push(`/workspace/${workspaceid}/chat/upload`)
+          }
+          setLoading(false)
+
+
+  };
+    
   };
 
   // async function getConnectorsID(folderId){
@@ -616,11 +626,15 @@ const Upload = () => {
   //   return []
   // };
 
-
+  async function indexingAll(){
+    const data = await fetch(`/api/manage/admin/connector/indexing-status`);
+    const json = await data.json();
+    console.log(json)
+  }
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
   useEffect(() => {
-
+    indexingAll()
     if (folder === null || folder?.length === 0) {
       // router.push('/chat/new')
     } 
@@ -632,7 +646,7 @@ const Upload = () => {
 
   useEffect(() => {
     if (folderId) {
-      //getDocSetDetails(folderId);
+      getDocSetDetails(folderId);
       // getConnectorsID(folderId);
     }
 

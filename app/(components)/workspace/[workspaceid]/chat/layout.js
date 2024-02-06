@@ -17,15 +17,16 @@ export default function RootLayout({ children }) {
       try {
           const data = await fetch(`/api/manage/admin/connector/indexing-status`);
           const json = await data?.json();
-          // console.log(json)
+          console.log(json)
           setAllConnectorFromServer(json)
-          const allConID = await readData(ses);
+          setUserConnectors(json)
+          // const allConID = await readData(ses);
           
-          if(json?.length > 0){
-            const filData = json?.filter((item)=> { if(allConID?.includes(item?.connector?.id)) return item });
+          // if(json?.length > 0){
+          //   const filData = json?.filter((item)=> { if(allConID?.includes(item?.connector?.id)) return item });
           
-            setUserConnectors(filData);
-          }
+          //   setUserConnectors(filData);
+          // }
           // console.log(filData)
       } catch (error) {
           setUserConnectors([])
@@ -34,32 +35,32 @@ export default function RootLayout({ children }) {
   
     };
   
-  async function readData(ses){
+  // async function readData(ses){
       
-      const { data, error } = await supabase
-      .from('connectors')
-      .select('connect_id')
-      .eq('user_id', ses?.user?.id);
+  //     const { data, error } = await supabase
+  //     .from('connectors')
+  //     .select('connect_id')
+  //     .eq('user_id', ses?.user?.id);
       
-      if(data?.length > 0){
-          let arr = []
-          for(const val of data){
-              arr.push(...val.connect_id)
-          };
-          return arr
-      }
-      return []
-  };
+  //     if(data?.length > 0){
+  //         let arr = []
+  //         for(const val of data){
+  //             arr.push(...val.connect_id)
+  //         };
+  //         return arr
+  //     }
+  //     return []
+  // };
 
     useEffect(()=> {
-    //   indexingStatus()
-    //   const int = setInterval(()=> {
-    //   indexingStatus(session)
-    // }, 5000);
+      indexingStatus()
+      const int = setInterval(()=> {
+      indexingStatus(session)
+    }, 5000);
 
-    // return ()=> {
-    //   clearInterval(int)
-    // }
+    return ()=> {
+      clearInterval(int)
+    }
       
     }, [])
 

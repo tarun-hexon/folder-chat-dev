@@ -6,7 +6,7 @@ import threeDot from '../../../public/assets/more-horizontal.svg'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../components/ui/accordion";
 import { Account, NewFolder } from '../(dashboard)'
 import { useAtom } from 'jotai';
-import { folderAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom, tempAtom } from '../../store';
+import { folderAtom, showAdvanceAtom, chatTitleAtom, chatSessionIDAtom, folderIdAtom, sessionAtom, folderAddedAtom, chatHistoryAtom, tempAtom, workAddedAtom } from '../../store';
 import rightArrow from '../../../public/assets/secondary icon.svg';
 import { Popover, PopoverContent, PopoverTrigger } from '../../../components/ui/popover';
 import { Pencil, Trash2, Check, X, MessageSquare, LogOut } from 'lucide-react';
@@ -29,6 +29,7 @@ import { logout } from '../../../lib/user';
 const FolderCard = ({ fol }) => {
     // console.log(fol) 
     const { name, id, workspace_id } = fol
+
     const [chatHistory, setChatHistory] = useAtom(chatHistoryAtom)
     const [files, setFiles] = useState([])
     const [chatTitle, setChatTitle] = useAtom(chatTitleAtom);
@@ -49,27 +50,24 @@ const FolderCard = ({ fol }) => {
 
     const router = useRouter();
 
-    const current_url = window.location.href;
 
-    const chat_id = current_url.split("/chat/")[1];
+    // async function getChatFiles() {
+       
+    //     try {
+    //         const { data, error } = await supabase
+    //             .from('chats')
+    //             .select('*')
+    //             .eq('folder_id', fol.id);
+    //         if (data) {
+    //             setFiles(data);
 
-    async function getChatFiles() {
-        // let ID = id === undefined ? props.fol[0].id : id
-        try {
-            const { data, error } = await supabase
-                .from('chats')
-                .select('*')
-                .eq('folder_id', fol.id);
-            if (data) {
-                setFiles(data);
-
-            } else {
-                throw error
-            }
-        } catch (error) {
-            console.log(error)
-        }
-    };
+    //         } else {
+    //             throw error
+    //         }
+    //     } catch (error) {
+    //         console.log(error)
+    //     }
+    // };
 
 
     function handleOptionsOnclick(id, fol_id, wk_id) {
@@ -101,15 +99,15 @@ const FolderCard = ({ fol }) => {
                 },
             });
         }
-        await supabase
-            .from('document_set')
-            .delete()
-            .eq('folder_id', fol_id);
+        // await supabase
+        //     .from('document_set')
+        //     .delete()
+        //     .eq('folder_id', fol_id);
 
-        const { error } = await supabase
-            .from('folders')
-            .delete()
-            .eq('id', fol_id)
+        // const { error } = await supabase
+        //     .from('folders')
+        //     .delete()
+        //     .eq('id', fol_id)
 
         if (!error) {
 
@@ -159,7 +157,7 @@ const FolderCard = ({ fol }) => {
             .delete()
             .eq('session_id', id)
         if (!error) {
-            await getChatFiles();
+            // await getChatFiles();
             router.push('/chat/new')
         }
 
@@ -274,16 +272,16 @@ const FolderCard = ({ fol }) => {
     // }
 
     async function getDocSetDetails(folder_id) {
-        console.log(folder_id)
+        // console.log(folder_id, '275')
         if (!folder_id) {
             // setLoading(false);
             return null
         }
         
-        const res = await fetch(`/api/manage/document-set?folder_id=${folder_id}`)
+        const res = await fetch(`/api/manage/document-set-v2?folder_id=${folder_id}`)
         if(res.ok){
             const data = await res.json();
-            console.log(data)
+            
             if(data.length > 0){
                 setDocumentSet(data)
             }else{
@@ -310,23 +308,23 @@ const FolderCard = ({ fol }) => {
     };
 
     useEffect(() => {
-        getChatFiles();
-        getDocSetDetails(id);
+        // getChatFiles();
+        getDocSetDetails(fol.id);
 
-    }, [chatHistory, chatTitle, id]);
+    }, [chatHistory, chatTitle, id, temp]);
 
 
     useEffect(() => {
 
         // getDocSetDetails()
-    }, [chat_id, temp])
+    }, [temp])
 
-    useEffect(() => {
-        setIsSelected(chat_id);
-        if (chat_id !== 'new' && chat_id) {
-            //getFolderId(chat_id);
-        }
-    }, [chat_id]);
+    // useEffect(() => {
+    //     setIsSelected(chat_id);
+    //     if (chat_id !== 'new' && chat_id) {
+    //         //getFolderId(chat_id);
+    //     }
+    // }, [chat_id]);
 
     return (
 
@@ -562,6 +560,7 @@ const SideBar = () => {
     const [folderAdded, setFolderAdded] = useAtom(folderAddedAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [workSpaces, setWorkSpaces] = useState([])
+    const [workSpaceAdded, setWorkSpaceAdded] = useAtom(workAddedAtom)
     const router = useRouter()
     const param = useParams()
 
@@ -628,10 +627,10 @@ const SideBar = () => {
     useEffect(() => {
         getFolders()
         
-    }, [folderAdded, param.workspaceid]);
+    }, [folderAdded, param.workspaceid, workSpaceAdded]);
     useEffect(()=> {
         getWorkSpace()
-    }, [])
+    }, [workSpaceAdded])
 
     return (
         <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-4 font-Inter relative min-h-screen'>

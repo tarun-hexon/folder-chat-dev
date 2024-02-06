@@ -30,6 +30,7 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
     const [inputError, setInputError] = useState(false);
     const [workAdded, setWorkAdded] = useAtom(workAddedAtom)
     const [currentUser, setCurrentUser] = useState({})
+    const [workSpaceAdded, setWorkSpaceAdded] = useAtom(workAddedAtom);
 
     const router = useRouter()
 
@@ -65,8 +66,16 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
             if (res.ok) {
                 workSpaceAdded(!workAdded)
                 setOpen(false);
+            }else{
+                const json = await res.json()
+                
+                if(json?.detail){
+                    
+                    setInputError(json?.detail)
+                }
             }
         } catch (error) {
+            
             console.log(error)
         }
     };

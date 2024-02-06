@@ -283,7 +283,6 @@ const ChatWindow = () => {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
-                    "Cookie":'fastapiusersauth=xXP_ecceQE_XmIJDNdy7DwyhbrjSREpC8BXjW9o5fGI'
                 },
                 body: JSON.stringify({
                     "chat_session_id": chatID,
@@ -637,16 +636,16 @@ const ChatWindow = () => {
     // };
 
     async function getDocSetDetails(folder_id) {
-        // console.log(folder_id)
+        console.log(folder_id, '639')
         if (!folder_id) {
             setLoading(false);
             return null
         }
         
-        const res = await fetch(`/api/manage/document-set?folder_id=${folder_id}`)
+        const res = await fetch(`/api/manage/document-set-v2?folder_id=${folder_id}`)
         if(res.ok){
             const data = await res.json();
-            // console.log(data)
+            console.log(data)
             if(data.length > 0){
                 setDocumentSet(data)
             }else{

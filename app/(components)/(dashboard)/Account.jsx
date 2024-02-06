@@ -10,7 +10,7 @@ import { useRouter } from 'next/navigation';
 import { sidebarOptions } from '../../../config/constants';
 import { Dialog, DialogTrigger } from '../../../components/ui/dialog';
 import { Setting } from '../(settings)'
-import { ArrowDownUp, Check, LogOut } from 'lucide-react';
+import { ChevronDown, Check, LogOut } from 'lucide-react';
 import { isUserExist } from '../../../config/lib';
 import { getCurrentUser } from '../../../lib/user';
 import { logout } from '../../../lib/user';
@@ -143,7 +143,7 @@ const Account = () => {
                     {value
                         ? workspaces.find((workspace) => workspace.name === value.name)?.name
                         : "Select workspace..."}
-                    <ArrowDownUp className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                    <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
             </PopoverTrigger>
             <PopoverContent className="w-full p-2">
