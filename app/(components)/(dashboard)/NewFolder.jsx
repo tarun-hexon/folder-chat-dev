@@ -31,7 +31,7 @@ import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation'
 import { getCurrentUser } from '../../../lib/user';
 
-const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
+const NewFolder = ( { setFolderAdded, openMenu, setOpenMenu }) => {
     // const [folder, setFolder] = useAtom(folderAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [open, setOpen] = useState(openMenu);
@@ -66,7 +66,7 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
                     "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
-                    "workspace_id":params.workspaceid,
+                    "workspace_id":workspaceid,
                     "user_id": currentUser?.id,
                     "name": folderData.title,
                     "description": folderData.description,
@@ -80,6 +80,10 @@ const NewFolder = ( {setFolderAdded, openMenu, setOpenMenu}) => {
             });
 
             if(response?.ok){
+                const json = await response.json()
+                setFolderId(json?.data?.id)
+                setOpen(false)
+                setFolderAdded(json?.data?.id)
                 router.push(`/workspace/${workspaceid}/chat/upload`)
                 return 
             }

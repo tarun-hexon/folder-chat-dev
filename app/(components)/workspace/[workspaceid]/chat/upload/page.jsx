@@ -348,6 +348,11 @@ const Upload = () => {
 
       //await updatetDataInDB(docSetid, context.fileName)
       setContext({ fileName: '', description: '', contextName: '' })
+      toast({
+        variant: 'default',
+        title: "File Uploaded!"
+      });
+      router.push(`/workspace/${workspaceid}/chat/new`)
     } catch (error) {
       console.log(error)
     }
