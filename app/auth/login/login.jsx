@@ -53,7 +53,7 @@ const Login= ( { shouldVerify } ) => {
                     await requestEmailVerification(email);
                     router.push("/auth/waiting-on-verification");
                 } else {
-                    router.push("/workspace/0/chat/new");
+                    router.push("/workspace");
                 }
             }
             else {

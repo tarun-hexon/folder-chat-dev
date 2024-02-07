@@ -13,14 +13,8 @@ import {
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Button } from "../../../components/ui/button";
-import plus from '../../../public/assets/plus - light.svg';
-import Image from 'next/image';
 import { useAtom } from 'jotai';
 import { workAddedAtom } from '../../store';
-import { Folder } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
-import { isUserExist } from '../../../config/lib';
-import supabase from '../../../config/supabse';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser } from '../../../lib/user';
 
@@ -30,7 +24,7 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
     const [inputError, setInputError] = useState(false);
     const [workAdded, setWorkAdded] = useAtom(workAddedAtom)
     const [currentUser, setCurrentUser] = useState({})
-    const [workSpaceAdded, setWorkSpaceAdded] = useAtom(workAddedAtom);
+    
 
     const router = useRouter()
 
@@ -64,8 +58,11 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
                 })
             });
             if (res.ok) {
-                workSpaceAdded(!workAdded)
+                const json = await res.json();
+                setWorkAdded(!workAdded)
                 setOpenMenu(false);
+                router.push(`/workspace/${json?.data?.id}/chat/new`)
+                
             }else{
                 const json = await res.json()
                 

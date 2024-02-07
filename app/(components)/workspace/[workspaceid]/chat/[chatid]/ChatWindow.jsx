@@ -143,7 +143,6 @@ const ChatWindow = () => {
     };
 
     async function createChatTitle(session_id, name, userMessage) {
-        // console.log(session_id, name, userMessage)
         try {
             const data = await fetch(`/api/chat/rename-chat-session`, {
                 credentials:'include',
@@ -158,7 +157,6 @@ const ChatWindow = () => {
                 })
             });
             const json = await data.json();
-            // console.log(json.new_name);
             //await updateTitle(json.new_name, session_id, userMessage)
             setChatTitle(json.new_name)
         } catch (error) {
@@ -235,7 +233,6 @@ const ChatWindow = () => {
         if (obj) {
             newMsg = [bot, user, ...oldChat, { 'source': obj }]
         }
-        // console.log(newMsg)
         try {
             const { data, error } = await supabase
                 .from('chats')
@@ -276,7 +273,6 @@ const ChatWindow = () => {
     };
 
     async function sendChatMsgs(userMsg, chatID, parent_ID) {
-        console.log(userMsg, chatID, parent_ID, folderId)
         try {
             const sendMessageResponse = await fetch(`/api/chat/send-message`, {
                 credentials:'include',
@@ -310,8 +306,6 @@ const ChatWindow = () => {
             }
 
             const entireResponse = await handleStream(sendMessageResponse, userMsg);
-            // console.log(entireResponse);
-            // getCitedDocumentsFromMessage(entireResponse)
 
             setTextFieldDisabled(false)
 
@@ -372,7 +366,6 @@ const ChatWindow = () => {
 
                         if (obj?.context_docs?.top_documents.length > 0 && Object.keys(obj.citations).length !== 0) {
                             const key = Object.keys(obj.citations);
-                            // console.log(obj.citations[key[0]])
                             const relatedDoc = obj?.context_docs?.top_documents.filter(doc => doc?.db_doc_id === obj?.citations[key[0]])
                             documents = obj?.context_docs?.top_documents;
                             query = obj?.context_docs?.rephrased_query
@@ -480,7 +473,6 @@ const ChatWindow = () => {
     //             .eq('session_id', id);
     //         if (data[0]?.chats) {
     //             setParentMessageId(data[0]?.message_id)
-    //             // console.log(data[0]?.message_id)
     //             if (folderId === '') {
     //                 setFolderId(data[0]?.folder_id)
     //             }
@@ -508,12 +500,12 @@ const ChatWindow = () => {
     // };
 
     async function getChatHistoryFromServer(id) {
+        await getDocSetDetails(folderId)
         try {
             const data = await fetch(`/api/chat/get-chat-session/${id}`);
             const json = await data.json();
-            // console.log(json)
             if (json?.messages.length > 0) {
-                await getDocSetDetails(folderId)
+                
                 setParentMessageId(json?.messages[json?.messages.length - 1].message_id);
                 setChatMsg(json?.messages.reverse());
                 setChatHistory(json);
@@ -527,7 +519,6 @@ const ChatWindow = () => {
     };
 
     async function updateDocumentSet(ccID, des) {
-        console.log(ccID, 'remove return from line no 530 for updating data in server')
         //need to fetch files names without replacing previous name
         return null
         if (!documentSet[0]?.doc_set_id) {
@@ -599,7 +590,6 @@ const ChatWindow = () => {
     };
 
     function handleDocSetID(id) {
-        //console.log(id)
         if (selectedDoc.includes(parseInt(id))) {
             // const idx = selectedDoc.indexOf(id);
             setSelectedDoc(selectedDoc.filter(doc => doc !== parseInt(id)))
@@ -607,7 +597,6 @@ const ChatWindow = () => {
             setSelectedDoc((prev) => [...prev, parseInt(id)])
 
         }
-        // console.log(selectedDoc)
 
     }
 
@@ -617,7 +606,6 @@ const ChatWindow = () => {
     //         setLoading(false);
     //         return null
     //     }
-    //     // console.log(folder_id)
     //     let { data: document_set, error } = await supabase
     //         .from('document_set')
     //         .select("*")
@@ -640,7 +628,7 @@ const ChatWindow = () => {
     // };
 
     async function getDocSetDetails(folder_id) {
-        console.log(folder_id, '639')
+        
         if (!folder_id) {
             setLoading(false);
             return null
@@ -649,7 +637,6 @@ const ChatWindow = () => {
         const res = await fetch(`/api/manage/document-set-v2?folder_id=${folder_id}`)
         if(res.ok){
             const data = await res.json();
-            console.log(data)
             if(data.length > 0){
                 setDocumentSet(data)
             }else{
@@ -695,8 +682,6 @@ const ChatWindow = () => {
 
     useEffect(() => {
         setShowAdvance(false);
-        // console.log(chatid)
-
         if (chatid !== 'new' && chatid) {
             getChatHistoryFromServer(chatid)
             setChatSessionID(chatid);

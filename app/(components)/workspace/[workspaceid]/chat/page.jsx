@@ -31,7 +31,7 @@ const Chat = () => {
       // else {
       //   router.push('/auth/login')
       // }
-      router.push('/chat/new')
+      router.push('/workspace/0/chat/new')
     }, []);
 
 

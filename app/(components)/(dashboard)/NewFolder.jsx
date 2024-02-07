@@ -22,7 +22,7 @@ import { Button } from "../../../components/ui/button";
 import plus from '../../../public/assets/plus - light.svg'
 import Image from 'next/image';
 import { useAtom } from 'jotai';
-import { currentWorkSpaceAtom, folderIdAtom } from '../../store';
+import { folderIdAtom } from '../../store';
 import { Folder } from 'lucide-react';
 import { v4 as uuidv4 } from 'uuid';
 import { isUserExist } from '../../../config/lib';
@@ -33,12 +33,11 @@ import { getCurrentUser } from '../../../lib/user';
 
 const NewFolder = ( { setFolderAdded, openMenu, setOpenMenu }) => {
     // const [folder, setFolder] = useAtom(folderAtom);
+    
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
-    // const [currentWorkSpace, setCurrentWorkSpace] = useAtom(currentWorkSpaceAtom)
     const [currentUser, setCurrentUser] = useState({})
-
     const { workspaceid } = useParams()
 
     const router = useRouter()

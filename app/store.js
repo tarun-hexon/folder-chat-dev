@@ -18,7 +18,6 @@ export const chatTitleAtom = atom('')
 export const allIndexingConnectorAtom = atom(null);
 export const documentSetAtom = atom([]);
 export const tempAtom = atom(false);
-export const currentWorkSpaceAtom = atom('')
 export const workAddedAtom = atom(false)
 export const selectOptionAtom = atom([
     {

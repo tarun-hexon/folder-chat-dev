@@ -5,7 +5,7 @@ import threeDot from '../../../public/assets/more-horizontal.svg'
 import supabase from '../../../config/supabse';
 import Image from 'next/image';
 import { useAtom } from 'jotai'
-import { sessionAtom, isPostSignUpCompleteAtom, isPostUserCompleteAtom, currentWorkSpaceAtom } from '../../store';
+import { sessionAtom, isPostSignUpCompleteAtom, isPostUserCompleteAtom } from '../../store';
 import { useRouter } from 'next/navigation';
 import { sidebarOptions } from '../../../config/constants';
 import { Dialog, DialogTrigger } from '../../../components/ui/dialog';
@@ -42,7 +42,7 @@ const Account = () => {
     const [item, setItem] = useState('profile')
     const [workSpace, setWorkSpace] = useState(null);
     const [currentUser, setCurrentUser] = useState({});
-    const [value, setValue] = useAtom(currentWorkSpaceAtom)
+    const [value, setValue] = useState('')
     const router = useRouter();
     const { workspaceid } = useParams()
     const [workspaces, setWorkSpaces] = useState([])
@@ -56,7 +56,17 @@ const Account = () => {
     async function getWorkSpace(){
         const res = await fetch('/api/workspace/list-workspace');
         const json = await res.json()
-        // console.log(json)
+        
+        if(json?.data?.length > 0){
+            const currentWorkSpace = json?.data?.filter(workspace => workspace.id == workspaceid);
+            if(currentWorkSpace.length > 0){
+                setValue(currentWorkSpace[0])
+            }else{
+                setValue(json?.data[0])
+            }
+        }else{
+            setValue('')
+        }
         setWorkSpaces(json?.data)
     }
 
@@ -64,7 +74,7 @@ const Account = () => {
         // getWorkspaceName();
         getWorkSpace()
         fetchCurrentUser();
-    }, [])
+    }, [workspaceid])
     return (
         <div className='w-full '>
             <Popover open={open} onOpenChange={setOpen} className='w-full h-40 overflow-y-scroll'>
@@ -76,7 +86,7 @@ const Account = () => {
                     className="w-full justify-between"
                 >
                     {value
-                        ? workspaces.find((workspace) => workspace.name === value.name)?.name
+                        ? workspaces.find((workspace) => workspace?.name === value?.name)?.name
                         : "Select workspace..."}
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
@@ -100,7 +110,7 @@ const Account = () => {
                                 <Check
                                     className={cn(
                                         "ml-auto h-4 w-4",
-                                        value.name === workspace.name ? "opacity-100" : "opacity-0"
+                                        value?.name === workspace?.name ? "opacity-100" : "opacity-0"
                                     )}
                                 />
                             </CommandItem>
