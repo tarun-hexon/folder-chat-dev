@@ -1,5 +1,5 @@
 'use client'
-import React, { useEffect, useState } from 'react'
+import React from 'react'
 import { DialogContent } from '../../../components/ui/dialog';
 import { Mail, MessageSquare, Plus, PlusCircle, UserPlus, Users} from "lucide-react"
 import { useAtom } from 'jotai';
@@ -14,10 +14,10 @@ import { Button } from '../../../components/ui/button';
 import { useToast } from '../../../components/ui/use-toast';
 
 const Setting = ({ item, setItem }) => {
-    // console.log(itemProp)
+    
     const [session, setSession] = useAtom(sessionAtom);
     const { toast } = useToast()
-    // const [item, setItem] = useState(itemProp);
+    
 
 
     function shareByEmail() {

@@ -1,18 +1,17 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import { Input } from '../../../../components/ui/input';
-import { Button } from '../../../../components/ui/button';
-import gitIcon from '../../../../public/assets/Danswer-github-B.svg';
-import check from '../../../../public/assets/check-circle.svg';
-import trash from '../../../../public/assets/trash-2.svg';
-import { useToast } from '../../../../components/ui/use-toast';
-import { deleteAdminCredentails, fetchAllCredentials, fetchCredentialID, generateConnectorId, addNewInstance, fetchAllConnector } from '../../../../lib/helpers';
-import { Dialog, DialogTrigger, DialogContent } from '../../../../components/ui/dialog';
+import { Input } from '../../../../../../components/ui/input';
+import { Button } from '../../../../../../components/ui/button';
+import gitIcon from '../../../../../../public/assets/Danswer-github-B.svg';
+import check from '../../../../../../public/assets/check-circle.svg';
+import trash from '../../../../../../public/assets/trash-2.svg';
+import { useToast } from '../../../../../../components/ui/use-toast';
+import { deleteAdminCredentails, fetchAllCredentials, fetchCredentialID, generateConnectorId, addNewInstance, fetchAllConnector } from '../../../../../../lib/helpers';
+import { Dialog, DialogTrigger, DialogContent } from '../../../../../../components/ui/dialog';
 import EditIndex from '../(component)/EditIndex';
-import supabase from '../../../../config/supabse';
 import { useAtom } from 'jotai';
-import { sessionAtom, userConnectorsAtom } from '../../../store';
+import { userConnectorsAtom } from '../../../../../store';
 import { Loader2 } from 'lucide-react';
 import {
     Table,
@@ -21,12 +20,11 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-  } from "../../../../components/ui/table";
+  } from "../../../../../../components/ui/table";
 
 
 
 const GitPrs = () => {
-    const [session, setSession] = useAtom(sessionAtom)
     const [git_token, setGitToken] = useState('');
     const [tokenValue, setTokenValue] = useState('');
     const [repos, setRepos] = useState([]);
@@ -49,8 +47,6 @@ const GitPrs = () => {
     async function getAdminCredentials(){
         try {
             const json = await fetchAllCredentials();
-
-            const allCred = await readData();
             
             const currentUserToken = json.filter((res) => { if(allCred?.includes(res?.id)) return res});
             
@@ -81,13 +77,6 @@ const GitPrs = () => {
                 "admin_public": false
             };
             const data = await fetchCredentialID(body);
-            
-            if(existingCredentials.length === 0){
-                
-                await insertDataInCred([data])
-            }else{
-                await updatetDataInConn(existingCredentials, data)
-            }
             await getAdminCredentials()
             setCredentialID(data);
             setTokenStatus(true)
@@ -238,61 +227,6 @@ const GitPrs = () => {
             })
         }
     };
-
-    async function insertDataInCred(newData){
-        // const id = await getSess();
-        // console.log(newData, session.user.id)
-        const { data, error } = await supabase
-        .from('credentials')
-        .insert(
-          { 'cred_ids': newData, 'user_id' : session?.user?.id },
-        )
-        .select()
-        // console.log(data)
-        console.log(error)
-        setExistingCredentials(data[0]?.cred_ids)
-    };
-
-    async function updatetDataInConn(exConn, newData){
-        // const id = await getSess();
-        const allConn = [...exConn, newData]
-        const { data, error } = await supabase
-        .from('credentials')
-        .update(
-          { 'cred_ids': allConn },
-        )
-        .eq('user_id', session.user.id)
-        .select()
-        // console.log(data)
-        console.log(error)
-        setExistingCredentials(data[0].cred_ids)
-    };
-
-    async function readData(){
-        // const id = await getSess();
-        try {
-            const { data, error } = await supabase
-            .from('credentials')
-            .select('cred_ids')
-            .eq('user_id', session?.user?.id);
-            // console.log(data);
-            if(error){
-                setExistingCredentials([]);
-                throw error
-            }
-            if(data[0]?.cred_ids === null){
-                setExistingCredentials([]);
-                return []
-            }
-            else{
-                setExistingCredentials(data[0]?.cred_ids);
-                return data[0]?.cred_ids
-            }
-        } catch (error) {
-            console.log(error);
-            return []
-        }
-    }; 
 
     useEffect(()=> {
         // readData();

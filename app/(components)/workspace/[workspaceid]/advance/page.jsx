@@ -1,16 +1,16 @@
 'use client'
 import React, { useState, useEffect } from 'react'
 import Image from 'next/image';
-import { Indexing, Slack, GitPrs, Files, Drive, Confluence, Web } from '../(common)/index'
-import { Input } from '../../../components/ui/input';
-import searchIcon from '../../../public/assets/search.svg';
-import drive from '../../../public/assets/Danswer-google-B.svg'
-import web from '../../../public/assets/Danswer-web-B.svg'
-import slack from '../../../public/assets/Danswer-slack-B.svg'
-import confluence from '../../../public/assets/Danswer-confluence-B.svg'
-import file from '../../../public/assets/Danswer-doc-B.svg'
+import { Indexing, Slack, GitPrs, Files, Drive, Confluence, Web } from '../../../(common)'
+import { Input } from '../../../../../components/ui/input';
+import searchIcon from '../../../../../public/assets/search.svg';
+import drive from '../../../../../public/assets/Danswer-google-B.svg'
+import web from '../../../../../public/assets/Danswer-web-B.svg'
+import slack from '../../../../../public/assets/Danswer-slack-B.svg'
+import confluence from '../../../../../public/assets/Danswer-confluence-B.svg'
+import file from '../../../../../public/assets/Danswer-doc-B.svg'
 import { useAtom } from 'jotai';
-import { showAdvanceAtom } from '../../store';
+import { showAdvanceAtom } from '../../../../store';
 import { MoreHorizontal } from 'lucide-react';
 import ReactMarkdown from "react-markdown";
 
@@ -96,7 +96,7 @@ const AdvancePage = () => {
 
         } catch (error) {
             console.log(error)
-            // setMsgLoader(false)
+            
             setInputFieldDisabled(false)
         }
     };
@@ -131,18 +131,10 @@ const AdvancePage = () => {
 
                 for (const obj of response) {
                     if (obj.answer_piece) {
-
-                        // botResponse.current += obj.answer_piece;
-
                         setRcvdMsg(prev => prev + obj.answer_piece);
-
                     } else if (obj.top_documents) {
 
                         setResponseObj(obj);
-                        console.log(obj)
-
-                        //await updateChats({ 'bot': botResponse.current }, { 'user': userMsg }, chatMsg, obj.message_id)
-                        //botResponse.current = ''
                         
                     } else if (obj.error) {
                         setMsgLoader(false);
@@ -289,7 +281,7 @@ const AdvancePage = () => {
       };
 
     useEffect(()=> {
-        setShowAdvance(true)
+        // setShowAdvance(true)
     }, []);
 
     return (

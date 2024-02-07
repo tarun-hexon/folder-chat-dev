@@ -1,9 +1,8 @@
 'use client'
 import React, { useEffect, useState } from 'react'
 import Image from 'next/image';
-import supabase from '../../../../config/supabse';
-import { Input } from '../../../../components/ui/input';
-import { Button } from '../../../../components/ui/button';
+import { Input } from '../../../../../../components/ui/input';
+import { Button } from '../../../../../../components/ui/button';
 import {
     Table,
     TableBody,
@@ -11,19 +10,18 @@ import {
     TableHead,
     TableHeader,
     TableRow,
-  } from "../../../../components/ui/table";
-import conIcon from '../../../../public/assets/Danswer-confluence-B.svg';
+  } from "../../../../../../components/ui/table";
+import conIcon from '../../../../../../public/assets/Danswer-confluence-B.svg';
 
-import check from '../../../../public/assets/check-circle.svg';
-import trash from '../../../../public/assets/trash-2.svg';
-import { useToast } from '../../../../components/ui/use-toast';
-import { fetchAllConnector, fetchAllCredentials, deleteConnector, generateConnectorId, addNewInstance, deleteAdminCredentails, fetchCredentialID } from '../../../../lib/helpers';
+import check from '../../../../../../public/assets/check-circle.svg';
+import trash from '../../../../../../public/assets/trash-2.svg';
+import { useToast } from '../../../../../../components/ui/use-toast';
+import { fetchAllConnector, fetchAllCredentials, deleteConnector, generateConnectorId, addNewInstance, deleteAdminCredentails, fetchCredentialID } from '../../../../../../lib/helpers';
 import { useAtom } from 'jotai';
-import { sessionAtom, userConnectorsAtom } from '../../../store';
+import { userConnectorsAtom } from '../../../../../store';
 import { Loader2 } from 'lucide-react';
 
 const Confluence = () => {
-    const [session, setSession] = useAtom(sessionAtom)
     const [con_token, setConToken] = useState('');
     const [tokenValue, setTokenValue] = useState('');
     const [userName, setUserName] = useState('');
@@ -43,13 +41,9 @@ const Confluence = () => {
     async function getAllCred() {
         try {
             const data = await fetchAllCredentials();
-            // console.log(data)
-            const allCred = await readData();
-            
             const currentUserToken = data?.filter((res) => { if(allCred?.includes(res?.id)) return res});
-            // console.log(currentUserToken)
+            
             const currentToken = currentUserToken.filter(res => res?.credential_json?.confluence_username !== undefined);
-            // console.log(currentToken)
 
             const conCred = currentToken?.filter(cred => cred?.credential_json?.confluence_username);
             // console.log(conCred)
@@ -125,7 +119,6 @@ const Confluence = () => {
 
     async function getConnectorId(space_url) {
         try {
-            // await checkExistingConnector(space_url);
 
             const body = {
                 "name": `ConfluenceConnector-${space_url}`,
@@ -158,7 +151,6 @@ const Confluence = () => {
             const data = await addNewInstance(conId, credId, name);
             setTokenStatus(true)
             addLisrUrl(url);
-            // console.log(data);
         } catch (error) {
             console.log(error)
         }
@@ -204,69 +196,6 @@ const Confluence = () => {
         deleteToken(conJson.id);
         setConToken('');
         setTokenStatus(false)
-    };
-
-
-    async function insertDataInCred(newData){
-        // const id = await getSess();
-        try {
-            // console.log(newData, session.user.id)
-            const { data, error } = await supabase
-            .from('credentials')
-            .insert(
-            { 'cred_ids': newData, 'user_id' : session.user.id },
-            )
-            .select();
-
-            if(error){
-                throw error
-            }
-            setExistingCredentials(data[0]?.cred_ids)
-        } catch (error) {
-            setExistingCredentials([])
-            console.log(error)
-        }
-    };
-
-    async function updatetDataInCred(exConn, newData){
-        // const id = await getSess();
-        const allConn = [...exConn, newData]
-        const { data, error } = await supabase
-        .from('credentials')
-        .update(
-          { 'cred_ids': allConn },
-        )
-        .eq('user_id', session.user.id)
-        .select()
-        // console.log(data)
-        console.log(error)
-        setExistingCredentials(data[0]?.cred_ids)
-    };
-
-    async function readData(){
-        // const id = await getSess();
-        try {
-            const { data, error } = await supabase
-            .from('credentials')
-            .select('cred_ids')
-            .eq('user_id', session?.user?.id);
-            // console.log(data);
-            if(error){
-                setExistingCredentials([]);
-                throw error
-            }
-            if(data[0]?.cred_ids === null){
-                setExistingCredentials([]);
-                return []
-            }
-            else{
-                setExistingCredentials(data[0]?.cred_ids);
-                return data[0]?.cred_ids
-            }
-        } catch (error) {
-            console.log(error);
-            return []
-        }
     }; 
 
     useEffect(() => {

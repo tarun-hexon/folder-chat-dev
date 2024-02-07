@@ -1,18 +1,18 @@
 'use client'
 import React, { useState } from 'react'
 import Image from 'next/image';
-import slackIcon from '../../../../public/assets/Danswer-slack-B.svg'
-import { Input } from '../../../../components/ui/input';
-import { Button } from '../../../../components/ui/button';
-import gDriveIcon from '../../../../public/assets/Danswer-google-B.svg'
-import webIcon from '../../../../public/assets/Danswer-web-B.svg'
-import confluenceIcon from '../../../../public/assets/Danswer-confluence-B.svg'
-import gitIcon from '../../../../public/assets/Danswer-github-B.svg';
-import fileIcon from '../../../../public/assets/Danswer-doc-B.svg';
-import check from '../../../../public/assets/check-circle.svg';
-import trash from '../../../../public/assets/trash-2.svg';
+import slackIcon from '../../../../../../public/assets/Danswer-slack-B.svg'
+import { Input } from '../../../../../../components/ui/input';
+import { Button } from '../../../../../../components/ui/button';
+import gDriveIcon from '../../../../../../public/assets/Danswer-google-B.svg'
+import webIcon from '../../../../../../public/assets/Danswer-web-B.svg'
+import confluenceIcon from '../../../../../../public/assets/Danswer-confluence-B.svg'
+import gitIcon from '../../../../../../public/assets/Danswer-github-B.svg';
+import fileIcon from '../../../../../../public/assets/Danswer-doc-B.svg';
+import check from '../../../../../../public/assets/check-circle.svg';
+import trash from '../../../../../../public/assets/trash-2.svg';
 import { useDropzone } from 'react-dropzone';
-import { Label } from '../../../../components/ui/label';
+import { Label } from '../../../../../../components/ui/label';
 import { Trash2 } from 'lucide-react';
 
 import { useAtom } from 'jotai';
@@ -55,10 +55,6 @@ const Drive = () => {
           }
         
           const credential = await credentialCreationResponse.json();
-
-          console.log(credential)
-
-        //   return null
         
           const authorizationUrlResponse = await fetch(
             `${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/connector/google-drive/authorize/${credential.id}`
@@ -76,17 +72,11 @@ const Drive = () => {
           return [authorizationUrlJson.auth_url, ""];
     }
     async function authWithDrive(){
-
-        // const [authUrl, errorMsg] = await googleDriveAuth();
+        
 
         const url = 'https://accounts.google.com/o/oauth2/auth/oauthchooseaccount?response_type=code&client_id=476946310824-r70o0t33mmhia9c98vfkmglqucfnggrg.apps.googleusercontent.com&redirect_uri=https%3A%2F%2Fdanswer.folder.chat%2Fadmin%2Fconnectors%2Fgoogle-drive%2Fauth%2Fcallback&scope=https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.readonly%20https%3A%2F%2Fwww.googleapis.com%2Fauth%2Fdrive.metadata.readonly&state=7lMCLPcKrUlan9rD9D8Qb5QVBKN1eU&prompt=consent&access_type=offline&service=lso&o2v=1&theme=glif&flowName=GeneralOAuthFlow'
 
 
-        
-
-        // if (authUrl) {
-            
-        //   }
           const width = 500;
             const height = 600;
             const left = window.screen.width / 2 - width / 2;
@@ -99,22 +89,7 @@ const Drive = () => {
 
             if (popupWindow) {
                 popupWindow.focus();
-            };
-        
-            // const setInt = setInterval(() => {
-            //     popupWindow.close();
-            //     // if (localStorage.getItem('access_token')) {
-            //     //     // Successful sign-in detected, close the pop-up window
-            //     //     clearInterval(checkSignInStatus);
-                    
-            //     //     // window.location.reload()
-            //     // }
-            // }, 10000)
-            
-    
-        
-
-        
+            };       
     }
 
 

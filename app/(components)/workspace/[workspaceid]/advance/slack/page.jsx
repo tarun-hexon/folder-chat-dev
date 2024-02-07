@@ -1,14 +1,14 @@
 'use client'
 import React, { useState } from 'react'
 import Image from 'next/image';
-import slackIcon from '../../../../public/assets/Danswer-slack-B.svg'
-import { Input } from '../../../../components/ui/input';
-import { Button } from '../../../../components/ui/button';
+import slackIcon from '../../../../../../public/assets/Danswer-slack-B.svg'
+import { Input } from '../../../../../../components/ui/input';
+import { Button } from '../../../../../../components/ui/button';
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow,
-  } from "../../../../components/ui/table";
-import check from '../../../../public/assets/check-circle.svg';
-import trash from '../../../../public/assets/trash-2.svg';
-import { Label } from '../../../../components/ui/label';
+  } from "../../../../../../components/ui/table";
+import check from '../../../../../../public/assets/check-circle.svg';
+import trash from '../../../../../../public/assets/trash-2.svg';
+import { Label } from '../../../../../../components/ui/label';
 
 const Slack = () => {
     const [token, setToken] = useState('');

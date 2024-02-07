@@ -24,16 +24,13 @@ import Image from 'next/image';
 import { useAtom } from 'jotai';
 import { folderIdAtom } from '../../store';
 import { Folder } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
-import { isUserExist } from '../../../config/lib';
-import supabase from '../../../config/supabse';
 import { useRouter } from 'next/navigation';
 import { useParams } from 'next/navigation'
 import { getCurrentUser } from '../../../lib/user';
 
 const NewFolder = ( { setFolderAdded, openMenu, setOpenMenu }) => {
-    // const [folder, setFolder] = useAtom(folderAtom);
     
+
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
@@ -99,7 +96,6 @@ const NewFolder = ( { setFolderAdded, openMenu, setOpenMenu }) => {
   
       useEffect(() => {
           fetchCurrentUser();
-        //   console.log(params.workspaceid)
       }, []);
    
 
