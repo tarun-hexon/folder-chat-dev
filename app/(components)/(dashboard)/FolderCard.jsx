@@ -40,8 +40,6 @@ const FolderCard = ({ fol }) => {
 
     const { workspaceid, chatid } = useParams();
 
-    // const [documentSet, setDocumentSet] = useAtom(documentSetAtom);
-
     const router = useRouter();
 
     function handleOptionsOnclick(id, fol_id, wk_id) {
@@ -177,27 +175,7 @@ const FolderCard = ({ fol }) => {
 
     }
 
-    // async function getDocSetDetails() {
-    //     if (!fol.id) {
-    //         return null
-    //     }
-    //     let { data: document_set, error } = await supabase
-    //         .from('document_set')
-    //         .select("*")
-    //         .eq('folder_id', fol.id)
-
-    //     if (document_set?.length > 0) {
-    //         setDocumentSet(document_set)
-
-    //     } else {
-    //         setDocumentSet([])
-
-    //     }
-
-    // }
-
     async function getDocSetDetails(folder_id) {
-        console.log(folder_id, '275')
         if (!folder_id) {
             // setLoading(false);
             return null
@@ -215,27 +193,12 @@ const FolderCard = ({ fol }) => {
             }
             
         }
-        // setLoading(false)
-        // if (document_set?.length > 0) {
-        //     setDocumentSet(document_set)
-        //     setSelectedDoc(document_set[0]?.cc_pair_id)
-        //     setLoading(false)
-        // } else {
-        //     setDocumentSet([])
-        //     setLoading(false)
-        //     // router.push('/chat/upload')
-        //     // if (folder_id !== null) {
-        //     //     router.push('/chat/upload')
-        //     // }
-        // }
 
 
     };
 
     useEffect(() => {
-        // getChatFiles();
         getDocSetDetails(id);
-
     }, [chatHistory, chatTitle, id, workspaceid, temp, chatid]);
 
     // useEffect(() => {

@@ -117,7 +117,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured!"
+        title: "Some error occured!!"
       });
 
     }
@@ -160,7 +160,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured!"
+        title: "Some error occured!!"
       });
     }
   };
@@ -186,7 +186,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured!"
+        title: "Some error occured!!"
       });
     }
   };
@@ -218,7 +218,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured!"
+        title: "Some error occured!!"
       });
     }
   };
@@ -245,7 +245,7 @@ const Upload = () => {
       setUploading(false)
       return toast({
         variant: 'destructive',
-        title: "Some Error Ocuured!"
+        title: "Some error occured!!"
       });
     }
   };
@@ -263,7 +263,6 @@ const Upload = () => {
 
       }
     };
-    // console.log(docSetid)
     if (docSetid.length === 0) {
       return null
     }
@@ -289,7 +288,7 @@ const Upload = () => {
 
         toast({
           variant: 'default',
-          title: "File Uploaded!"
+          title: "File uploaded!"
         });
         router.push(`/workspace/${workspaceid}/chat/new`)
         setD_open(false)
@@ -297,7 +296,7 @@ const Upload = () => {
       } else {
         return toast({
           variant: 'destructive',
-          title: "Some Error Occured!"
+          title: "Some error occured!!"
         })
       }
 
@@ -305,7 +304,7 @@ const Upload = () => {
       console.log(error);
       toast({
         variant: 'destructive',
-        title: "Some Error Occured!"
+        title: "Some error occured!!"
       });
     }
   }
@@ -339,7 +338,7 @@ const Upload = () => {
       setContext({ fileName: '', description: '', contextName: '' })
       toast({
         variant: 'default',
-        title: "File Uploaded!"
+        title: "File uploaded!"
       });
       router.push(`/workspace/${workspaceid}/chat/new`)
     } catch (error) {
@@ -376,7 +375,7 @@ const Upload = () => {
       if (id) {
         toast({
           variant: 'default',
-          title: "File Uploaded!"
+          title: "File uploaded!"
         });
         setContext({ fileName: '', contextName: '', description: '' })
         router.push(`/workspace/${workspaceid}/chat/new`)
@@ -385,7 +384,7 @@ const Upload = () => {
       } else {
         return toast({
           variant: 'destructive',
-          title: "Some error occured!"
+          title: "Some error occured!!"
         })
       }
 
@@ -393,7 +392,7 @@ const Upload = () => {
       console.log(error);
       toast({
         variant: 'destructive',
-        title: "Some error occured!"
+        title: "Some error occured!!"
       });
     }
   }
@@ -416,7 +415,7 @@ const Upload = () => {
       setContext({ fileName: '', description: '', contextName: '' })
       toast({
         variant: 'default',
-        title: "File Uploaded!"
+        title: "File uploaded!"
       });
       router.push(`/workspace/${workspaceid}/chat/new`)
 
@@ -457,7 +456,6 @@ const Upload = () => {
   };
 
   async function getDocSetDetails(folder_id) {
-    console.log(folder_id, '639')
     if (!folder_id) {
       setLoading(false);
       return null

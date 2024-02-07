@@ -10,6 +10,7 @@ import { AdvanceMenu } from './index'
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { getCurrentUser, logout } from '../../../lib/user';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "../../../components/ui/accordion";
 
 
 const SideBar = () => {
@@ -33,38 +34,7 @@ const SideBar = () => {
         
         setCurrentUser(user)
       };
-    // async function getFolders() {
-    //     try {
-    //         const wkID = await isUserExist('workspaces', 'id', 'created_by', session?.user?.id);
-    //         let { data: folders, error } = await supabase
-    //             .from('folders')
-    //             .select('*')
-    //             .eq('workspace_id', wkID[0]?.id);
-    //         if (folders.length > 0) {
-
-    //             const lastFolder = folders[folders.length - 1];
-    //             // if (folder?.length === 0) {
-    //             //     setFolderId(lastFolder?.id)
-    //             // }
-    //             setFolderId(lastFolder?.id)
-    //             if (!folderId && !localStorage.getItem('chatSessionID')) {
-    //                 localStorage.setItem('lastFolderId', lastFolder?.id)
-    //             }
-    //             // console.log(folders)
-    //             setFolder(folders);
-    //             return null
-    //         } else {
-    //             setFolderId(null)
-    //             setFolder([])
-    //             localStorage.removeItem('lastFolderId')
-    //         }
-    //         if (error) {
-    //             throw error
-    //         }
-    //     } catch (error) {
-    //         console.log(error)
-    //     }
-    // };
+    
 
     async function getWorkSpace(){
         const res = await fetch('/api/workspace/list-workspace');
@@ -105,8 +75,6 @@ const SideBar = () => {
     return (
         <div className='w-full bg-[#EFF5F5] flex flex-col py-[19px] px-[18px] gap-4 font-Inter relative min-h-screen'>
 
-            
-
             <div className='flex flex-col gap-2 w-full p-2'>
                 {/* <div className='flex flex-col gap-2 w-full'>
 
@@ -133,10 +101,18 @@ const SideBar = () => {
                         )
                     })}
                 </div> */}
-                <div className='w-full p-2 rounded-md text-sm leading-5 font-[500]'>
-                {currentUser?.email}
-                </div>
-                <div className='flex items-center gap-2 hover:cursor-pointer hover:bg-[#d9dada] w-full p-2 rounded-md' onClick={async () => {
+                <Accordion type="single" defaultValue='profile' collapsible className='w-full'>
+                <AccordionItem value="profile" className='p-2 gap-2 flex flex-col w-full'>
+                    <AccordionTrigger className='flex-row-reverse justify-between items-center gap-2'>
+                        <div className='flex w-full justify-between'>
+                        
+                            <h1 className='font-[600] text-sm leading-5 mr-10'>{currentUser?.email}</h1>
+                            
+                        </div>
+                    </AccordionTrigger>
+                    <AccordionContent className='flex flex-col justify-center gap-4 items-start h-fit bg-[#EFF5F5] rounded-lg p-2'>
+                        
+                    <div className='flex items-center gap-2 hover:cursor-pointer hover:bg-[#d9dada] w-full p-2 rounded-md' onClick={async () => {
                     const res = await logout();
                     if (res.ok) {
                         router.push('/auth/login')
@@ -145,6 +121,10 @@ const SideBar = () => {
                     <LogOut className='w-4 h-4' color='#14B8A6' /><span className='font-[500] leading-5 text-sm hover:cursor-pointer'>Log Out</span>
                     {/* <Image src={threeDot} alt={'options'} className='w-4 h-4 hover:cursor-pointer' /> */}
                 </div>
+                    </AccordionContent>
+                </AccordionItem>
+            </Accordion>
+                
             </div>
             <Account/>
             {!showAdvance ?
