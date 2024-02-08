@@ -166,7 +166,8 @@ export const sidebarOptions = [
         title: 'Settings',
         icon: settingsIcon,
         id:'settings'
-    }
+    },
+    
 ];
 
 export const plans = [

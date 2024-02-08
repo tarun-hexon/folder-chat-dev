@@ -62,7 +62,7 @@ const UpdatePassword = () => {
     };
   return (
     
-    <div className='w-full flex flex-col justify-center items-center'>
+    <div className='w-full h-full flex flex-col justify-center items-center'>
 
     <h1 className={`text-3xl font-Inter space-x-0 text-center font-[600] leading-[48px] tracking-[1.2%] mb-12 ${darkMode ? 'text-black': ''}`}>Update Password</h1>
 

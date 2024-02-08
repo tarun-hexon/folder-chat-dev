@@ -6,7 +6,7 @@ import fileIcon from '../../../../public/assets/Danswer-doc-B.svg';
 import { useToast } from '../../../../components/ui/use-toast';
 import { useDropzone } from 'react-dropzone';
 import { Label } from '../../../../components/ui/label';
-import { deleteConnectorFromTable, fetchAllConnector, getSess } from '../../../../lib/helpers';
+import { deleteConnectorFromTable, fetchAllConnector, fetchIndexing, getSess } from '../../../../lib/helpers';
 import { useAtom } from 'jotai';
 import { sessionAtom, userConnectorsAtom } from '../../../store';
 import supabase from '../../../../config/supabse';
@@ -32,6 +32,7 @@ const Files = () => {
     const [uploading, setUploading] = useState(false);
     const [connectorName, setConnectorName] = useState('');
     const { toast } = useToast();
+<<<<<<< HEAD
     // async function uploadFile(file, name) {
         
     //     setUploading(true)
@@ -54,8 +55,75 @@ const Files = () => {
     // };
 
     async function connectorRequest(path) {
+=======
+    
+    const onDrop = (acceptedFiles) => {
+
+        if (acceptedFiles && acceptedFiles.length > 0) {
+    
+          acceptedFiles?.map((file) => {
+            setUserFiles((prev) => [...prev, file])
+          })
+        } else {
+          console.error('Invalid file. Please upload a PDF, DOC, or XLS file.');
+        }
+    };
+
+    async function uploadFile(files) {
+        if(connectorName === ''){
+            return toast({
+                variant: 'destructive',
+                title: "Please give your connector a name first"
+              }); 
+        }
+        
+>>>>>>> folder-dev
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector`, {
+          const formData = new FormData();
+          let isZip = false
+          files?.forEach((file) => {
+            //console.log(file.type === "application/zip")
+            if(file.type === "application/zip"){
+              
+              isZip = true
+              return toast({
+                variant: 'destructive',
+                title: "Zip File Not Allowed"
+              });
+            }
+            formData.append("files", file);
+          });
+          
+         if(isZip){
+          
+          return null
+         }
+         setUploading(true)
+         setUserFiles([])
+         setConnectorName('')
+          const data = await fetch(`/api/manage/admin/connector/file/upload`, {
+            method: "POST",
+            body: formData
+          });
+          const json = await data.json();
+          // console.log('upload done', json)
+          // setFilePath(json.file_paths[0]);
+          await connectorRequest(json.file_paths)
+        } catch (error) {
+          console.log('error in upload', error)
+          setUploading(false)
+          return toast({
+            variant: 'destructive',
+            title: "Some Error Ocuured!"
+          });
+    
+        }
+    };
+
+
+    async function connectorRequest(path) {
+        try {
+            const data = await fetch(`/api/manage/admin/connector`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json"
@@ -74,6 +142,7 @@ const Files = () => {
 
             );
             const json = await data?.json();
+<<<<<<< HEAD
             if(existConnector?.length === 0){
                 await insertDataInConn([json?.id])
             }else{
@@ -81,6 +150,13 @@ const Files = () => {
             }
             // setConnectorId(json.id)
             // console.log(json.id)
+=======
+            // if(existConnector?.length === 0){
+            //     await insertDataInConn([json?.id])
+            // }else{
+            //     await updatetDataInConn(existConnector, json?.id)
+            // }
+>>>>>>> folder-dev
             getCredentials(json?.id)
         } catch (error) {
             console.log('error while connectorRequest :', error)
@@ -88,6 +164,7 @@ const Files = () => {
         }
     };
 
+<<<<<<< HEAD
     async function insertDataInConn(newData){
                
         const { data, error } = await supabase
@@ -120,9 +197,11 @@ const Files = () => {
         setUploading(false)
     };
 
+=======
+>>>>>>> folder-dev
     async function getCredentials(connectID) {
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/credential`, {
+            const data = await fetch(`/api/manage/credential`, {
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json",
@@ -138,8 +217,12 @@ const Files = () => {
         } catch (error) {
             console.log('error while getCredentials:', error);
             setUploading(false)
+        }finally{
+            setConnectorName('');
+            setUploading(false);
         }
     };
+<<<<<<< HEAD
 
     // const onDrop = (acceptedFiles) => {
     //     if (acceptedFiles && acceptedFiles.length > 0) {
@@ -222,9 +305,12 @@ const Files = () => {
         }
       };
 
+=======
+    
+>>>>>>> folder-dev
     async function runOnce(conID, credID){
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/run-once`,{
+            const data = await fetch(`/api/manage/admin/connector/run-once`,{
             method:'POST',
             headers: {
                 "Content-Type": "application/json",
@@ -238,13 +324,16 @@ const Files = () => {
         })
         } catch (error) {
             console.log('error in runOnce :', error);
+            
+        }finally{
+            setConnectorName('');
             setUploading(false);
         }
     };
 
     async function sendURL(connectID, credID){
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/connector/${connectID}/credential/${credID}`, {
+            const data = await fetch(`/api/manage/connector/${connectID}/credential/${credID}`, {
             method: 'PUT',
                 headers: {
                     "Content-Type": "application/json",
@@ -255,15 +344,47 @@ const Files = () => {
             const json = await data.json();
             setLoading(true)
             await runOnce(connectID, credID);
+<<<<<<< HEAD
             
             
             // await getAllExistingConnector();
            
+=======
+            await indexStatus()
+>>>>>>> folder-dev
         } catch (error) {
             console.log('error while sendURL:', error);
             
             setUploading(false)
         }
+    };
+    
+
+    async function insertDataInConn(newData){
+               
+        const { data, error } = await supabase
+        .from('connectors')
+        .insert(
+          { 'connect_id': newData, 'user_id' : session?.user?.id },
+        )
+        .select()
+        setExistConnector(data[0]?.connect_id);
+        setUploading(false)
+    };
+
+    async function updatetDataInConn(exConn, newData){
+        
+        const allConn = [...exConn, newData]
+        const { data, error } = await supabase
+        .from('connectors')
+        .update(
+          { 'connect_id': allConn },
+        )
+        .eq('user_id', session?.user?.id)
+        .select()
+        setExistConnector(data[0]?.connect_id);
+        
+        setUploading(false)
     };
 
     
@@ -297,10 +418,26 @@ const Files = () => {
             return ('text-yellow-500')
         }
     }
+<<<<<<< HEAD
 
     useEffect(()=> {
         // getAllExistingConnector();
+=======
+>>>>>>> folder-dev
 
+    async function indexStatus(){
+        const res = await fetch(`/api/manage/admin/connector/indexing-status`);
+        const json = await res.json();
+        if(json.detail){
+
+        }else{
+            setFiles(json)
+        }
+        
+    }
+
+    useEffect(()=> {
+        indexStatus();
         if(userConnectors !== null ){
             const filData = userConnectors?.filter((item)=> item?.connector?.source === 'file');
             if(filData.length > 0){
@@ -310,8 +447,9 @@ const Files = () => {
                 
                 setExistConnector(conn_ids)
             };
-            setLoading(false)
+            
         }
+        setLoading(false)
         
     }, [userConnectors]);
 

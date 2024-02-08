@@ -1,59 +1,67 @@
 'use client'
 
 import { useEffect } from "react"
-import { folderIdAtom, allIndexingConnectorAtom } from "../../store"
+import { folderIdAtom, allIndexingConnectorAtom, userConnectorsAtom, sessionAtom } from "../../store"
 import { useAtom } from "jotai"
 import supabase from "../../../config/supabse"
 
 export default function RootLayout({ children }) {
+
+    const [session, setSession] = useAtom(sessionAtom);
     const [folderId, setFolderId] = useAtom(folderIdAtom);
-
-
-    const [allConnectorFromServer, setAllConnectorFromServer] = useAtom(allIndexingConnectorAtom);
-
-    async function indexingStatus(){
-      if(allConnectorFromServer === null){
-        return null
-      }
-        try {            
-            const allConID = await readData();
-            var cc_p_id = []
-            for(const cc_id of allConnectorFromServer){
-              if(allConID?.includes(cc_id?.cc_pair_id)){
-                cc_p_id.push(cc_id)
-              }
-            };
-            
-            return cc_p_id
-        } catch (error) {
-            console.log(error)
-            
-        }
+    const [allConnectorFromServer, setAllConnectorFromServer] = useAtom(allIndexingConnectorAtom)
+    const [userConnectors, setUserConnectors] = useAtom(userConnectorsAtom);
     
-    };
-    
-    async function readData(){
-      if(!folderId){
-        return null
+    async function indexingStatus(ses){
+      // console.log(ses)
+      try {
+          const data = await fetch(`/api/manage/admin/connector/indexing-status`);
+          const json = await data?.json();
+          // console.log(json)
+          setAllConnectorFromServer(json)
+          const allConID = await readData(ses);
+          
+          if(json?.length > 0){
+            const filData = json?.filter((item)=> { if(allConID?.includes(item?.connector?.id)) return item });
+          
+            setUserConnectors(filData);
+          }
+          // console.log(filData)
+      } catch (error) {
+          setUserConnectors([])
+          console.log(error)
       }
-        const { data, error } = await supabase
-        .from('document_set')
-        .select('*')
-        .eq('folder_id', folderId);
-        
-        if(data?.length > 0){
-          
-          
-          return data[0].cc_pair_id
-        }else{
-          
-        }
+  
     };
+  
+  async function readData(ses){
+      
+      const { data, error } = await supabase
+      .from('connectors')
+      .select('connect_id')
+      .eq('user_id', ses?.user?.id);
+      
+      if(data?.length > 0){
+          let arr = []
+          for(const val of data){
+              arr.push(...val.connect_id)
+          };
+          return arr
+      }
+      return []
+  };
 
     useEffect(()=> {
-      //indexingStatus()
+      indexingStatus()
+    const int = setInterval(()=> {
+      indexingStatus(session)
+    }, 5000);
+
+    return ()=> {
+      clearInterval(int)
+    }
       
-    }, [folderId])
+    }, [])
 
   return (
     <div>

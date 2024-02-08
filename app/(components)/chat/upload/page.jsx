@@ -283,7 +283,7 @@ const Upload = () => {
 
   async function setDocumentSetInServer(ccID, set_name, con) {
 
-    const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    const data = await fetch(`/api/manage/admin/connector/indexing-status`);
     const json = await data.json();
 
     const docSetid = []
@@ -337,7 +337,7 @@ const Upload = () => {
 
   async function updateDocumentSetInServer(db_id, ccID, con) {
 
-    const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    const data = await fetch(`/api/manage/admin/connector/indexing-status`);
     const json = await data.json();
 
     const docSetid = documentSet[0]?.cc_pair_id
@@ -369,7 +369,7 @@ const Upload = () => {
 
   async function setDocumentSetInServer2(ccID, context) {
 
-    const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/connector/indexing-status`);
+    const data = await fetch(`/api/manage/admin/connector/indexing-status`);
     const json = await data.json();
 
 

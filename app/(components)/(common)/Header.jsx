@@ -13,8 +13,7 @@ import { useRouter } from 'next/navigation';
 
 
 
-const Header = () => {
-
+const Header = ({ showActions }) => {
 
     const [darkMode, setDarkMode] = useAtom(darkModeAtom);
     const [userSession, setUserSession] = useAtom(sessionAtom);
@@ -37,12 +36,12 @@ const Header = () => {
 
     return (
         
-            <div className='w-full flex justify-between items-center px-5 py-1'>
+            <div className={`w-full flex justify-between items-center px-5 py-4 ${darkMode ? 'bg-[#EFF5F5] text-black' : 'bg-[#115E59] text-white'}`}>
                 <Link href={'/'}>
                     <Image src={darkMode ? Logo : LogoW} alt='logo' priority={false} className='' />
                 </Link>
 
-                <div className='flex gap-5 justify-center items-center'>
+                {showActions && <div className='flex gap-5 justify-center items-center'>
                     <div>
                         {darkMode ? <IoSunnySharp className='hover:cursor-pointer select-none' color='#115E59' size={'2rem'} onClick={() => setDarkMode(false)} /> : <IoSunnyOutline className='hover:cursor-pointer select-none' color='white' size={'2rem'} onClick={() => setDarkMode(true)} />}
                     </div>
@@ -50,7 +49,7 @@ const Header = () => {
                     <div>
                         {userSession && <Button className=' bg-[#14B8A6] border-[#14B8A6] leading-[24px] hover:bg-[#EFF5F5] hover:text-[#14B8A6] block' onClick={signOut}>Log Out</Button>}
                     </div>
-                </div>
+                </div>}
             </div>
            
        

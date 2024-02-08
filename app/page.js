@@ -17,13 +17,13 @@ export default function Home() {
   const router = useRouter() 
   
 useEffect(()=> {
-  if(allowSession){
-    router.push('/chat')
-  }else{
-    router.push('/auth/signup')
-  }
+  // if(allowSession){
+  //   router.push('/chat')
+  // }else{
+  //   router.push('/auth/signup')
+  // }
   
-  
+  router.push('/auth/signup')
 
 }, [allowSession]);
 

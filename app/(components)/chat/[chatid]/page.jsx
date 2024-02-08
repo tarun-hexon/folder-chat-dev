@@ -16,25 +16,33 @@ const Chat = () => {
   
 
  
-  const current_url = window.location.href;
+  // const current_url = window.location.href;
 
-  const chat_id = current_url.split("/chat/")[1];
+  // const chat_id = current_url.split("/chat/")[1];
   
 
 useEffect(() => {
-  if (session) {
-    if (session?.user?.user_metadata?.onBoarding) {
-      setLoading(false)
-      // router.push('/chat/new')
-    } else {
-      router.push('/auth/signup')
-    }
+  // if (session) {
+  //   if (session?.user?.user_metadata?.onBoarding) {
+  //     setLoading(false)
+  //     // router.push('/chat/new')
+  //   } else {
+  //     router.push('/auth/signup')
+  //   }
 
-  }
-  else {
-    setLoading(false)
-    router.push('/auth/login')
-  }
+  // }
+  // else {
+  //   setLoading(false)
+  //   router.push('/auth/login')
+  // }
+
+  // if (!session) {
+  //   router.push('/auth/login')
+  // }
+  // else {
+  //   router.push('/chat/new')    
+  // }
+  setLoading(false)
   // setTimeout(()=> {
     // if(folderId === '' || folderId === null){
     //   console.log(folderId)
@@ -63,17 +71,17 @@ useEffect(() => {
   // },[existConnector])
 
 
-  if (loading || !session) {
-    return (
-      <div className='flex w-full justify-center items-center h-screen'>
-        <Loader2 className='animate-spin' />
-      </div>
-    )
-  };
+  // if (loading || !session) {
+  //   return (
+  //     <div className='flex w-full justify-center items-center h-screen'>
+  //       <Loader2 className='animate-spin' />
+  //     </div>
+  //   )
+  // };
 
   return (
 
-    !loading &&
+    // !loading &&
 
         <div className='w-full h-full'>
           <ChatWindow />
