@@ -2,9 +2,11 @@
 import { Loader2 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 import React, { useEffect } from 'react'
-import supabase from '../../../config/supabse';
+import supabase from '../../../../../config/supabse';
 import { useAtom } from 'jotai';
-import { sessionAtom, userConnectorsAtom, allIndexingConnectorAtom } from '../../store';
+import { sessionAtom, userConnectorsAtom, allIndexingConnectorAtom } from '../../../../store';
+import { useSearchParams } from 'next/navigation'
+
 
 const Chat = () => {
   const router = useRouter();
@@ -29,7 +31,7 @@ const Chat = () => {
       // else {
       //   router.push('/auth/login')
       // }
-      router.push('/chat/new')
+      router.push('/workspace/0/chat/new')
     }, []);
 
 

@@ -13,23 +13,18 @@ import {
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Button } from "../../../components/ui/button";
-import plus from '../../../public/assets/plus - light.svg';
-import Image from 'next/image';
 import { useAtom } from 'jotai';
-import { folderAtom, sessionAtom, folderIdAtom } from '../../store';
-import { Folder } from 'lucide-react';
-import { v4 as uuidv4 } from 'uuid';
-import { isUserExist } from '../../../config/lib';
-import supabase from '../../../config/supabse';
+import { workAddedAtom } from '../../store';
 import { useRouter } from 'next/navigation';
 import { getCurrentUser } from '../../../lib/user';
 
 const Workspace = ({ openMenu, setOpenMenu }) => {
     
-    const [open, setOpen] = useState(openMenu);
+    // const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);
-
+    const [workAdded, setWorkAdded] = useAtom(workAddedAtom)
     const [currentUser, setCurrentUser] = useState({})
+    
 
     const router = useRouter()
 
@@ -49,11 +44,11 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
         };
 
         try {
-            const res = await fetch('/workspace/create-workspace', {
+            const res = await fetch('/api/workspace/create-workspace', {
                 method: 'POST',
                 credentials: "include",
                 headers: {
-                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     "name": userInput.name,
@@ -63,9 +58,21 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
                 })
             });
             if (res.ok) {
-                setOpen(false);
+                const json = await res.json();
+                setWorkAdded(!workAdded)
+                setOpenMenu(false);
+                router.push(`/workspace/${json?.data?.id}/chat/new`)
+                
+            }else{
+                const json = await res.json()
+                
+                if(json?.detail){
+                    
+                    setInputError(json?.detail)
+                }
             }
         } catch (error) {
+            
             console.log(error)
         }
     };
@@ -80,19 +87,19 @@ const Workspace = ({ openMenu, setOpenMenu }) => {
 
 
     return (
-        <Dialog open={open} onOpenChange={() => {
-            setOpen(!open);
+        <Dialog open={openMenu} onOpenChange={() => {
+            setOpenMenu(!openMenu);
             setInputError(false); 
             setUserInput({
                 name: '',
                 domain: ''
             });
-            setOpenMenu && setOpenMenu(false)
+            openMenu && setOpenMenu(false)
         }}>
             {!openMenu && <DialogTrigger className='w-full'>
-                <Button className='w-full bg-[#14B8A6] hover:bg-[#14B8A6] opacity-75 hover:opacity-100 shadow-lg'>
+                <div className='w-full bg-[#14B8A6] hover:bg-[#14B8A6] opacity-75 hover:opacity-100 shadow-lg text-white rounded-md p-1'>
                     Add Workspace
-                </Button>
+                </div>
             </DialogTrigger>}
 
             <DialogContent>

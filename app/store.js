@@ -17,7 +17,8 @@ export const userConnectorsAtom = atom(null);
 export const chatTitleAtom = atom('')
 export const allIndexingConnectorAtom = atom(null);
 export const documentSetAtom = atom([]);
-export const tempAtom = atom(false)
+export const tempAtom = atom(false);
+export const workAddedAtom = atom(false)
 export const selectOptionAtom = atom([
     {
         name:'option_1',

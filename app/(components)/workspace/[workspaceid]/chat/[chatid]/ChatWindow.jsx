@@ -1,37 +1,37 @@
 'use client'
 import React, { useEffect, useState, useRef } from 'react'
-import sendIcon from '../../../../public/assets/send.svg'
-import Logo from "../../../../public/assets/Logo.svg"
-import editIcon from "../../../../public/assets/edit-2.svg"
-import shareIcon from '../../../../public/assets/Navbar_Share.svg'
-import openDocIcon from '../../../../public/assets/Navbar_OpenDoc.svg'
+import sendIcon from '../../../../../../public/assets/send.svg'
+import Logo from "../../../../../../public/assets/Logo.svg"
+import editIcon from "../../../../../../public/assets/edit-2.svg"
+import shareIcon from '../../../../../../public/assets/Navbar_Share.svg'
+import openDocIcon from '../../../../../../public/assets/Navbar_OpenDoc.svg'
 import Image from 'next/image'
-import { iconSelector } from '../../../../config/constants'
+import { iconSelector } from '../../../../../../config/constants'
 import { Folder, Loader2, Plus, MoreHorizontal } from 'lucide-react';
 import { useAtom } from 'jotai'
-import { chatHistoryAtom, chatTitleAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, showAdvanceAtom, userConnectorsAtom, documentSetAtom } from '../../../store'
+import { chatHistoryAtom, chatTitleAtom, chatSessionIDAtom, folderAddedAtom, folderAtom, folderIdAtom, showAdvanceAtom, userConnectorsAtom, documentSetAtom } from '../../../../../store'
 import ReactMarkdown from "react-markdown";
-import supabase from '../../../../config/supabse'
-import { useToast } from '../../../../components/ui/use-toast'
-import { NewFolder } from '../../(dashboard)'
+import supabase from '../../../../../../config/supabse'
+import { useToast } from '../../../../../../components/ui/use-toast'
+import { NewFolder } from '../../../../(dashboard)'
 import { useRouter } from 'next/navigation'
-import { getSess } from '../../../../lib/helpers'
-import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../components/ui/dialog'
-import pdfIcon from '../../../../public/assets/pdf.svg'
-import { Button } from '../../../../components/ui/button';
-import { Label } from '../../../../components/ui/label'
-import { cn } from '../../../../lib/utils'
-import plus from '../../../../public/assets/plus.svg'
+import { getSess } from '../../../../../../lib/helpers'
+import { Dialog, DialogTrigger, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '../../../../../../components/ui/dialog'
+import pdfIcon from '../../../../../../public/assets/pdf.svg'
+import { Button } from '../../../../../../components/ui/button';
+import { Label } from '../../../../../../components/ui/label'
+import { cn } from '../../../../../../lib/utils'
+import plus from '../../../../../../public/assets/plus.svg'
 import Link from 'next/link'
 import { useParams } from 'next/navigation'
-import { Workspace } from '../../(common)'
+import { Workspace } from '../../../../(common)'
 import {
     Select,
     SelectContent,
     SelectItem,
     SelectTrigger,
     SelectValue,
-} from "../../../../components/ui/select"
+} from "../../../../../../components/ui/select"
 
 
 const ChatWindow = () => {
@@ -63,15 +63,10 @@ const ChatWindow = () => {
     const [selectedDoc, setSelectedDoc] = useState([]);
     const [docSetOpen, setDocSetOpen] = useState(false);
     const [workSpaceValue, setWorkSpaceValue] = useState(null)
-    const [userWorkSpaces, setUserWorkSpaces] = useState([1]);
+    const [userWorkSpaces, setUserWorkSpaces] = useState([]);
     const botResponse = useRef('');
-
-    // const current_url = window.location.href;
-
-    // const chatid = current_url.split("/chat/")[1];
-
-    // const router = useRouter();
-    const {chatid} = useParams()
+    const router = useRouter();
+    const { workspaceid, chatid } = useParams()
     
     const { toast } = useToast();
 
@@ -79,7 +74,8 @@ const ChatWindow = () => {
         setRcvdMsg('')
         botResponse.current = ''
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/create-chat-session`, {
+            const data = await fetch(`/api/chat/create-chat-session`, {
+                credentials:'include',
                 method: 'POST',
                 headers: {
                     "Content-Type": "application/json"
@@ -92,13 +88,13 @@ const ChatWindow = () => {
             localStorage.setItem('chatSessionID', json?.chat_session_id)
             setChatSessionID(json?.chat_session_id)
 
-            await insertChatInDB(null, json?.chat_session_id, folderId);
+            //await insertChatInDB(null, json?.chat_session_id, folderId);
 
             await sendChatMsgs(userMsgdata, json.chat_session_id, parentMessageId);
             await createChatTitle(json.chat_session_id, null, userMsgdata)
 
             // router.push(`/chat/${json.chat_session_id}`)
-            window.history.pushState('', '', `/chat/${json.chat_session_id}`);
+            window.history.pushState('', '', `/workspace/${workspaceid}/chat/${json.chat_session_id}`);
 
         } catch (error) {
 
@@ -147,9 +143,9 @@ const ChatWindow = () => {
     };
 
     async function createChatTitle(session_id, name, userMessage) {
-        // console.log(session_id, name, userMessage)
         try {
-            const data = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/rename-chat-session`, {
+            const data = await fetch(`/api/chat/rename-chat-session`, {
+                credentials:'include',
                 method: 'PUT',
                 headers: {
                     "Content-Type": "application/json"
@@ -161,8 +157,7 @@ const ChatWindow = () => {
                 })
             });
             const json = await data.json();
-            // console.log(json.new_name);
-            await updateTitle(json.new_name, session_id)
+            //await updateTitle(json.new_name, session_id, userMessage)
             setChatTitle(json.new_name)
         } catch (error) {
             console.log(error)
@@ -212,10 +207,10 @@ const ChatWindow = () => {
     // };
 
 
-    async function updateTitle(newTitle, id) {
+    async function updateTitle(newTitle, id, userMessage) {
 
         try {
-            const response = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/rename-chat-session`, {
+            const response = await fetch(`/api/chat/rename-chat-session`, {
                 method: 'PUT',
                 body: JSON.stringify({
                     "chat_session_id": id,
@@ -238,7 +233,6 @@ const ChatWindow = () => {
         if (obj) {
             newMsg = [bot, user, ...oldChat, { 'source': obj }]
         }
-        // console.log(newMsg)
         try {
             const { data, error } = await supabase
                 .from('chats')
@@ -279,15 +273,16 @@ const ChatWindow = () => {
     };
 
     async function sendChatMsgs(userMsg, chatID, parent_ID) {
-
         try {
-            const sendMessageResponse = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/chat/send-message`, {
+            const sendMessageResponse = await fetch(`/api/chat/send-message`, {
+                credentials:'include',
                 method: 'POST',
                 headers: {
-                    "Content-Type": "application/json"
+                    "Content-Type": "application/json",
                 },
                 body: JSON.stringify({
                     "chat_session_id": chatID,
+                    "folder_id":folderId,
                     "parent_message_id": parent_ID,
                     "message": userMsg,
                     "prompt_id": 0,
@@ -297,7 +292,7 @@ const ChatWindow = () => {
                         "real_time": true,
                         "filters": {
                             "source_type": null,
-                            "document_set": documentSet.length === 0 ? null : [documentSet[0]?.doc_set_name],
+                            "document_set": documentSet.length === 0 ? null : [documentSet[0]?.name],
                             "time_cutoff": null
                         }
                     }
@@ -311,8 +306,6 @@ const ChatWindow = () => {
             }
 
             const entireResponse = await handleStream(sendMessageResponse, userMsg);
-            // console.log(entireResponse);
-            // getCitedDocumentsFromMessage(entireResponse)
 
             setTextFieldDisabled(false)
 
@@ -327,7 +320,8 @@ const ChatWindow = () => {
         const reader = streamingResponse.body?.getReader();
         const decoder = new TextDecoder("utf-8");
 
-        let entireResponse = []; // Array to store the entire response
+        let entireResponse = []; // Array to store the entire 
+        
         let previousPartialChunk = null;
         let answer = ''
         let error = ''
@@ -362,13 +356,9 @@ const ChatWindow = () => {
 
             if (response.length > 0) {
                 for (const obj of response) {
-                    if (obj.citations) {
-
-                        // const key = Object.keys(obj.citations);
-                        // console.log(obj.citations[key[0]])
-                    }
                     if (obj.answer_piece) {
                         botResponse.current += obj.answer_piece;
+                        answer += obj.answer_piece;
                         setRcvdMsg((prev) => prev + obj.answer_piece);
 
                     } else if (obj.parent_message) {
@@ -376,30 +366,32 @@ const ChatWindow = () => {
 
                         if (obj?.context_docs?.top_documents.length > 0 && Object.keys(obj.citations).length !== 0) {
                             const key = Object.keys(obj.citations);
-                            // console.log(obj.citations[key[0]])
                             const relatedDoc = obj?.context_docs?.top_documents.filter(doc => doc?.db_doc_id === obj?.citations[key[0]])
-                            // console.log(relatedDoc)
-                            await updateChats(
-                                {
-                                    bot: botResponse.current,
-                                    source: relatedDoc[0],
-                                },
-                                { user: userMsg },
-                                chatMsg,
-                                obj.message_id
-                            );
+                            documents = obj?.context_docs?.top_documents;
+                            query = obj?.context_docs?.rephrased_query
+                            // await updateChats(
+                            //     {
+                            //         bot: botResponse.current,
+                            //         source: relatedDoc[0],
+                            //     },
+                            //     { user: userMsg },
+                            //     chatMsg,
+                            //     obj.message_id
+                            // );
                         } else {
-                            await updateChats(
-                                { bot: botResponse.current },
-                                { user: userMsg },
-                                chatMsg,
-                                obj.message_id
-                            );
+                            // await updateChats(
+                            //     { bot: botResponse.current },
+                            //     { user: userMsg },
+                            //     chatMsg,
+                            //     obj.message_id
+                            // );
                         }
 
+                        finalMessage = obj
                         botResponse.current = '';
                         setMsgLoader(false);
                     } else if (obj.error) {
+                        error = obj.error
                         setMsgLoader(false);
                         return toast({
                             variant: 'destructive',
@@ -411,7 +403,11 @@ const ChatWindow = () => {
         }
 
         setChatMsg((prev) => [
-            
+            // {
+            //     messageId: finalMessage?.parent_message || null,
+            //     message: userMsg,
+            //     message_type: "user",
+            // },
             {
                 messageId: finalMessage?.message_id || null,
                 message: error || answer,
@@ -477,7 +473,6 @@ const ChatWindow = () => {
     //             .eq('session_id', id);
     //         if (data[0]?.chats) {
     //             setParentMessageId(data[0]?.message_id)
-    //             // console.log(data[0]?.message_id)
     //             if (folderId === '') {
     //                 setFolderId(data[0]?.folder_id)
     //             }
@@ -505,11 +500,12 @@ const ChatWindow = () => {
     // };
 
     async function getChatHistoryFromServer(id) {
+        await getDocSetDetails(folderId)
         try {
-            const data = await fetch(`https://danswer.folder.chat/api/chat/get-chat-session/${id}`);
+            const data = await fetch(`/api/chat/get-chat-session/${id}`);
             const json = await data.json();
-            console.log(json)
             if (json?.messages.length > 0) {
+                
                 setParentMessageId(json?.messages[json?.messages.length - 1].message_id);
                 setChatMsg(json?.messages.reverse());
                 setChatHistory(json);
@@ -523,7 +519,6 @@ const ChatWindow = () => {
     };
 
     async function updateDocumentSet(ccID, des) {
-        console.log(ccID, 'remove return from line no 530 for updating data in server')
         //need to fetch files names without replacing previous name
         return null
         if (!documentSet[0]?.doc_set_id) {
@@ -537,7 +532,7 @@ const ChatWindow = () => {
             });
         }
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_INTEGRATION_IP}/api/manage/admin/document-set`, {
+            const res = await fetch(`/api/manage/admin/document-set`, {
                 method: 'PATCH',
                 headers: {
                     "Content-Type": "application/json",
@@ -595,7 +590,6 @@ const ChatWindow = () => {
     };
 
     function handleDocSetID(id) {
-        //console.log(id)
         if (selectedDoc.includes(parseInt(id))) {
             // const idx = selectedDoc.indexOf(id);
             setSelectedDoc(selectedDoc.filter(doc => doc !== parseInt(id)))
@@ -603,55 +597,98 @@ const ChatWindow = () => {
             setSelectedDoc((prev) => [...prev, parseInt(id)])
 
         }
-        // console.log(selectedDoc)
 
     }
 
-    async function getDocSetDetails(folder_id) {
+    // async function getDocSetDetails(folder_id) {
 
+    //     if (!folder_id) {
+    //         setLoading(false);
+    //         return null
+    //     }
+    //     let { data: document_set, error } = await supabase
+    //         .from('document_set')
+    //         .select("*")
+    //         .eq('folder_id', folder_id)
+
+    //     if (document_set?.length > 0) {
+    //         setDocumentSet(document_set)
+    //         setSelectedDoc(document_set[0]?.cc_pair_id)
+    //         setLoading(false)
+    //     } else {
+    //         setDocumentSet([])
+    //         setLoading(false)
+    //         // router.push('/chat/upload')
+    //         // if (folder_id !== null) {
+    //         //     router.push('/chat/upload')
+    //         // }
+    //     }
+
+
+    // };
+
+    async function getDocSetDetails(folder_id) {
+        
         if (!folder_id) {
             setLoading(false);
             return null
         }
-        // console.log(folder_id)
-        let { data: document_set, error } = await supabase
-            .from('document_set')
-            .select("*")
-            .eq('folder_id', folder_id)
-
-        if (document_set?.length > 0) {
-            setDocumentSet(document_set)
-            setSelectedDoc(document_set[0]?.cc_pair_id)
-            setLoading(false)
-        } else {
-            setDocumentSet([])
-            setLoading(false)
-            // router.push('/chat/upload')
-            // if (folder_id !== null) {
-            //     router.push('/chat/upload')
-            // }
+        
+        const res = await fetch(`/api/manage/document-set-v2?folder_id=${folder_id}`)
+        if(res.ok){
+            const data = await res.json();
+            if(data.length > 0){
+                setDocumentSet(data)
+            }else{
+                setDocumentSet([])
+                router.push(`/workspace/${workspaceid}/chat/upload`)
+            }
+            
         }
+        setLoading(false)
+        // if (document_set?.length > 0) {
+        //     setDocumentSet(document_set)
+        //     setSelectedDoc(document_set[0]?.cc_pair_id)
+        //     setLoading(false)
+        // } else {
+        //     setDocumentSet([])
+        //     setLoading(false)
+        //     // router.push('/chat/upload')
+        //     // if (folder_id !== null) {
+        //     //     router.push('/chat/upload')
+        //     // }
+        // }
 
 
+    };
+
+
+    async function getWorkSpace(){
+        const res = await fetch('/api/workspace/list-workspace');
+        if(res.ok){
+            const json = await res.json();
+            setUserWorkSpaces(json.data)
+        }else{
+            setUserWorkSpaces([])
+        }
     }
 
+
+
     useEffect(() => {
+        getWorkSpace()
         resizeTextarea();
     }, [userMsg]);
 
     useEffect(() => {
         setShowAdvance(false);
-        // console.log(chatid)
         if (chatid !== 'new' && chatid) {
-
             getChatHistoryFromServer(chatid)
             setChatSessionID(chatid);
             localStorage.setItem('chatSessionID', chatid)
         } else {
-
             setRcvdMsg('')
             setChatMsg([])
-
             if (!folderId) {
                 getDocSetDetails(localStorage.getItem('lastFolderId'))
             } else {
@@ -670,18 +707,16 @@ const ChatWindow = () => {
         }
     }, [chatSessionID])
 
-   if(userWorkSpaces.length === 0){
-        return <div className='w-full flex flex-col justify-center rounded-[6px] items-center no-scrollbar box-border h-screen px-80 text-center'><Workspace openMenu={openWorkSpace} setOpenMenu={setOpenWorkSpace} /></div>
-   }
 
     return (
         <div className='w-full flex flex-col rounded-[6px] gap-5 items-center no-scrollbar box-border h-screen pb-2 text-center'>
+            
             <div className='w-full flex justify-between px-4 py-2 h-fit '>
                 <div className='flex gap-2 justify-center items-center hover:cursor-pointer'>
                     {folder?.length === 0 ? <Image src={Logo} alt='folder.chat' /> :
-                        <span className='text-sm leading-5 font-[500] opacity-[60%] hover:opacity-100'>Context : {documentSet[0]?.doc_set_name?.split('-')[0] || 'No Doc Uploaded'}</span>}
+                        <span className='text-sm leading-5 font-[500] opacity-[60%] hover:opacity-100'>Context : {documentSet[0]?.name?.split('-')[0] || 'No Doc Uploaded'}</span>}
 
-                    {folder?.length !== 0 && (!documentSet[0]?.doc_set_id ?
+                    {folder?.length !== 0 && (!documentSet[0]?.id ?
                         <Link href={'/chat/upload'}>
                             <Image src={plus} alt='add' title='Add Documents' />
                         </Link>
@@ -689,7 +724,7 @@ const ChatWindow = () => {
                         null
                         // <Dialog open={docSetOpen} onOpenChange={() => { setInputDocDes(''); setDocSetOpen(!docSetOpen) }}>
                         //     <DialogTrigger asChild>
-                        //         <Image src={editIcon} alt='edit' title='edit' onClick={() => { getDocSetDetails(folderId); setDocSetOpen(true) }} />
+                        //         <Image src={editIcon} alt='edit' title='edit' onClick={async () => { await getDocSetDetails(folderId); setDocSetOpen(true) }} />
                         //     </DialogTrigger>
                         //     <DialogContent>
                         //         <DialogHeader className='mb-2'>
@@ -745,37 +780,6 @@ const ChatWindow = () => {
                         {open && <NewFolder setFolderAdded={setFolderAdded} openMenu={open} setOpenMenu={setOpen} />}
                         
                     </div>
-
-                    // <div className='w-96 border-2 rounded-sm shadow-md h-fit m-auto p-12 flex flex-col justify-center items-center gap-2 text-[16px] leading-5 font-[400]'>
-                        
-                    //     {false ? 
-                    //     <p>No Workspace Found</p> :
-                    //     <div className="flex flex-col gap-4 w-64 justify-center items-center font-[500] text-sm leading-5">
-                        
-                    //     <Select 
-                            
-                    //         onValueChange={(e) => (setWorkSpaceValue(e))}
-                    //         className='select-none'
-                    //     >
-                    //         <SelectTrigger>
-                    //             <SelectValue
-                    //                 placeholder="select from existing workplaces"
-                    //             />
-                    //         </SelectTrigger>
-                    //         <SelectContent className="full">
-                    //             <SelectItem value="General" >Workspace 1</SelectItem>
-                                
-                    //         </SelectContent>
-                    //     </Select>
-                    //     <p>OR</p>
-                    //     </div>
-                        
-                    //     }
-                    //     <Button className='w-64 bg-[#14B8A6] hover:bg-[#14B8A6] opacity-75 hover:opacity-100 shadow-lg' onClick={() => setOpen(true)}>
-                    //         Create a New Workspace
-                    //     </Button>
-                    //     {open && <Workspace openMenu={open} setOpenMenu={setOpen} />}
-                    // </div>
 
                     :
                     <div className='w-[70%] h-[88%] rounded-[6px] flex flex-col justify-between box-border'>
