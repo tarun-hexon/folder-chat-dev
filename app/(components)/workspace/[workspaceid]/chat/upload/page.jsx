@@ -446,9 +446,8 @@ const Upload = () => {
       setLoading(false);
       return null
     }
-    const res = await fetch(`/api/manage/document-set-v2?folder_id=${folder_id}`)
+    const res = await fetch(`/api/manage/document-set-v2/${folder_id}`)
     if (res.ok) {
-
       const data = await res.json();
       console.log(data)
       //console.log(data[0].cc_pair_descriptors.map(item => item.id))
@@ -458,9 +457,9 @@ const Upload = () => {
         setDocumentSet([])
         // router.push(`/workspace/${workspaceid}/chat/upload`)
       }
-      setLoading(false)
+      
     };
-
+    setLoading(false)
   };
 
 

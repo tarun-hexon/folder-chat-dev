@@ -30,7 +30,6 @@ import { getCurrentUser } from '../../../lib/user';
 
 const NewFolder = ( { setFolderAdded, openMenu, setOpenMenu }) => {
     
-
     const [folderId, setFolderId] = useAtom(folderIdAtom);
     const [open, setOpen] = useState(openMenu);
     const [inputError, setInputError] = useState(false);

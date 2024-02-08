@@ -17,6 +17,7 @@ import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, A
 import { Label } from '../../../components/ui/label';
 import { cn } from '../../../lib/utils';
 import Link from 'next/link';
+import { getCurrentUser } from '../../../lib/user';
 
 const FolderCard = ({ fol }) => { 
 
@@ -36,7 +37,7 @@ const FolderCard = ({ fol }) => {
     const [dialogOpen, setDialogOpen] = useState(false);
     const [documentSet, setDocumentSet] = useState([]);
     const [temp, setTemp] = useAtom(tempAtom)
-
+    const [currentUser, setCurrentUser] = useState({})
     const { workspaceid, chatid } = useParams();
 
     const router = useRouter();
@@ -54,14 +55,6 @@ const FolderCard = ({ fol }) => {
         }
 
         setPopOpen(false)
-    };
-
-
-    async function deleteFolder(fol_id) {
-        console.log(fol_id)
-        setFolderAdded(!folderAdded)
-        setPopOpen(false)
-        return null
     };
 
     function handleFilessOnclick(data) {
@@ -95,12 +88,66 @@ const FolderCard = ({ fol }) => {
         }
     };
 
-    async function updateFolderName(name, id) {
-        console.log(name, id)
-        setFolderAdded(!folderAdded)
-        setDialogOpen(false);
-        setPopOpen(false);
+    async function fetchCurrentUser(){
+        const user = await getCurrentUser();
+        setCurrentUser(user)
+      };
+  
+      
+    async function updateFolderName(name, folder) {
+        // console.log(name, folder, currentUser);
+
+        // return null
+        
+        try {
+            const { id, workspace_id, description, is_active, chat_enabled } = folder
+            const url = currentUser?.role === "admin" ? '/api/workspace/admin/update-folder' :'/api/workspace/update-folder'
+            const response = await fetch(url, {
+                credentials:'include',
+                method: 'PUT',
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body:JSON.stringify({
+                    "workspace_folder_id": id,
+                    "workspace_id": workspace_id,
+                    "name": name,
+                    "description": description,
+                    "function": folder.function,
+                    "is_active": is_active,
+                    "chat_enabled": chat_enabled
+                })
+            });
+            if(response.ok){
+                console.log(response)
+                setFolderAdded(!folderAdded)
+                setDialogOpen(false);
+                setPopOpen(false);
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        
         return null
+    };
+
+    async function deleteFolder(fol_id) {
+        console.log(fol_id);
+        try {
+            const url = currentUser?.role === "admin" ? '/api/workspace/admin/delete-folder' :'/api/workspace/delete-folder' 
+            const response = await fetch(`${url}/${fol_id}`, {
+                credentials:'include',
+                method:'DELETE'
+            });
+            if(response.ok){
+                setFolderAdded(!folderAdded)
+                setPopOpen(false)
+                return null
+            }
+        } catch (error) {
+            console.log(error)
+        }
+        
     };
 
     async function deleteDocSetFile(data) {
@@ -145,7 +192,7 @@ const FolderCard = ({ fol }) => {
             return null
         }
         
-        const res = await fetch(`/api/manage/document-set-v2?folder_id=${folder_id}`)
+        const res = await fetch(`/api/manage/document-set-v2/${folder_id}`)
         if(res.ok){
             const data = await res.json();
             
@@ -159,6 +206,10 @@ const FolderCard = ({ fol }) => {
 
 
     };
+
+    useEffect(() => {
+        fetchCurrentUser();
+    }, []);
 
     useEffect(() => {
         getDocSetDetails(id);
@@ -212,7 +263,7 @@ const FolderCard = ({ fol }) => {
 
 
                                                     <DialogFooter className={cn('w-full')}>
-                                                        <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateFolderName(folNewName, id)}>Update</Button>
+                                                        <Button variant={'outline'} className={cn('bg-[#14B8A6] text-[#ffffff] m-auto')} onClick={() => updateFolderName(folNewName, fol)}>Update</Button>
                                                     </DialogFooter>
 
                                                 </DialogContent>
@@ -256,7 +307,7 @@ const FolderCard = ({ fol }) => {
 
                             </Link>
                             :
-                            files?.map((data, idx) => {
+                            files?.map((data) => {
 
                                 return (
                                     <Link href={`/chat/${data?.session_id}`} key={data?.id} className={`flex justify-between items-center h-fit rounded-lg p-2 hover:cursor-pointer hover:bg-slate-100 ${chatid === data.session_id ? 'bg-slate-200' : ''}`} onClick={() => handleFilessOnclick(data)}>
@@ -292,7 +343,7 @@ const FolderCard = ({ fol }) => {
                                             ) : (
                                                 <div className="ml-auto my-auto flex">
                                                     <div
-                                                        title='Edit Name'
+                                                        title='edit name'
                                                         onClick={() => { setInputChatName(data?.chat_title); setIsRenamingChat(true) }}
                                                         className={`hover:bg-black/10 p-1 -m-1 rounded`}
                                                     >

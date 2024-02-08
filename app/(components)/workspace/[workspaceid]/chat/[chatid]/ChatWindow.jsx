@@ -417,13 +417,13 @@ const ChatWindow = () => {
 
     
     async function getDocSetDetails(folder_id) {
-        
+        console.log(folder_id)
         if (!folder_id) {
             setLoading(false);
             return null
         }
         
-        const res = await fetch(`/api/manage/document-set-v2?folder_id=${folder_id}`)
+        const res = await fetch(`/api/manage/document-set-v2/${folder_id}`)
         if(res.ok){
             const data = await res.json();
             if(data.length > 0){
@@ -432,6 +432,8 @@ const ChatWindow = () => {
                 setDocumentSet([])
                 router.push(`/workspace/${workspaceid}/chat/upload`)
             }
+        }else{
+            router.push(`/workspace/${workspaceid}/chat/upload`)
         }
         setLoading(false)
     
